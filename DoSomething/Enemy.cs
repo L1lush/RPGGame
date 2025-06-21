@@ -16,22 +16,20 @@ namespace DoSomething
         {
             this.CLASS = CLASS;
 
-            if (CLASS == "Goblin")
+            switch(CLASS)
             {
-                this.HP = 20;
-                this.ATTACK = 5;
-            }
-
-            if (CLASS == "Skeleton")
-            {
-                this.HP = 15;
-                this.ATTACK = 7;
-            }
-
-            if (CLASS == "Dragon")
-            {
-                this.HP = 80;
-                this.ATTACK = 10;
+                case "Goblin":
+                    this.HP = 20;
+                    this.ATTACK = 5;
+                    break;
+                case "Skeleton":
+                    this.HP = 15;
+                    this.ATTACK = 7;
+                    break;
+                case "Dragon":
+                    this.HP = 80;
+                    this.ATTACK = 10;
+                    break;
             }
         }
 

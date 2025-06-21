@@ -16,16 +16,16 @@ namespace DoSomething
         {
             this.CLASS = CLASS;
 
-            if(CLASS == "Knight")
+            switch (CLASS)
             {
-                this.HP = 20;
-                this.ATTACK = 5;
-            }
-
-            if(CLASS == "Assassin")
-            {
-                this.HP = 15;
-                this.ATTACK = 7;
+                case "Knight"
+                    this.HP = 20;
+                    this.ATTACK = 5;
+                    break;
+                case "Assassin"
+                     this.HP = 15;
+                    this.ATTACK = 7;
+                    break;
             }
 
         }
