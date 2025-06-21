@@ -39,14 +39,26 @@ namespace DoSomething
                 Console.WriteLine("3. Castle");
                 Console.WriteLine("4. Stats");
                 ConsoleKeyInfo keyInfo = Console.ReadKey();
-                if (keyInfo.Key == ConsoleKey.D1)
-                    Forest(Enemy, Player, rand);
-                if (keyInfo.Key == ConsoleKey.D2)
-                    Cave(Enemy, Player, rand);
-                if (keyInfo.Key == ConsoleKey.D3)
-                    Castle(Enemy, Player, rand);
-                if (keyInfo.Key == ConsoleKey.D4)
-                    Player.ShowStats();
+
+                switch (keyInfo.Key)
+                {
+                    case ConsoleKey.D1:
+                        Forest(Enemy, Player, rand);
+                        break;
+                    case ConsoleKey.D2:
+                        Cave(Enemy, Player, rand);
+                        break;
+                    case ConsoleKey.D3:
+                        Castle(Enemy, Player, rand);
+                        break;
+                    case ConsoleKey.D4:
+                        Player.ShowStats();
+                        break;
+                    default:
+                        continue;
+                        break;
+                }
+
                 Console.Clear();
             }
 
@@ -102,26 +114,30 @@ namespace DoSomething
                 Console.Write("3. Use Potion");
                 Console.WriteLine($" - {Potions} Potions left");
                 ConsoleKeyInfo keyInfo = Console.ReadKey();
-                if (keyInfo.Key == ConsoleKey.D1)
+
+                switch (keyInfo.Key)
                 {
-                    Enemy.SetHP(Math.Max(0, Enemy.GetHP() - Player.GetATTACK()));
-                }
-                if (keyInfo.Key == ConsoleKey.D2)
-                {
-                    int num = rand.Next(1, 3);
-                    if (num == 1) { Console.WriteLine("you ran away"); break; }
-                    if (num == 2) { Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK())); }
-                }
-                if (keyInfo.Key == ConsoleKey.D3 && Potions > 0)
-                {
-                    Console.WriteLine("You Used Potions {+20HP}");
-                    Player.SetHP(Player.GetHP() + 20);
-                    Potions -= 1;
-                }
-                else if(keyInfo.Key == ConsoleKey.D3 && Potions <= 0)
-                {
-                    Console.WriteLine("No more Potions");
-                    continue;
+                    case ConsoleKey.D1:
+                        Enemy.SetHP(Math.Max(0, Enemy.GetHP() - Player.GetATTACK()));
+                        break;
+                    case ConsoleKey.D2:
+                        int num = rand.Next(1, 3);
+                        if (num == 1) { Console.WriteLine("you ran away"); break; }
+                        if (num == 2) { Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK())); }
+                        break;
+                    case ConsoleKey.D3:
+                        if(Potions > 0)
+                        {
+                            Console.WriteLine("You Used Potions {+20HP}");
+                            Player.SetHP(Player.GetHP() + 20);
+                            Potions -= 1;
+                        }
+                        else
+                        {
+                            Console.WriteLine("No more Potions");
+                            continue;
+                        }
+                        break;
                 }
 
                 if (Enemy.GetHP() <= 0) 
