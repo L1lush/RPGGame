@@ -11,6 +11,9 @@ namespace DoSomething
     class Program
     {
         static int Potions = 3;
+        static int GoblinXP = 5;
+        static int SkeletonXP = 7;
+        static int DragonXP = 20;
         static void Main(string[] args)
         {
             Random rand = new Random();
@@ -144,7 +147,7 @@ namespace DoSomething
 
                 if (Enemy.GetHP() <= 0) 
                 {
-                    CheckLVL(Player, 5);
+                    CheckLVL(Player, GoblinXP);
                     Console.WriteLine("You won");
                     break; 
                 }
@@ -179,10 +182,17 @@ namespace DoSomething
             {
                 player.SetXP(CurrentXP + XPGOT);
             }
+            else if (CurrentXP + XPGOT == RXP)
+            {
+                player.SetLVL(CurrentLVL + 1);
+                player.SetXP(0);
+                player.SetXPR(player.GETXPR() * 1.25);
+            }
+
             else
             {
                 player.SetLVL(CurrentLVL + 1);
-                player.SetXPR(CurrentXP + XPGOT);
+                player.SetXP((CurrentXP + XPGOT) - (int)player.GETXPR());
                 player.SetXPR(player.GETXPR() * 1.25);
             }
         }
