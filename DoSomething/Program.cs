@@ -128,7 +128,7 @@ namespace DoSomething
                         if (num == 2) { Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK())); }
                         break;
                     case ConsoleKey.D3:
-                        if(Potions > 0)
+                        if (Potions > 0)
                         {
                             Console.WriteLine("You Used Potions {+20HP}");
                             Player.SetHP(Player.GetHP() + 20);
