@@ -55,8 +55,8 @@ namespace DoSomething
                         Player.ShowStats();
                         break;
                     default:
-                        Console.WriteLine("Invalid choice, try again.");
                         continue;
+                        break;
                 }
 
                 Console.Clear();
@@ -122,19 +122,11 @@ namespace DoSomething
                         break;
                     case ConsoleKey.D2:
                         int num = rand.Next(1, 3);
-                        if (num == 1)
-                        {
-                            Console.WriteLine("you ran away");
-                            break;
-                        }
-                        if (num == 2)
-                        {
-                            Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK()));
-                        }
+                        if (num == 1) { Console.WriteLine("you ran away"); break; }
+                        if (num == 2) { Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK())); }
                         break;
                     case ConsoleKey.D3:
                         if (Potions > 0)
-
                         {
                             Console.WriteLine("You Used Potions {+20HP}");
                             Player.SetHP(Player.GetHP() + 20);
@@ -179,7 +171,7 @@ namespace DoSomething
             Random rand = new Random();
             int num = rand.Next(0, 50);
             if (num <= 24) { return new Enemy("Goblin"); }
-            else if (num <= 48) { return new Enemy("Skeleton"); }
+            else if (num <= 49) { return new Enemy("Skeleton"); }
             else { return new Enemy("Dragon"); }
         }
     }
