@@ -39,6 +39,7 @@ namespace DoSomething
                 Console.WriteLine("3. Castle");
                 Console.WriteLine("4. Stats");
                 ConsoleKeyInfo keyInfo = Console.ReadKey();
+
                 switch (keyInfo.Key)
                 {
                     case ConsoleKey.D1:
@@ -57,6 +58,7 @@ namespace DoSomething
                         Console.WriteLine("Invalid choice, try again.");
                         continue;
                 }
+
                 Console.Clear();
             }
 
@@ -112,6 +114,7 @@ namespace DoSomething
                 Console.Write("3. Use Potion");
                 Console.WriteLine($" - {Potions} Potions left");
                 ConsoleKeyInfo keyInfo = Console.ReadKey();
+
                 switch (keyInfo.Key)
                 {
                     case ConsoleKey.D1:
@@ -131,6 +134,7 @@ namespace DoSomething
                         break;
                     case ConsoleKey.D3:
                         if (Potions > 0)
+
                         {
                             Console.WriteLine("You Used Potions {+20HP}");
                             Player.SetHP(Player.GetHP() + 20);
