@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,7 +30,7 @@ namespace DoSomething
             }
 
             Console.Clear();
-
+            Console.WriteLine(Player.GETLVL());
             Enemy Enemy = GenerateClass();
             while (true)
             {
@@ -53,6 +54,7 @@ namespace DoSomething
                         break;
                     case ConsoleKey.D4:
                         Player.ShowStats();
+                        Thread.Sleep(3000);
                         break;
                     default:
                         continue;
@@ -142,7 +144,9 @@ namespace DoSomething
 
                 if (Enemy.GetHP() <= 0) 
                 {
-                    Console.WriteLine("You won"); break; 
+                    CheckLVL(Player, 5);
+                    Console.WriteLine("You won");
+                    break; 
                 }
                 Console.Clear();
                 Console.WriteLine("Enemy Move");
@@ -162,6 +166,24 @@ namespace DoSomething
                 }
 
                 if (Player.GetHP() <= 0) { Console.WriteLine("You Lost"); break; }
+            }
+        }
+
+        static void CheckLVL(Player player, int XPGOT)
+        {
+            int CurrentLVL = player.GETLVL();
+            int CurrentXP = player.GETXP();
+            double RXP = player.GETXPR();
+
+            if (CurrentXP + XPGOT < RXP)
+            {
+                player.SetXP(CurrentXP + XPGOT);
+            }
+            else
+            {
+                player.SetLVL(CurrentLVL + 1);
+                player.SetXPR(CurrentXP + XPGOT);
+                player.SetXPR(player.GETXPR() * 1.25);
             }
         }
 
