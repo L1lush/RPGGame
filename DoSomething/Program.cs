@@ -53,6 +53,9 @@ namespace DoSomething
                     case ConsoleKey.D4:
                         Player.ShowStats();
                         break;
+                    default:
+                        Console.WriteLine("Invalid choice, try again.");
+                        continue;
                 }
                 Console.Clear();
             }
