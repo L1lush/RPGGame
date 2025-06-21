@@ -57,11 +57,10 @@ namespace DoSomething
                         break;
                     case ConsoleKey.D4:
                         Player.ShowStats();
-                        Thread.Sleep(3000);
                         break;
                     default:
+                        Console.WriteLine("Invalid choice, try again.");
                         continue;
-                        break;
                 }
 
                 Console.Clear();
