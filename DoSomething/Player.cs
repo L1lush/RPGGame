@@ -14,6 +14,7 @@ namespace DoSomething
         private int LVL = 1;
         private int XP = 0;
         private double XPR = 10;
+        private int Gold = 0;
 
         public Player(string CLASS)
         {
@@ -50,6 +51,9 @@ namespace DoSomething
 
         public void SetXPR(double XPR) { this.XPR = XPR; }
         public double GETXPR() { return this.XPR; }
+
+        public void SetGold(int Gold) {  this.Gold = Gold; }
+        public int GetGold() {  return this.Gold; }
 
         public void ShowStats()
         {

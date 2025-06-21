@@ -14,6 +14,7 @@ namespace DoSomething
         static int GoblinXP = 5;
         static int SkeletonXP = 7;
         static int DragonXP = 20;
+        static int ShopCount = 0;
         static void Main(string[] args)
         {
             Random rand = new Random();
@@ -42,6 +43,8 @@ namespace DoSomething
                 Console.WriteLine("2. cave");
                 Console.WriteLine("3. Castle");
                 Console.WriteLine("4. Stats");
+                if(ShopCount == 5)
+                    Console.WriteLine("5. Shop");
                 ConsoleKeyInfo keyInfo = Console.ReadKey();
 
                 switch (keyInfo.Key)
@@ -58,6 +61,9 @@ namespace DoSomething
                     case ConsoleKey.D4:
                         Player.ShowStats();
                         Thread.Sleep(3000);
+                        break;
+                    case ConsoleKey.D5:
+                        Shop();
                         break;
                     default:
                         continue;
@@ -96,13 +102,10 @@ namespace DoSomething
 
         static void Chest(Enemy Enemy, Player Player, Random rand)
         {
-            int Chest = rand.Next(1, 4);
+            int Chest = rand.Next(1, 5);
             if (Chest == 2)
             {
-                Console.WriteLine("you got Chest");
-                Console.WriteLine($"+5HP and +5 Attack");
-                Player.SetHP(Player.GetHP() + 5);
-                Player.SetATTACK(Player.GetATTACK() + 5);
+                Player.SetGold(Player.GetGold() + 20);
             }
         }
 
@@ -195,6 +198,11 @@ namespace DoSomething
                 player.SetXP((CurrentXP + XPGOT) - (int)player.GETXPR());
                 player.SetXPR(player.GETXPR() * 1.25);
             }
+        }
+
+        static void Shop()
+        {
+
         }
 
         static Enemy GenerateClass()
