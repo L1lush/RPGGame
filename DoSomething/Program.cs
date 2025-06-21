@@ -16,7 +16,18 @@ namespace DoSomething
 
             Console.WriteLine("write your Class (Knight, Assassin)");
             string Class = Console.ReadLine();
-            Player Player = new Player(Class);
+            Player Player;
+
+            if (Class == "Knight" || Class == "Assassin")
+            {
+                Player = new Player(Class);
+            }
+            else
+            {
+                Main(args);
+                return;
+            }
+
             Console.Clear();
 
             Enemy Enemy = GenerateClass();
@@ -72,7 +83,7 @@ namespace DoSomething
             if (Chest == 2)
             {
                 Console.WriteLine("you got Chest");
-                Console.WriteLine($"+5HP and +5HP");
+                Console.WriteLine($"+5HP and +5 Attack");
                 Player.SetHP(Player.GetHP() + 5);
                 Player.SetATTACK(Player.GetATTACK() + 5);
             }
@@ -88,7 +99,8 @@ namespace DoSomething
                 Console.WriteLine("Choose Your Action");
                 Console.WriteLine("1. Attack");
                 Console.WriteLine("2. Run");
-                Console.WriteLine("3. Use Potion");
+                Console.Write("3. Use Potion");
+                Console.WriteLine($" - {Potions} Potions left");
                 ConsoleKeyInfo keyInfo = Console.ReadKey();
                 if (keyInfo.Key == ConsoleKey.D1)
                 {
@@ -106,8 +118,16 @@ namespace DoSomething
                     Player.SetHP(Player.GetHP() + 20);
                     Potions -= 1;
                 }
+                else if(keyInfo.Key == ConsoleKey.D3 && Potions <= 0)
+                {
+                    Console.WriteLine("No more Potions");
+                    continue;
+                }
 
-                if (Enemy.GetHP() <= 0) { Console.WriteLine("You won"); break; }
+                if (Enemy.GetHP() <= 0) 
+                {
+                    Console.WriteLine("You won"); break; 
+                }
                 Console.Clear();
                 Console.WriteLine("Enemy Move");
                 Console.WriteLine($"Enemy HP: {Enemy.GetHP()}");
@@ -133,9 +153,9 @@ namespace DoSomething
         {
             Enemy Enemy;
             Random rand = new Random();
-            int num = rand.Next(0, 2);
-            if (num == 0) { return new Enemy("Goblin"); }
-            if (num == 1) { return new Enemy("Skeleton"); }
+            int num = rand.Next(0, 50);
+            if (num <= 24) { return new Enemy("Goblin"); }
+            else if (num <= 49) { return new Enemy("Skeleton"); }
             else { return new Enemy("Dragon"); }
         }
     }
