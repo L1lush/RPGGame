@@ -18,11 +18,11 @@ namespace DoSomething
 
             switch (CLASS)
             {
-                case "Knight"
+                case "Knight":
                     this.HP = 20;
                     this.ATTACK = 5;
                     break;
-                case "Assassin"
+                case "Assassin":
                      this.HP = 15;
                     this.ATTACK = 7;
                     break;
