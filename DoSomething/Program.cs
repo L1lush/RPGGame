@@ -21,7 +21,12 @@ namespace DoSomething
         static int ShopCount = 1;
         static void Main(string[] args)
         {
-            OpeningStory();
+            //Random rand = new Random();
+            //Player Player = new Player("Knight");
+            //Enemy Enemy = new Enemy("Goblin");
+            //Test(Player, rand);
+
+            //OpeningStory();
             StartUpMenu();
         }
 
@@ -224,11 +229,11 @@ namespace DoSomething
                         switch (options[selected])
                         {
                             case "Forest":
-                                Forest(Enemy, Player, rand);
+                                Forest(Enemy, Player, rand); // ADD MAP
                                 ShopCount++;
                                 return;
                             case "Cave":
-                                Cave(Enemy, Player, rand);
+                                Cave(Enemy, Player, rand); // ADD MAP
                                 ShopCount++;
                                 return;
                             case "Castle":
@@ -305,44 +310,38 @@ namespace DoSomething
 
 
 
-        static void Forest(Enemy Enemy, Player Player, Random rand)
+        static void Forest(Enemy Enemy, Player Player, Random rand) // change ADD MAP
         {
-            Chest(Enemy, Player, rand);
+            Chest(Player);
 
             Console.WriteLine($"You attacked by {Enemy.GetClass()}");
-            Battle( Player, rand);
+            Battle( Player, Enemy, rand);
 
         }
 
-        static void Cave(Enemy Enemy, Player Player, Random rand)
+        static void Cave(Enemy Enemy, Player Player, Random rand) // change ADD Map
         {
-            Chest(Enemy, Player, rand);
+            Chest(Player);
 
             Console.WriteLine($"You attacked by {Enemy.GetClass()}");
-            Battle( Player, rand);
+            Battle( Player, Enemy, rand);
         }
 
         static void Castle(Enemy Enemy, Player Player, Random rand)
         {
-            Chest(Enemy, Player, rand);
+            char[,] map = MapCastle();
+            MoveOnMap(map, Player, rand);
 
-            Console.WriteLine($"You attacked by {Enemy.GetClass()}");
-            Battle(Player, rand);
         }
 
-        static void Chest(Enemy Enemy, Player Player, Random rand)
+        static void Chest(Player Player)
         {
-            int Chest = rand.Next(1, 5);
-            if (Chest == 2)
-            {
-                Console.WriteLine("You got 20 Gold");
-                Player.SetGold(Player.GetGold() + 20);
-            }
+            Console.WriteLine("You got 20 Gold");
+            Player.SetGold(Player.GetGold() + 20);
         }
 
-        static void Battle(Player Player, Random rand)
+        static void Battle(Player Player , Enemy Enemy, Random rand)
         {
-            Enemy Enemy = GenerateClass();
             bool enemyUsedPotion = false;
 
             while (Player.GetHP() > 0 && Enemy.GetHP() > 0)
@@ -570,6 +569,110 @@ namespace DoSomething
         {
             Console.WriteLine(text);
             Thread.Sleep(delay);
+        }
+
+        static void Test(Player Player, Random rand)
+        {
+            char[,] map = MapCastle();
+            MoveOnMap(map, Player, rand);
+        }
+
+        static char[,] MapCastle() // Create map for castle // later ADD for forest and cave
+        {
+            // C - Chest || D - Dragon || G - Goblin
+            char[,] map = new char[10, 10]
+            {
+        { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
+        { '#', 'P', ' ', ' ', '#', 'C', ' ', ' ', ' ', '#' },
+        { '#', '#', '#', ' ', '#', ' ', ' ', '#', ' ', '#' },
+        { '#', ' ', ' ', ' ', 'G', ' ', ' ', '#', 'G', '#' },
+        { '#', ' ', '#', '#', '#', '#', ' ', '#', ' ', '#' },
+        { '#', ' ', '#', 'C', 'D', ' ', ' ', '#', 'G', '#' },
+        { '#', ' ', '#', '#', '#', '#', '#', '#', ' ', '#' },
+        { '#', ' ', '#', ' ', ' ', 'D', ' ', '#', ' ', '#' },
+        { '#', ' ', ' ', 'D', '#', ' ', 'C', '#', 'X', '#' },
+        { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
+            };
+
+            return map;
+        }
+
+        static void MoveOnMap(char[,] map, Player Player, Random rand) // this function Draw the map and player need to move by using arrows also if you touch letter it will call another function for battle or get Chest
+        {
+            int playerX = 0, playerY = 0;
+
+            // Find player start position
+            for (int y = 0; y < map.GetLength(0); y++)
+            {
+                for (int x = 0; x < map.GetLength(1); x++)
+                {
+                    if (map[y, x] == 'P')
+                    {
+                        playerX = x;
+                        playerY = y;
+                        break;
+                    }
+                }
+            }
+
+            while (true)
+            {
+                Console.Clear();
+                PrintMap(map);
+
+                Console.WriteLine("Move: ↑ ↓ ← → ");
+
+                ConsoleKey key = Console.ReadKey(true).Key;
+                int newX = playerX, newY = playerY;
+
+                // Movement with arrow keys
+                switch (key)
+                {
+                    case ConsoleKey.UpArrow: newY--; break;
+                    case ConsoleKey.DownArrow: newY++; break;
+                    case ConsoleKey.LeftArrow: newX--; break;
+                    case ConsoleKey.RightArrow: newX++; break;
+                        Console.WriteLine("Game Quit.");
+                        return;
+                }
+
+                // Check bounds and wall collision
+                if (newX < 0 || newX >= map.GetLength(1) ||
+                    newY < 0 || newY >= map.GetLength(0) ||
+                    map[newY, newX] == '#') continue;
+
+                char destination = map[newY, newX];
+
+                // Handle interactions
+                switch (destination)
+                {
+                    case 'D': Enemy EnemyD = new Enemy("Dragon"); Console.WriteLine($"you attacked by {EnemyD.GetClass()}"); Battle(Player, EnemyD, rand); break;
+                    case 'C': Chest(Player); Thread.Sleep(1000); break;
+                    case 'G': Enemy EnemyG = new Enemy("Goblin"); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
+                    case 'S': Enemy EnemyS = new Enemy("Skeleton"); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
+                    case 'X':
+                        Console.WriteLine("You reached the exit! Game Over.");
+                        return;
+                }
+
+                // Move player
+                map[playerY, playerX] = '.';
+                playerX = newX;
+                playerY = newY;
+                map[playerY, playerX] = 'P';
+            }
+        }
+
+        static void PrintMap(char[,] map) // this function print map (used in MoveOnMap)
+        {
+            for (int y = 0; y < 10; y++)
+            {
+                for (int x = 0; x < 10; x++)
+                {
+                    Console.Write($"{map[y, x]} ");
+                }
+                Console.WriteLine();
+            }
         }
     }
 }
