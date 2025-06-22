@@ -59,5 +59,18 @@ namespace DoSomething
         {
             Console.WriteLine($"HP: {this.HP} ATTACK: {this.ATTACK} CLASS: {this.CLASS} LVL: {this.LVL} XP: {this.XP} XPR: {this.XPR}");
         }
+
+        public void LevelUp()
+        {
+            if (this.XP >= this.XPR)
+            {
+                this.LVL++;
+                this.XP -= (int)this.XPR;
+                this.XPR *= 1.5;
+                this.HP += 5;
+                this.ATTACK += 2;
+                Console.WriteLine($"Congratulations! You leveled up to LVL {this.LVL}!");
+            }
+        }
     }
 }
