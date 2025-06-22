@@ -17,180 +17,11 @@ namespace DoSomething
         static int GoblinXP = 5;
         static int SkeletonXP = 7;
         static int DragonXP = 20;
-        static int ShopCount = 0;
         static string SavePath = @"C:\";
+        static int ShopCount = 1;
         static void Main(string[] args)
         {
                 StartUpMenu();
-        }
-
-        static void Forest(Enemy Enemy, Player Player, Random rand)
-        {
-            Chest(Enemy, Player, rand);
-
-            Console.WriteLine($"You attacked by {Enemy.GetClass()}");
-            Battle( Player, rand);
-
-        }
-
-        static void Cave(Enemy Enemy, Player Player, Random rand)
-        {
-            Chest(Enemy, Player, rand);
-
-            Console.WriteLine($"You attacked by {Enemy.GetClass()}");
-            Battle( Player, rand);
-        }
-
-        static void Castle(Enemy Enemy, Player Player, Random rand)
-        {
-            Chest(Enemy, Player, rand);
-
-            Console.WriteLine($"You attacked by {Enemy.GetClass()}");
-            Battle(Player, rand);
-        }
-
-        static void Chest(Enemy Enemy, Player Player, Random rand)
-        {
-            int Chest = rand.Next(1, 5);
-            if (Chest == 2)
-            {
-                Console.WriteLine("You got 20 Gold");
-                Player.SetGold(Player.GetGold() + 20);
-            }
-        }
-
-        static void Battle( Player Player, Random rand)
-        {
-            Enemy Enemy = GenerateClass();
-            bool enemyUsedPotion = false;
-
-            while (Player.GetHP() > 0 && Enemy.GetHP() > 0)
-            {
-                Console.WriteLine("Choose Your Action");
-                Console.WriteLine("1. Attack");
-                Console.WriteLine("2. Run");
-                Console.Write("3. Use Potion");
-                Console.WriteLine($" - {Potions} Potions left");
-                ConsoleKeyInfo keyInfo = Console.ReadKey();
-
-                switch (keyInfo.Key)
-                {
-                    case ConsoleKey.Escape:
-                        PAUSEMenu(Player);
-                        continue;
-                        break;
-                    case ConsoleKey.D1:
-                        Enemy.SetHP(Math.Max(0, Enemy.GetHP() - Player.GetATTACK()));
-                        break;
-                    case ConsoleKey.D2:
-                        int num = rand.Next(1, 3);
-                        if (num == 1) { Console.WriteLine("you ran away"); break; }
-                        if (num == 2) { Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK())); }
-                        break;
-                    case ConsoleKey.D3:
-                        if (Potions > 0)
-                        {
-                            Console.WriteLine("You Used Potions {+20HP}");
-                            Player.SetHP(Player.GetHP() + 20);
-                            Potions -= 1;
-                        }
-                        else
-                        {
-                            Console.WriteLine("No more Potions");
-                            continue;
-                        }
-                        break;
-                }
-
-                if (Enemy.GetHP() <= 0) 
-                {
-                    CheckLVL(Player, GoblinXP); // Change
-                    Player.SetGold(Player.GetGold() + 3);
-                    Console.WriteLine("You won");
-                    break; 
-                }
-                Console.Clear();
-                Console.WriteLine("Enemy Move");
-                Console.WriteLine($"Enemy HP: {Enemy.GetHP()}");
-
-                if (Enemy.GetHP() <= 5 && !enemyUsedPotion)
-                {
-                    Console.WriteLine("Enemy used a potion {+5 HP}!");
-                    Enemy.SetHP(Enemy.GetHP() + 5);
-                    enemyUsedPotion = true;
-                }
-                else
-                {
-                    Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK()));
-                    Console.WriteLine($"Enemy Attacked -{Enemy.GetATTACK()}HP");
-                    Console.WriteLine($"your hp is {Player.GetHP()}");
-                }
-
-                if (Player.GetHP() <= 0) { Console.WriteLine("You Lost"); break; }
-            }
-        }
-
-        static void CheckLVL(Player player, int XPGOT)
-        {
-            int CurrentLVL = player.GETLVL();
-            int CurrentXP = player.GETXP();
-            double RXP = player.GETXPR();
-
-            if (CurrentXP + XPGOT < RXP)
-            {
-                player.SetXP(CurrentXP + XPGOT);
-            }
-            else if (CurrentXP + XPGOT == RXP)
-            {
-                player.SetLVL(CurrentLVL + 1);
-                player.SetXP(0);
-                player.SetXPR(player.GETXPR() * 1.25);
-            }
-            else
-            {
-                player.SetLVL(CurrentLVL + 1);
-                player.SetXP((CurrentXP + XPGOT) - (int)player.GETXPR());
-                player.SetXPR(player.GETXPR() * 1.25);
-            }
-        }
-
-        static void Shop(Player Player)
-        {
-            Console.Clear();
-            Console.WriteLine($"What do you want to buy (you have {Player.GetGold()} Gold)");
-            Console.WriteLine("1. Knife (ATTACK 10) | Price: 30 gold");
-            Console.WriteLine("2. Sword (ATTACK 20) | Price: 60 gold");
-            Console.WriteLine("3. Big Sword (ATTACK 30) | Price: 90 gold");
-            Console.WriteLine("4. Exit");
-
-            ConsoleKeyInfo keyInfo = Console.ReadKey();
-            switch (keyInfo.Key)
-            {
-                case ConsoleKey.Escape:
-                    PAUSEMenu(Player);
-                    break;
-                case ConsoleKey.D1:
-                    Player.SetATTACK(10);
-                    break;
-                case ConsoleKey.D2:
-                    Player.SetATTACK(20);
-                    break;
-                case ConsoleKey.D3:
-                    Player.SetATTACK(30);
-                    break;
-                case ConsoleKey.D4:
-                    break;
-            }
-        }
-
-        static Enemy GenerateClass()
-        {
-            Enemy Enemy;
-            Random rand = new Random();
-            int num = rand.Next(0, 50);
-            if (num <= 24) { return new Enemy("Goblin"); }
-            else if (num <= 49) { return new Enemy("Skeleton"); }
-            else { return new Enemy("Dragon"); }
         }
 
         static void StartUpMenu()
@@ -232,7 +63,7 @@ namespace DoSomething
                     Console.WriteLine(line);
                 }
 
-                Console.WriteLine("\nUse ↑ ↓ to navigate. Press Enter to select.");
+                Console.WriteLine("Use ↑ ↓ to navigate. Press Enter to select.");
 
                 var key = Console.ReadKey(true).Key;
 
@@ -267,7 +98,7 @@ namespace DoSomething
                                 return;
                         }
 
-                        Console.WriteLine("\nPress any key to return to menu...");
+                        Console.WriteLine("Press any key to return to menu...");
                         Console.ReadKey(true);
                         break;
                 }
@@ -289,73 +120,9 @@ namespace DoSomething
             return JsonSerializer.Deserialize<Player>(json);        // Convert the JSON string back into a Player object
         }
 
-        static void OpenSettings() 
+        static void OpenSettings()
         {
-            
-        }
 
-        static void StartNewGame()
-        {
-            Random rand = new Random();
-
-            Console.WriteLine("write your Class (Knight, Assassin)");
-            string Class = Console.ReadLine();
-            Player Player;
-
-            if (Class == "Knight" || Class == "Assassin")
-            {
-                Player = new Player(Class);
-            }
-            else
-            {
-                StartNewGame();
-                return;
-            }
-
-            Console.Clear();
-            Console.WriteLine(Player.GETLVL());
-            Enemy Enemy = GenerateClass();
-            while (true)
-            {
-                Console.WriteLine("Where to go");
-                Console.WriteLine("1. forest");
-                Console.WriteLine("2. cave");
-                Console.WriteLine("3. Castle");
-                Console.WriteLine("4. Stats");
-                if (ShopCount % 5 == 0)
-                    Console.WriteLine("5. Shop");
-
-                ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-
-                switch (keyInfo.Key)
-                {
-                    case ConsoleKey.Escape:
-                        PAUSEMenu(Player);
-                        continue;
-                        break;
-                    case ConsoleKey.D1:
-                        Forest(Enemy, Player, rand);
-                        break;
-                    case ConsoleKey.D2:
-                        Cave(Enemy, Player, rand);
-                        break;
-                    case ConsoleKey.D3:
-                        Castle(Enemy, Player, rand);
-                        break;
-                    case ConsoleKey.D4:
-                        Player.ShowStats();
-                        Thread.Sleep(3000);
-                        break;
-                    case ConsoleKey.D5:
-                        Shop(Player);
-                        break;
-                    default:
-                        continue;
-                        break;
-                }
-                ShopCount++;
-                Console.Clear();
-            }
         }
 
         static void ShowCredits()
@@ -371,6 +138,115 @@ namespace DoSomething
             Environment.Exit(0);// Exits the application
         }
 
+        static void StartNewGame()
+        {
+            Random rand = new Random();
+
+            string[] classOptions = { "Knight", "Assassin" };
+            int selectedClass = 0;
+            ConsoleKey classKey;
+            Console.CursorVisible = false;
+
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("╔══════════════════════════════╗");
+                Console.WriteLine("║      Choose Your Class       ║");
+                Console.WriteLine("╠══════════════════════════════╣");
+                for (int i = 0; i < classOptions.Length; i++)
+                {
+                    if (i == selectedClass)
+                        Console.WriteLine($"║ ▶ {classOptions[i],-27}║");
+                    else
+                        Console.WriteLine($"║   {classOptions[i],-27}║");
+                }
+                Console.WriteLine("╚══════════════════════════════╝");
+                Console.WriteLine("Use ↑ ↓ to navigate. Press Enter to select.");
+
+                classKey = Console.ReadKey(true).Key;
+                if (classKey == ConsoleKey.UpArrow)
+                    selectedClass = (selectedClass - 1 + classOptions.Length) % classOptions.Length;
+                else if (classKey == ConsoleKey.DownArrow)
+                    selectedClass = (selectedClass + 1) % classOptions.Length;
+
+            } while (classKey != ConsoleKey.Enter);
+
+            Player Player = new Player(classOptions[selectedClass]);
+
+            Console.Clear();
+            Console.WriteLine(Player.GETLVL());
+            Enemy Enemy = GenerateClass();
+            while (true)
+            {
+                    string[] options = {
+                        "Forest",
+                        "Cave",
+                        "Castle",
+                        "Stats",
+                        (ShopCount % 5 == 0) ? "Shop" : null
+                    };
+                    options = options.Where(o => o != null).ToArray();
+                    int selected = 0;
+                    ConsoleKey key;
+
+                    Console.CursorVisible = false;
+                do
+                {
+                    Console.Clear();
+                    Console.WriteLine("╔══════════════════════════════╗");
+                    Console.WriteLine("║        Where to go?          ║");
+                    Console.WriteLine("╠══════════════════════════════╣");
+                    for (int i = 0; i < options.Length; i++)
+                    {
+                        if (i == selected)
+                            Console.WriteLine($"║ ▶ {options[i],-27}║");
+                        else
+                            Console.WriteLine($"║   {options[i],-27}║");
+                    }
+                    Console.WriteLine("╚══════════════════════════════╝");
+                    Console.WriteLine("Esc for pause.");
+
+                    key = Console.ReadKey(true).Key;
+                    if (key == ConsoleKey.UpArrow)
+                        selected = (selected - 1 + options.Length) % options.Length;
+                    else if (key == ConsoleKey.DownArrow)
+                        selected = (selected + 1) % options.Length;
+                    else if (key == ConsoleKey.Escape)
+                    {
+                        PAUSEMenu(Player);
+                        return;
+                    }
+                    else if (key == ConsoleKey.Enter)
+                    {
+                        switch (options[selected])
+                        {
+                            case "Forest":
+                                Forest(Enemy, Player, rand);
+                                ShopCount++;
+                                return;
+                            case "Cave":
+                                Cave(Enemy, Player, rand);
+                                ShopCount++;
+                                return;
+                            case "Castle":
+                                Castle(Enemy, Player, rand);
+                                ShopCount++;
+                                return;
+                            case "Stats":
+                                Player.ShowStats();
+                                Thread.Sleep(3000);
+                                return;
+                            case "Shop":
+                                Shop(Player);
+                                ShopCount++;
+                                return;
+                        }
+                    }
+                } while (true);
+                
+            }
+        }
+
         static void PAUSEMenu(Player player)
         {
             string[] options = { "Resume", "Stats", "Exit to Main Menu" };
@@ -381,9 +257,9 @@ namespace DoSomething
             do
             {
                 Console.Clear();
-                         Console.WriteLine("╔═══════════════════════╗");
-                         Console.WriteLine("║       PAUSE MENU      ║");
-                         Console.WriteLine("╠═══════════════════════╣");
+                Console.WriteLine("╔═══════════════════════╗");
+                Console.WriteLine("║       PAUSE MENU      ║");
+                Console.WriteLine("╠═══════════════════════╣");
                 for (int i = 0; i < options.Length; i++)
                 {
                     if (i == selected)
@@ -391,8 +267,8 @@ namespace DoSomething
                     else
                         Console.WriteLine($"║   {options[i],-17}   ║");
                 }
-                         Console.WriteLine("╚═══════════════════════╝");
-                Console.WriteLine("\nUse ↑ ↓ to navigate. Enter to select.");
+                Console.WriteLine("╚═══════════════════════╝");
+                Console.WriteLine("Use ↑ ↓ to navigate. Enter to select.");
 
                 key = Console.ReadKey(true).Key;
                 if (key == ConsoleKey.UpArrow)
@@ -422,5 +298,238 @@ namespace DoSomething
             }
 
         }
+
+
+
+
+        static void Forest(Enemy Enemy, Player Player, Random rand)
+        {
+            Chest(Enemy, Player, rand);
+
+            Console.WriteLine($"You attacked by {Enemy.GetClass()}");
+            Battle( Player, rand);
+
+        }
+
+        static void Cave(Enemy Enemy, Player Player, Random rand)
+        {
+            Chest(Enemy, Player, rand);
+
+            Console.WriteLine($"You attacked by {Enemy.GetClass()}");
+            Battle( Player, rand);
+        }
+
+        static void Castle(Enemy Enemy, Player Player, Random rand)
+        {
+            Chest(Enemy, Player, rand);
+
+            Console.WriteLine($"You attacked by {Enemy.GetClass()}");
+            Battle(Player, rand);
+        }
+
+        static void Chest(Enemy Enemy, Player Player, Random rand)
+        {
+            int Chest = rand.Next(1, 5);
+            if (Chest == 2)
+            {
+                Console.WriteLine("You got 20 Gold");
+                Player.SetGold(Player.GetGold() + 20);
+            }
+        }
+
+        static void Battle(Player Player, Random rand)
+        {
+            Enemy Enemy = GenerateClass();
+            bool enemyUsedPotion = false;
+
+            while (Player.GetHP() > 0 && Enemy.GetHP() > 0)
+            {
+                // Action selection menu
+                string[] actions = {
+                    "Attack                     ",
+                    "Run                        ",
+                   $"Use Potion ({Potions} left)        " 
+                };
+                int selectedAction = 0;
+                ConsoleKey key;
+                do
+                {
+                    Console.Clear();
+                    Console.WriteLine("╔═══════════════════════════════╗");
+                    Console.WriteLine("║   Choose Your Action          ║");
+                    Console.WriteLine("╠═══════════════════════════════╣");
+                    for (int i = 0; i < actions.Length; i++)
+                    {
+                        if (i == selectedAction)
+                            Console.WriteLine($"║ ▶ {actions[i],-16} ║");
+                        else
+                            Console.WriteLine($"║   {actions[i],-16} ║");
+                    }
+                    Console.WriteLine("╚═══════════════════════════════╝");
+                    Console.WriteLine("Use ↑ ↓ to navigate. Enter to select. Esc for pause.");
+
+                    key = Console.ReadKey(true).Key;
+                    if (key == ConsoleKey.UpArrow)
+                        selectedAction = (selectedAction - 1 + actions.Length) % actions.Length;
+                    else if (key == ConsoleKey.DownArrow)
+                        selectedAction = (selectedAction + 1) % actions.Length;
+                    else if (key == ConsoleKey.Escape)
+                    {
+                        PAUSEMenu(Player);
+                    }
+                } while (key != ConsoleKey.Enter);
+
+                Console.Clear();
+                switch (selectedAction)
+                {
+                    case 0: // Attack
+                        Enemy.SetHP(Math.Max(0, Enemy.GetHP() - Player.GetATTACK()));
+                        Console.WriteLine($"You attacked! Enemy HP is now {Enemy.GetHP()}");
+                        break;
+                    case 1: // Run
+                        int num = rand.Next(1, 3);
+                        if (num == 1)
+                        {
+                            Console.WriteLine("You ran away!");
+                            Thread.Sleep(1000);
+                            return;
+                        }
+                        else
+                        {
+                            Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK()));
+                            Console.WriteLine($"Failed to run! Enemy attacked for {Enemy.GetATTACK()} damage.");
+                            Console.WriteLine($"Your HP: {Player.GetHP()}");
+                        }
+                        break;
+                    case 2: // Use Potion
+                        if (Potions > 0)
+                        {
+                            Console.WriteLine("You used a potion! (+20 HP)");
+                            Player.SetHP(Player.GetHP() + 20);
+                            Potions -= 1;
+                        }
+                        else
+                        {
+                            Console.WriteLine("No more potions left!");
+                            Thread.Sleep(1000);
+                            continue;
+                        }
+                        break;
+                }
+
+                if (Enemy.GetHP() <= 0)
+                {
+                    Player.LevelUp();
+                    Player.SetGold(Player.GetGold() + 3);
+                    Console.WriteLine("You won!");
+                    Thread.Sleep(1500);
+                    break;
+                }
+
+                // Enemy's turn
+                Console.WriteLine("Enemy's move...");
+                Thread.Sleep(800);
+                if (Enemy.GetHP() <= 5 && !enemyUsedPotion)
+                {
+                    Console.WriteLine("Enemy used a potion! (+5 HP)");
+                    Enemy.SetHP(Enemy.GetHP() + 5);
+                    enemyUsedPotion = true;
+                }
+                else
+                {
+                    Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK()));
+                    Console.WriteLine($"Enemy attacked for {Enemy.GetATTACK()} damage.");
+                    Console.WriteLine($"Your HP: {Player.GetHP()}");
+                }
+
+                if (Player.GetHP() <= 0)
+                {
+                    Console.WriteLine("You lost!");
+                    Thread.Sleep(1500);
+                    break;
+                }
+                Thread.Sleep(1200);
+            }
+        }
+
+        static void Shop(Player Player)
+        {
+            string[] shopOptions = {
+                "Knife (ATTACK 10) | Price: 30 gold    ",
+                "Sword (ATTACK 20) | Price: 60 gold    ",
+                "Big Sword (ATTACK 30) | Price: 90 gold",
+                "Exit                                  "
+            };
+            int[] prices = { 30, 60, 90, 0 };
+            int[] attacks = { 10, 20, 30, 0 };
+            int selected = 0;
+            ConsoleKey key;
+
+            Console.CursorVisible = false;
+            do
+            {
+                Console.Clear();
+                Console.WriteLine($"╔════════════════════════════════════════════╗");
+                Console.WriteLine($"║          RPG SHOP                          ║");
+                Console.WriteLine($"╠════════════════════════════════════════════╣");
+                Console.WriteLine($"║   Gold: {Player.GetGold(),-28}       ║");
+                Console.WriteLine($"╠════════════════════════════════════════════╣");
+                for (int i = 0; i < shopOptions.Length; i++)
+                {
+                    if (i == selected)
+                        Console.WriteLine($"║ ▶ {shopOptions[i],-28}   ║");
+                    else
+                        Console.WriteLine($"║   {shopOptions[i],-28}   ║");
+                }
+                Console.WriteLine($"╚════════════════════════════════════════════╝");
+                Console.WriteLine("Use ↑ ↓ to navigate. Enter to buy. Esc for pause.");
+
+                key = Console.ReadKey(true).Key;
+                if (key == ConsoleKey.UpArrow)
+                    selected = (selected - 1 + shopOptions.Length) % shopOptions.Length;
+                else if (key == ConsoleKey.DownArrow)
+                    selected = (selected + 1) % shopOptions.Length;
+                else if (key == ConsoleKey.Escape)
+                {
+                    PAUSEMenu(Player);
+                    return;
+                }
+                else if (key == ConsoleKey.Enter)
+                {
+                    if (selected == 3) // Exit
+                        return;
+                    if (Player.GetGold() >= prices[selected])
+                    {
+                        Player.SetGold(Player.GetGold() - prices[selected]);
+                        Player.SetATTACK(attacks[selected]);
+                        Console.Clear();
+                        Console.WriteLine($"You bought {shopOptions[selected].Split('|')[0].Trim()}!");
+                        Console.WriteLine($"Your attack is now {attacks[selected]}.");
+                        Console.WriteLine("Press any key to continue...");
+                        Console.ReadKey(true);
+                        return;
+                    }
+                    else
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Not enough gold!");
+                        Console.WriteLine("Press any key to continue...");
+                        Console.ReadKey(true);
+                    }
+                }
+            } while (true);
+        }
+
+        static Enemy GenerateClass()
+        {
+            Enemy Enemy;
+            Random rand = new Random();
+            int num = rand.Next(0, 50);
+            if (num <= 24) { return new Enemy("Goblin"); }
+            else if (num <= 49) { return new Enemy("Skeleton"); }
+            else { return new Enemy("Dragon"); }
+        }
+
+
     }
 }
