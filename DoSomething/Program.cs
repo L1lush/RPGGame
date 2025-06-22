@@ -21,7 +21,8 @@ namespace DoSomething
         static int ShopCount = 1;
         static void Main(string[] args)
         {
-                StartUpMenu();
+            OpeningStory();
+            StartUpMenu();
         }
 
         static void StartUpMenu()
@@ -140,6 +141,8 @@ namespace DoSomething
 
         static void StartNewGame()
         {
+            
+
             Random rand = new Random();
 
             string[] classOptions = { "Knight", "Assassin" };
@@ -530,6 +533,43 @@ namespace DoSomething
             else { return new Enemy("Dragon"); }
         }
 
+        static void OpeningStory()
+        {
+            Console.WriteLine("Kael, Son of a God");
+            Console.WriteLine("Press Enter to skip the intro or any other key to watch the story...");
 
+            ConsoleKey key = Console.ReadKey(true).Key;
+            if (key == ConsoleKey.Enter)
+            {
+                Console.Clear();
+                return;
+            }
+
+            Console.Clear();
+            ShowStoryLine("Kael was raised as an ordinary villager — quiet, kind, and curious.");
+            ShowStoryLine("The people of Nerith Hollow treated him like family, but Kael always felt different.");
+            ShowStoryLine("He had no memory of his real parents, only a pendant he wore since birth — glowing faintly when he was near danger.");
+            ShowStoryLine("What he didn't know was that he is the son of the god Aetherion...");
+            ShowStoryLine("The ancient god of balance and light. Aetherion had fallen in love with a mortal woman, Kael’s mother.");
+            ShowStoryLine("To protect them from divine enemies, he sealed his power and hid Kael in the mortal world.");
+
+            Console.WriteLine();
+            ShowStoryLine("One night, under a blood-red moon, shadow beasts from the Umbraverse descended upon the village...");
+            ShowStoryLine("The skies cracked with lightning, and flames swallowed the homes Kael knew.");
+            ShowStoryLine("He fought to save his friends, but he was too weak — forced to watch as the monsters slaughtered everyone he loved.");
+            ShowStoryLine("In that moment of pain, rage, and sorrow, something awoke inside him...");
+            ShowStoryLine("Time slowed, the pendant shattered, and divine energy surged through him.");
+            ShowStoryLine("He destroyed the creatures with light that came from within his own body.");
+            ShowStoryLine("When he awoke, the village was ash.");
+
+            Console.WriteLine();
+            Thread.Sleep(3000);
+            Console.Clear();
+        }
+        static void ShowStoryLine(string text, int delay = 4000)
+        {
+            Console.WriteLine(text);
+            Thread.Sleep(delay);
+        }
     }
 }
