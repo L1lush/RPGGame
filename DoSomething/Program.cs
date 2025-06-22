@@ -18,8 +18,7 @@ namespace DoSomething
         static int ShopCount = 0;
         static void Main(string[] args)
         {
-            StartUpMenu();
-
+                StartUpMenu();
         }
 
         static void Forest(Enemy Enemy, Player Player, Random rand)
@@ -73,6 +72,10 @@ namespace DoSomething
 
                 switch (keyInfo.Key)
                 {
+                    case ConsoleKey.Escape:
+                        PAUSEMenu(Player);
+                        continue;
+                        break;
                     case ConsoleKey.D1:
                         Enemy.SetHP(Math.Max(0, Enemy.GetHP() - Player.GetATTACK()));
                         break;
@@ -140,7 +143,6 @@ namespace DoSomething
                 player.SetXP(0);
                 player.SetXPR(player.GETXPR() * 1.25);
             }
-
             else
             {
                 player.SetLVL(CurrentLVL + 1);
@@ -161,6 +163,9 @@ namespace DoSomething
             ConsoleKeyInfo keyInfo = Console.ReadKey();
             switch (keyInfo.Key)
             {
+                case ConsoleKey.Escape:
+                    PAUSEMenu(Player);
+                    break;
                 case ConsoleKey.D1:
                     Player.SetATTACK(10);
                     break;
@@ -190,7 +195,7 @@ namespace DoSomething
             string[] lines =
             {
             "╔════════════════════════════════════╗",
-            "║          ⚔️  RPG MAIN MENU ⚔️         ║",
+            "║          ⚔️RPG MAIN MENU ⚔️       ║",
             "╠════════════════════════════════════╣",
             "║     Start New Game                 ║",
             "║     Load Game                      ║",
@@ -306,10 +311,15 @@ namespace DoSomething
                 Console.WriteLine("4. Stats");
                 if (ShopCount % 5 == 0)
                     Console.WriteLine("5. Shop");
-                ConsoleKeyInfo keyInfo = Console.ReadKey();
+
+                ConsoleKeyInfo keyInfo = Console.ReadKey(true);
 
                 switch (keyInfo.Key)
                 {
+                    case ConsoleKey.Escape:
+                        PAUSEMenu(Player);
+                        continue;
+                        break;
                     case ConsoleKey.D1:
                         Forest(Enemy, Player, rand);
                         break;
@@ -342,12 +352,61 @@ namespace DoSomething
 
         static void ExitGame()
         {
-
+            Console.Clear();
+            Console.WriteLine("Thank you for playing! Goodbye!");
+            Thread.Sleep(2000);
+            Environment.Exit(0);// Exits the application
         }
 
-        static void EndMenu()
+        static void PAUSEMenu(Player player)
         {
+            string[] options = { "Resume", "Stats", "Exit to Main Menu" };
+            int selected = 0;
+            ConsoleKey key;
 
+            Console.CursorVisible = false;
+            do
+            {
+                Console.Clear();
+                         Console.WriteLine("╔═══════════════════════╗");
+                         Console.WriteLine("║       PAUSE MENU      ║");
+                         Console.WriteLine("╠═══════════════════════╣");
+                for (int i = 0; i < options.Length; i++)
+                {
+                    if (i == selected)
+                        Console.WriteLine($"║ ▶ {options[i],-17}   ║");// -17 is for alignment
+                    else
+                        Console.WriteLine($"║   {options[i],-17}   ║");
+                }
+                         Console.WriteLine("╚═══════════════════════╝");
+                Console.WriteLine("\nUse ↑ ↓ to navigate. Enter to select.");
+
+                key = Console.ReadKey(true).Key;
+                if (key == ConsoleKey.UpArrow)
+                    selected = (selected - 1 + options.Length) % options.Length;
+                else if (key == ConsoleKey.DownArrow)
+                    selected = (selected + 1) % options.Length;
+
+            } while (key != ConsoleKey.Enter);
+
+            switch (selected)
+            {
+                case 0:
+                    // Resume game
+                    Console.Clear();
+                    return;
+                case 1:
+                    // Show stats
+                    player.ShowStats();
+                    Console.WriteLine("Press any key to return...");
+                    Console.ReadKey(true);
+                    PAUSEMenu(player);
+                    break;
+                case 2:
+                    // Exit to main menu
+                    StartUpMenu();
+                    break;
+            }
         }
     }
 }
