@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.InteropServices.Marshalling;
+using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,57 +12,13 @@ namespace DoSomething
     class Program
     {
         static int Potions = 3;
+        static int GoblinXP = 5;
+        static int SkeletonXP = 7;
+        static int DragonXP = 20;
+        static int ShopCount = 0;
         static void Main(string[] args)
         {
-            Random rand = new Random();
-
-            Console.WriteLine("write your Class (Knight, Assassin)");
-            string Class = Console.ReadLine();
-            Player Player;
-
-            if (Class == "Knight" || Class == "Assassin")
-            {
-                Player = new Player(Class);
-            }
-            else
-            {
-                Main(args);
-                return;
-            }
-
-            Console.Clear();
-
-            Enemy Enemy = GenerateClass();
-            while (true)
-            {
-                Console.WriteLine("Where to go");
-                Console.WriteLine("1. forest");
-                Console.WriteLine("2. cave");
-                Console.WriteLine("3. Castle");
-                Console.WriteLine("4. Stats");
-                ConsoleKeyInfo keyInfo = Console.ReadKey();
-
-                switch (keyInfo.Key)
-                {
-                    case ConsoleKey.D1:
-                        Forest(Enemy, Player, rand);
-                        break;
-                    case ConsoleKey.D2:
-                        Cave(Enemy, Player, rand);
-                        break;
-                    case ConsoleKey.D3:
-                        Castle(Enemy, Player, rand);
-                        break;
-                    case ConsoleKey.D4:
-                        Player.ShowStats();
-                        break;
-                    default:
-                        Console.WriteLine("Invalid choice, try again.");
-                        continue;
-                }
-
-                Console.Clear();
-            }
+            StartUpMenu();
 
         }
 
@@ -91,13 +49,11 @@ namespace DoSomething
 
         static void Chest(Enemy Enemy, Player Player, Random rand)
         {
-            int Chest = rand.Next(1, 4);
+            int Chest = rand.Next(1, 5);
             if (Chest == 2)
             {
-                Console.WriteLine("you got Chest");
-                Console.WriteLine($"+5HP and +5 Attack");
-                Player.SetHP(Player.GetHP() + 5);
-                Player.SetATTACK(Player.GetATTACK() + 5);
+                Console.WriteLine("You got 20 Gold");
+                Player.SetGold(Player.GetGold() + 20);
             }
         }
 
@@ -122,19 +78,11 @@ namespace DoSomething
                         break;
                     case ConsoleKey.D2:
                         int num = rand.Next(1, 3);
-                        if (num == 1)
-                        {
-                            Console.WriteLine("you ran away");
-                            break;
-                        }
-                        if (num == 2)
-                        {
-                            Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK()));
-                        }
+                        if (num == 1) { Console.WriteLine("you ran away"); break; }
+                        if (num == 2) { Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK())); }
                         break;
                     case ConsoleKey.D3:
                         if (Potions > 0)
-
                         {
                             Console.WriteLine("You Used Potions {+20HP}");
                             Player.SetHP(Player.GetHP() + 20);
@@ -150,7 +98,10 @@ namespace DoSomething
 
                 if (Enemy.GetHP() <= 0) 
                 {
-                    Console.WriteLine("You won"); break; 
+                    CheckLVL(Player, GoblinXP); // Change
+                    Player.SetGold(Player.GetGold() + 3);
+                    Console.WriteLine("You won");
+                    break; 
                 }
                 Console.Clear();
                 Console.WriteLine("Enemy Move");
@@ -173,14 +124,230 @@ namespace DoSomething
             }
         }
 
+        static void CheckLVL(Player player, int XPGOT)
+        {
+            int CurrentLVL = player.GETLVL();
+            int CurrentXP = player.GETXP();
+            double RXP = player.GETXPR();
+
+            if (CurrentXP + XPGOT < RXP)
+            {
+                player.SetXP(CurrentXP + XPGOT);
+            }
+            else if (CurrentXP + XPGOT == RXP)
+            {
+                player.SetLVL(CurrentLVL + 1);
+                player.SetXP(0);
+                player.SetXPR(player.GETXPR() * 1.25);
+            }
+
+            else
+            {
+                player.SetLVL(CurrentLVL + 1);
+                player.SetXP((CurrentXP + XPGOT) - (int)player.GETXPR());
+                player.SetXPR(player.GETXPR() * 1.25);
+            }
+        }
+
+        static void Shop(Player Player)
+        {
+            Console.Clear();
+            Console.WriteLine($"What do you want to buy (you have {Player.GetGold()} Gold)");
+            Console.WriteLine("1. Knife (ATTACK 10) | Price: 30 gold");
+            Console.WriteLine("2. Sword (ATTACK 20) | Price: 60 gold");
+            Console.WriteLine("3. Big Sword (ATTACK 30) | Price: 90 gold");
+            Console.WriteLine("4. Exit");
+
+            ConsoleKeyInfo keyInfo = Console.ReadKey();
+            switch (keyInfo.Key)
+            {
+                case ConsoleKey.D1:
+                    Player.SetATTACK(10);
+                    break;
+                case ConsoleKey.D2:
+                    Player.SetATTACK(20);
+                    break;
+                case ConsoleKey.D3:
+                    Player.SetATTACK(30);
+                    break;
+                case ConsoleKey.D4:
+                    break;
+            }
+        }
+
         static Enemy GenerateClass()
         {
             Enemy Enemy;
             Random rand = new Random();
             int num = rand.Next(0, 50);
             if (num <= 24) { return new Enemy("Goblin"); }
-            else if (num <= 48) { return new Enemy("Skeleton"); }
+            else if (num <= 49) { return new Enemy("Skeleton"); }
             else { return new Enemy("Dragon"); }
+        }
+
+        static void StartUpMenu()
+        {
+            string[] lines =
+            {
+            "╔════════════════════════════════════╗",
+            "║          ⚔️  RPG MAIN MENU ⚔️         ║",
+            "╠════════════════════════════════════╣",
+            "║     Start New Game                 ║",
+            "║     Load Game                      ║",
+            "║     Settings                       ║",
+            "║     Credits                        ║",
+            "║     Exit                           ║",
+            "╚════════════════════════════════════╝"
+        };
+
+            int selectedIndex = 0;
+            int menuStartRow = 3;
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.CursorVisible = false;
+
+            while (true)
+            {
+                Console.Clear();
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string line = lines[i];
+
+                    if (i >= menuStartRow && i < menuStartRow + 5)
+                    {
+                        int optionIndex = i - menuStartRow;
+                        if (optionIndex == selectedIndex)
+                            line = line.Substring(0, 3) + "▶" + line.Substring(4);
+                        else
+                            line = line.Substring(0, 3) + " " + line.Substring(4);
+                    }
+
+                    Console.WriteLine(line);
+                }
+
+                Console.WriteLine("\nUse ↑ ↓ to navigate. Press Enter to select.");
+
+                var key = Console.ReadKey(true).Key;
+
+                switch (key)
+                {
+                    case ConsoleKey.DownArrow:
+                        selectedIndex = (selectedIndex + 1) % 5;
+                        break;
+                    case ConsoleKey.UpArrow:
+                        selectedIndex = (selectedIndex - 1 + 5) % 5;
+                        break;
+                    case ConsoleKey.Enter:
+                        Console.Clear();
+
+                        // 🔽 Function call logic based on selection
+                        switch (selectedIndex)
+                        {
+                            case 0:
+                                StartNewGame();
+                                break;
+                            case 1:
+                                LoadGame();
+                                break;
+                            case 2:
+                                OpenSettings();
+                                break;
+                            case 3:
+                                ShowCredits();
+                                break;
+                            case 4:
+                                ExitGame();
+                                return;
+                        }
+
+                        Console.WriteLine("\nPress any key to return to menu...");
+                        Console.ReadKey(true);
+                        break;
+                }
+            }
+        }
+
+        static void LoadGame()
+        {
+
+        }
+
+        static void OpenSettings() 
+        {
+            
+        }
+
+        static void StartNewGame()
+        {
+            Random rand = new Random();
+
+            Console.WriteLine("write your Class (Knight, Assassin)");
+            string Class = Console.ReadLine();
+            Player Player;
+
+            if (Class == "Knight" || Class == "Assassin")
+            {
+                Player = new Player(Class);
+            }
+            else
+            {
+                StartNewGame();
+                return;
+            }
+
+            Console.Clear();
+            Console.WriteLine(Player.GETLVL());
+            Enemy Enemy = GenerateClass();
+            while (true)
+            {
+                Console.WriteLine("Where to go");
+                Console.WriteLine("1. forest");
+                Console.WriteLine("2. cave");
+                Console.WriteLine("3. Castle");
+                Console.WriteLine("4. Stats");
+                if (ShopCount % 5 == 0)
+                    Console.WriteLine("5. Shop");
+                ConsoleKeyInfo keyInfo = Console.ReadKey();
+
+                switch (keyInfo.Key)
+                {
+                    case ConsoleKey.D1:
+                        Forest(Enemy, Player, rand);
+                        break;
+                    case ConsoleKey.D2:
+                        Cave(Enemy, Player, rand);
+                        break;
+                    case ConsoleKey.D3:
+                        Castle(Enemy, Player, rand);
+                        break;
+                    case ConsoleKey.D4:
+                        Player.ShowStats();
+                        Thread.Sleep(3000);
+                        break;
+                    case ConsoleKey.D5:
+                        Shop(Player);
+                        break;
+                    default:
+                        continue;
+                        break;
+                }
+                ShopCount++;
+                Console.Clear();
+            }
+        }
+
+        static void ShowCredits()
+        {
+            Console.WriteLine("Game developed by Ilya and Or!");
+        }
+
+        static void ExitGame()
+        {
+
+        }
+
+        static void EndMenu()
+        {
+
         }
     }
 }
