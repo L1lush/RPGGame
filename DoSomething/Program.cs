@@ -6,6 +6,8 @@ using System.Runtime.InteropServices.Marshalling;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json;
+using System.IO;
 
 namespace DoSomething
 {
@@ -16,6 +18,7 @@ namespace DoSomething
         static int SkeletonXP = 7;
         static int DragonXP = 20;
         static int ShopCount = 0;
+        static string SavePath = @"C:\";
         static void Main(string[] args)
         {
                 StartUpMenu();
@@ -195,7 +198,7 @@ namespace DoSomething
             string[] lines =
             {
             "╔════════════════════════════════════╗",
-            "║          ⚔️RPG MAIN MENU ⚔️       ║",
+            "║          ⚔️RPG MAIN MENU ⚔️        ║",
             "╠════════════════════════════════════╣",
             "║     Start New Game                 ║",
             "║     Load Game                      ║",
@@ -251,7 +254,7 @@ namespace DoSomething
                                 StartNewGame();
                                 break;
                             case 1:
-                                LoadGame();
+                                Player player = LoadGame(SavePath);
                                 break;
                             case 2:
                                 OpenSettings();
@@ -271,9 +274,19 @@ namespace DoSomething
             }
         }
 
-        static void LoadGame()
+        static void SaveGame(Player player, string FilePath)
         {
+            string json = JsonSerializer.Serialize(player); // save Player properties to Json string
+            File.WriteAllText(FilePath, json); // save this string to file
+        }
 
+        static Player LoadGame(string filePath)
+        {
+            if (!File.Exists(filePath))
+                return null;
+
+            string json = File.ReadAllText(filePath);               // Read the JSON string from the file
+            return JsonSerializer.Deserialize<Player>(json);        // Convert the JSON string back into a Player object
         }
 
         static void OpenSettings() 
@@ -407,6 +420,7 @@ namespace DoSomething
                     StartUpMenu();
                     break;
             }
+
         }
     }
 }
