@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Runtime.InteropServices.Marshalling;
+using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,60 +18,7 @@ namespace DoSomething
         static int ShopCount = 0;
         static void Main(string[] args)
         {
-            Random rand = new Random();
-
-            Console.WriteLine("write your Class (Knight, Assassin)");
-            string Class = Console.ReadLine();
-            Player Player;
-
-            if (Class == "Knight" || Class == "Assassin")
-            {
-                Player = new Player(Class);
-            }
-            else
-            {
-                Main(args);
-                return;
-            }
-
-            Console.Clear();
-            Console.WriteLine(Player.GETLVL());
-            Enemy Enemy = GenerateClass();
-            while (true)
-            {
-                Console.WriteLine("Where to go");
-                Console.WriteLine("1. forest");
-                Console.WriteLine("2. cave");
-                Console.WriteLine("3. Castle");
-                Console.WriteLine("4. Stats");
-                if(ShopCount == 5)
-                    Console.WriteLine("5. Shop");
-                ConsoleKeyInfo keyInfo = Console.ReadKey();
-
-                switch (keyInfo.Key)
-                {
-                    case ConsoleKey.D1:
-                        Forest(Enemy, Player, rand);
-                        break;
-                    case ConsoleKey.D2:
-                        Cave(Enemy, Player, rand);
-                        break;
-                    case ConsoleKey.D3:
-                        Castle(Enemy, Player, rand);
-                        break;
-                    case ConsoleKey.D4:
-                        Player.ShowStats();
-                        break;
-                    case ConsoleKey.D5:
-                        Shop();
-                        break;
-                    default:
-                        Console.WriteLine("Invalid choice, try again.");
-                        continue;
-                }
-
-                Console.Clear();
-            }
+            StartUpMenu();
 
         }
 
@@ -104,6 +52,7 @@ namespace DoSomething
             int Chest = rand.Next(1, 5);
             if (Chest == 2)
             {
+                Console.WriteLine("You got 20 Gold");
                 Player.SetGold(Player.GetGold() + 20);
             }
         }
@@ -149,7 +98,8 @@ namespace DoSomething
 
                 if (Enemy.GetHP() <= 0) 
                 {
-                    CheckLVL(Player, GoblinXP);
+                    CheckLVL(Player, GoblinXP); // Change
+                    Player.SetGold(Player.GetGold() + 3);
                     Console.WriteLine("You won");
                     break; 
                 }
@@ -199,9 +149,30 @@ namespace DoSomething
             }
         }
 
-        static void Shop()
+        static void Shop(Player Player)
         {
+            Console.Clear();
+            Console.WriteLine($"What do you want to buy (you have {Player.GetGold()} Gold)");
+            Console.WriteLine("1. Knife (ATTACK 10) | Price: 30 gold");
+            Console.WriteLine("2. Sword (ATTACK 20) | Price: 60 gold");
+            Console.WriteLine("3. Big Sword (ATTACK 30) | Price: 90 gold");
+            Console.WriteLine("4. Exit");
 
+            ConsoleKeyInfo keyInfo = Console.ReadKey();
+            switch (keyInfo.Key)
+            {
+                case ConsoleKey.D1:
+                    Player.SetATTACK(10);
+                    break;
+                case ConsoleKey.D2:
+                    Player.SetATTACK(20);
+                    break;
+                case ConsoleKey.D3:
+                    Player.SetATTACK(30);
+                    break;
+                case ConsoleKey.D4:
+                    break;
+            }
         }
 
         static Enemy GenerateClass()
@@ -212,6 +183,171 @@ namespace DoSomething
             if (num <= 24) { return new Enemy("Goblin"); }
             else if (num <= 49) { return new Enemy("Skeleton"); }
             else { return new Enemy("Dragon"); }
+        }
+
+        static void StartUpMenu()
+        {
+            string[] lines =
+            {
+            "╔════════════════════════════════════╗",
+            "║          ⚔️  RPG MAIN MENU ⚔️         ║",
+            "╠════════════════════════════════════╣",
+            "║     Start New Game                 ║",
+            "║     Load Game                      ║",
+            "║     Settings                       ║",
+            "║     Credits                        ║",
+            "║     Exit                           ║",
+            "╚════════════════════════════════════╝"
+        };
+
+            int selectedIndex = 0;
+            int menuStartRow = 3;
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.CursorVisible = false;
+
+            while (true)
+            {
+                Console.Clear();
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string line = lines[i];
+
+                    if (i >= menuStartRow && i < menuStartRow + 5)
+                    {
+                        int optionIndex = i - menuStartRow;
+                        if (optionIndex == selectedIndex)
+                            line = line.Substring(0, 3) + "▶" + line.Substring(4);
+                        else
+                            line = line.Substring(0, 3) + " " + line.Substring(4);
+                    }
+
+                    Console.WriteLine(line);
+                }
+
+                Console.WriteLine("\nUse ↑ ↓ to navigate. Press Enter to select.");
+
+                var key = Console.ReadKey(true).Key;
+
+                switch (key)
+                {
+                    case ConsoleKey.DownArrow:
+                        selectedIndex = (selectedIndex + 1) % 5;
+                        break;
+                    case ConsoleKey.UpArrow:
+                        selectedIndex = (selectedIndex - 1 + 5) % 5;
+                        break;
+                    case ConsoleKey.Enter:
+                        Console.Clear();
+
+                        // 🔽 Function call logic based on selection
+                        switch (selectedIndex)
+                        {
+                            case 0:
+                                StartNewGame();
+                                break;
+                            case 1:
+                                LoadGame();
+                                break;
+                            case 2:
+                                OpenSettings();
+                                break;
+                            case 3:
+                                ShowCredits();
+                                break;
+                            case 4:
+                                ExitGame();
+                                return;
+                        }
+
+                        Console.WriteLine("\nPress any key to return to menu...");
+                        Console.ReadKey(true);
+                        break;
+                }
+            }
+        }
+
+        static void LoadGame()
+        {
+
+        }
+
+        static void OpenSettings() 
+        {
+            
+        }
+
+        static void StartNewGame()
+        {
+            Random rand = new Random();
+
+            Console.WriteLine("write your Class (Knight, Assassin)");
+            string Class = Console.ReadLine();
+            Player Player;
+
+            if (Class == "Knight" || Class == "Assassin")
+            {
+                Player = new Player(Class);
+            }
+            else
+            {
+                StartNewGame();
+                return;
+            }
+
+            Console.Clear();
+            Console.WriteLine(Player.GETLVL());
+            Enemy Enemy = GenerateClass();
+            while (true)
+            {
+                Console.WriteLine("Where to go");
+                Console.WriteLine("1. forest");
+                Console.WriteLine("2. cave");
+                Console.WriteLine("3. Castle");
+                Console.WriteLine("4. Stats");
+                if (ShopCount % 5 == 0)
+                    Console.WriteLine("5. Shop");
+                ConsoleKeyInfo keyInfo = Console.ReadKey();
+
+                switch (keyInfo.Key)
+                {
+                    case ConsoleKey.D1:
+                        Forest(Enemy, Player, rand);
+                        break;
+                    case ConsoleKey.D2:
+                        Cave(Enemy, Player, rand);
+                        break;
+                    case ConsoleKey.D3:
+                        Castle(Enemy, Player, rand);
+                        break;
+                    case ConsoleKey.D4:
+                        Player.ShowStats();
+                        Thread.Sleep(3000);
+                        break;
+                    case ConsoleKey.D5:
+                        Shop(Player);
+                        break;
+                    default:
+                        continue;
+                        break;
+                }
+                ShopCount++;
+                Console.Clear();
+            }
+        }
+
+        static void ShowCredits()
+        {
+            Console.WriteLine("Game developed by Ilya and Or!");
+        }
+
+        static void ExitGame()
+        {
+
+        }
+
+        static void EndMenu()
+        {
+
         }
     }
 }
