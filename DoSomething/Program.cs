@@ -18,8 +18,10 @@ namespace DoSomething
         static int GoblinXP = 5;
         static int SkeletonXP = 7;
         static int DragonXP = 20;
-        static int ShopCount = 0;
-        static string SaveFile = @"\source\repos\RPGGame\SaveFile";
+        static string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        static string gameFolder = Path.Combine(appData, "DoSomethingGame");
+        static string saveFile = Path.Combine(gameFolder, "savegame.json");
+
         static void Main(string[] args)
         {
             //Random rand = new Random();
@@ -95,10 +97,11 @@ namespace DoSomething
                         switch (selectedIndex)
                         {
                             case 0:
+                                Directory.CreateDirectory(gameFolder); // Ensure the game folder exists
                                 StartNewGame();
                                 break;
                             case 1:
-                                Player player = LoadGame(SaveFile);
+                                LoadGame(saveFile);
                                 break;
                             case 2:
                                 OpenSettings();
@@ -118,19 +121,48 @@ namespace DoSomething
             }
         }
 
-        static void SaveGame(Player player, string saveFile)
+        static void SaveGame(Player player, string filePath)
         {
-            string json = JsonSerializer.Serialize(player); // save Player properties to Json string
-            File.WriteAllText(saveFile, json); // save this string to file
+            try
+            {
+                string json = JsonSerializer.Serialize(player, new JsonSerializerOptions { WriteIndented = true });
+                Console.WriteLine($"Saving to: {filePath}");
+                File.WriteAllText(filePath, json);
+                Console.WriteLine("Game saved successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error saving game: " + ex.Message);
+            }
         }
-        
-        static Player LoadGame(string filePath)
-        {
-            if (!File.Exists(filePath))
-                return null;
 
-            string json = File.ReadAllText(filePath);               // Read the JSON string from the file
-            return JsonSerializer.Deserialize<Player>(json);        // Convert the JSON string back into a Player object
+
+
+        static void LoadGame(string filePath)
+        {
+            Player player = new Player(); // Initialize player to avoid null reference
+            try
+            {
+                if (!File.Exists(filePath))
+                {
+                    Console.WriteLine("Save file not found.");
+                }
+
+                string json = File.ReadAllText(filePath);
+                player = JsonSerializer.Deserialize<Player>(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error loading game: " + ex.Message);
+            }
+
+            if (player == null)
+            {
+                Console.WriteLine("Failed to load player data. Starting a new game.");
+                StartNewGame();
+                return;
+            }
+            Game(player); // Start the game with the loaded player
         }
 
         static void OpenSettings()
@@ -153,10 +185,6 @@ namespace DoSomething
 
         static void StartNewGame()
         {
-            
-
-            Random rand = new Random();
-
             string[] classOptions = { "Knight", "Assassin" };
             int selectedClass = 0;
             ConsoleKey classKey;
@@ -187,24 +215,29 @@ namespace DoSomething
             } while (classKey != ConsoleKey.Enter);
 
             Player Player = new Player(classOptions[selectedClass]);
+            Game(Player); // Start the game with the selected class
+        }
 
+        static void Game(Player player)
+        {
             Console.Clear();
-            Console.WriteLine(Player.GETLVL());
+            Console.WriteLine(player.GETLVL());
             Enemy Enemy = GenerateClass();
+            Random rand = new Random();
             while (true)
             {
-                    string[] options = {
+                string[] options = {
                         "Forest",
                         "Cave",
                         "Castle",
                         "Shop",
                         "Stats",
                     };
-                    options = options.Where(o => o != null).ToArray();
-                    int selected = 0;
-                    ConsoleKey key;
+                options = options.Where(o => o != null).ToArray();
+                int selected = 0;
+                ConsoleKey key;
 
-                    Console.CursorVisible = false;
+                Console.CursorVisible = false;
                 do
                 {
                     Console.Clear();
@@ -228,7 +261,7 @@ namespace DoSomething
                         selected = (selected + 1) % options.Length;
                     else if (key == ConsoleKey.Escape)
                     {
-                        PAUSEMenu(Player);
+                        PAUSEMenu(player);
                         return;
                     }
                     else if (key == ConsoleKey.Enter)
@@ -236,27 +269,25 @@ namespace DoSomething
                         switch (options[selected])
                         {
                             case "Forest":
-                                Forest(Enemy, Player, rand); // ADD MAP
-                                ShopCount++;
-                                break;
+                                Forest(Enemy, player, rand); // ADD MAP
+                                return;
                             case "Cave":
-                                Cave(Enemy, Player, rand); // ADD MAP
-                                ShopCount++;
-                                break;
+                                Cave(Enemy, player, rand); // ADD MAP
+                                return;
                             case "Castle":
-                                Castle(Enemy, Player, rand);
+                                Castle(Enemy, player, rand);
                                 break;
                             case "Stats":
-                                Player.ShowStats();
+                                player.ShowStats();
                                 Thread.Sleep(3000);
                                 break;
                             case "Shop":
-                                Shop(Player);
+                                Shop(player);
                                 break;
                         }
                     }
                 } while (true);
-                
+
             }
         }
 
@@ -307,7 +338,7 @@ namespace DoSomething
                 case 2:
                     // Save Game
                     Console.WriteLine("Saving game...");
-                    SaveGame(player, SaveFile);
+                    SaveGame(player, saveFile);
                     Console.WriteLine("Game saved!");
                     Console.WriteLine("Press any key to return...");
                     Console.ReadKey(true);

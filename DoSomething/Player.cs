@@ -9,14 +9,15 @@ namespace DoSomething
 {
     internal class Player
     {
-        private int HP;
-        private int ATTACK;
-        private string CLASS;
-        private int LVL = 1;
-        private int XP = 0;
-        private double XPR = 10;
-        private int Gold = 0;
+        public int HP { get; set; }
+        public int ATTACK { get; set; }
+        public string CLASS { get; set; }
+        public int LVL { get; set; } = 1;
+        public int XP { get; set; } = 0;
+        public double XPR { get; set; } = 10;
+        public int Gold { get; set; } = 0;
 
+        public Player() { }
         public Player(string CLASS)
         {
             this.CLASS = CLASS;
