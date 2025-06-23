@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.IO;
+using NAudio.Wave;
 
 namespace DoSomething
 {
@@ -26,8 +27,14 @@ namespace DoSomething
             //Test(Player, rand);
 
             //OpeningStory();
+            MainMusicPlayer.Play(); // Play main music
             StartUpMenu();
         }
+        //music
+        static MusicPlayer MainMusicPlayer = new MusicPlayer("medieval_sound.mp3");
+        static MusicPlayer BattleMusicPlayer = new MusicPlayer("bttle_sound.mp3");
+
+
 
         static void StartUpMenu()
         {
@@ -229,11 +236,9 @@ namespace DoSomething
                         {
                             case "Forest":
                                 Forest(Enemy, Player, rand); // ADD MAP
-                                ShopCount++;
                                 return;
                             case "Cave":
                                 Cave(Enemy, Player, rand); // ADD MAP
-                                ShopCount++;
                                 return;
                             case "Castle":
                                 Castle(Enemy, Player, rand);
@@ -352,7 +357,8 @@ namespace DoSomething
         static void Battle(Player Player , Enemy Enemy, Random rand)
         {
             bool enemyUsedPotion = false;
-
+            MainMusicPlayer.Pause(); // Pause battle music
+            BattleMusicPlayer.Play(); // Play battle music
             while (Player.GetHP() > 0 && Enemy.GetHP() > 0)
             {
                 // Action selection menu
@@ -402,6 +408,8 @@ namespace DoSomething
                         if (num == 1)
                         {
                             Console.WriteLine("You ran away!");
+                            BattleMusicPlayer.Pause(); // Pause battle music
+                            MainMusicPlayer.Play(); // Play main music again
                             Thread.Sleep(1000);
                             return;
                         }
@@ -433,6 +441,8 @@ namespace DoSomething
                     Player.LevelUp();
                     Player.SetGold(Player.GetGold() + 3);
                     Console.WriteLine("You won!");
+                    BattleMusicPlayer.Pause(); // Pause battle music
+                    MainMusicPlayer.Play(); // Play main music again
                     Thread.Sleep(1500);
                     break;
                 }
@@ -456,6 +466,8 @@ namespace DoSomething
                 if (Player.GetHP() <= 0)
                 {
                     Console.WriteLine("You lost!");
+                    BattleMusicPlayer.Pause(); // Pause battle music
+                    MainMusicPlayer.Play(); // Play main music again
                     Thread.Sleep(2500);
                     StartUpMenu();
                     break;
@@ -467,13 +479,14 @@ namespace DoSomething
         static void Shop(Player Player)
         {
             string[] shopOptions = {
-                "Knife (ATTACK 10) | Price: 30 gold    ",
-                "Sword (ATTACK 20) | Price: 60 gold    ",
-                "Big Sword (ATTACK 30) | Price: 90 gold",
-                "Exit                                  "
+                "Knife (ATTACK 10) | Price: 30 gold      ",
+                "Sword (ATTACK 20) | Price: 60 gold      ",
+                "Big Sword (ATTACK 30) | Price: 90 gold  ",
+                "Potion (Restores 20 HP) | Price: 20 gold",
+                "Exit                                    "
             };
-            int[] prices = { 30, 60, 90, 0 };
-            int[] attacks = { 10, 20, 30, 0 };
+            int[] prices = { 30, 60, 90, 20, 0 };
+            int[] attacks = { 10, 20, 30, 0, 0 };
             int selected = 0;
             ConsoleKey key;
 
@@ -481,11 +494,11 @@ namespace DoSomething
             do
             {
                 Console.Clear();
-                Console.WriteLine($"╔════════════════════════════════════════════╗");
-                Console.WriteLine($"║          RPG SHOP                          ║");
-                Console.WriteLine($"╠════════════════════════════════════════════╣");
-                Console.WriteLine($"║   Gold: {Player.GetGold(),-28}       ║");
-                Console.WriteLine($"╠════════════════════════════════════════════╣");
+                Console.WriteLine($"╔══════════════════════════════════════════════╗");
+                Console.WriteLine($"║           RPG SHOP                           ║");
+                Console.WriteLine($"╠══════════════════════════════════════════════╣");
+                Console.WriteLine($"║   Gold: {Player.GetGold(),-28}         ║");
+                Console.WriteLine($"╠══════════════════════════════════════════════╣");
                 for (int i = 0; i < shopOptions.Length; i++)
                 {
                     if (i == selected)
@@ -493,7 +506,7 @@ namespace DoSomething
                     else
                         Console.WriteLine($"║   {shopOptions[i],-28}   ║");
                 }
-                Console.WriteLine($"╚════════════════════════════════════════════╝");
+                Console.WriteLine($"╚══════════════════════════════════════════════╝");
                 Console.WriteLine("Use ↑ ↓ to navigate. Enter to buy. Esc for pause.");
 
                 key = Console.ReadKey(true).Key;
@@ -508,8 +521,41 @@ namespace DoSomething
                 }
                 else if (key == ConsoleKey.Enter)
                 {
-                    if (selected == 3) // Exit
+                    if (selected == 4) // Exit
                         return;
+                    if(selected == 3) // Buy potion
+                    {
+                        if (Player.GetGold() >= prices[selected])
+                        {
+                            if (Potions < 10)
+                            {
+                                Player.SetGold(Player.GetGold() - prices[selected]);
+                                Potions++;
+                                Console.Clear();
+                                Console.WriteLine("You bought a potion!");
+                                Console.WriteLine($"You now have {Potions} potions.");
+                                Console.WriteLine("Press any key to continue...");
+                                Console.ReadKey(true);
+                                Shop(Player);
+                            }
+                            else
+                            {
+                                Console.Clear();
+                                Console.WriteLine("You can't carry more potions!");
+                                Console.WriteLine("Press any key to continue...");
+                                Console.ReadKey(true);
+                                Shop(Player);
+                            }
+                        }
+                        else
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Not enough gold!");
+                            Console.WriteLine("Press any key to continue...");
+                            Console.ReadKey(true);
+                            Shop(Player);
+                        }
+                    }
                     if (Player.GetGold() >= prices[selected])
                     {
                         Player.SetGold(Player.GetGold() - prices[selected]);
@@ -519,7 +565,7 @@ namespace DoSomething
                         Console.WriteLine($"Your attack is now {attacks[selected]}.");
                         Console.WriteLine("Press any key to continue...");
                         Console.ReadKey(true);
-                        return;
+                        Shop(Player);
                     }
                     else
                     {
@@ -527,6 +573,7 @@ namespace DoSomething
                         Console.WriteLine("Not enough gold!");
                         Console.WriteLine("Press any key to continue...");
                         Console.ReadKey(true);
+                        Shop(Player);
                     }
                 }
             } while (true);
@@ -575,10 +622,10 @@ namespace DoSomething
             Thread.Sleep(3000);
             Console.Clear();
         }
-        static void ShowStoryLine(string text, int delay = 4000)
+        static void ShowStoryLine(string text)
         {
             Console.WriteLine(text);
-            Thread.Sleep(delay);
+            Thread.Sleep(4000);
         }
 
         static void Test(Player Player, Random rand)
@@ -642,8 +689,7 @@ namespace DoSomething
                     case ConsoleKey.DownArrow: newY++; break;
                     case ConsoleKey.LeftArrow: newX--; break;
                     case ConsoleKey.RightArrow: newX++; break;
-                        Console.WriteLine("Game Quit.");
-                        return;
+                    case ConsoleKey.Escape: PAUSEMenu(Player); break;
                 }
 
                 // Check bounds and wall collision
