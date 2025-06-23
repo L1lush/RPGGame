@@ -13,12 +13,11 @@ namespace DoSomething
 {
     class Program
     {
-        static int Potions = 3;
+        static int Potions = 7;
         static int GoblinXP = 5;
         static int SkeletonXP = 7;
         static int DragonXP = 20;
-        static string SavePath = @"C:\";
-        static int ShopCount = 1;
+        static string SaveFile = @"\source\repos\RPGGame\SaveFile";
         static void Main(string[] args)
         {
             //Random rand = new Random();
@@ -91,7 +90,7 @@ namespace DoSomething
                                 StartNewGame();
                                 break;
                             case 1:
-                                Player player = LoadGame(SavePath);
+                                Player player = LoadGame(SaveFile);
                                 break;
                             case 2:
                                 OpenSettings();
@@ -111,12 +110,12 @@ namespace DoSomething
             }
         }
 
-        static void SaveGame(Player player, string FilePath)
+        static void SaveGame(Player player, string saveFile)
         {
             string json = JsonSerializer.Serialize(player); // save Player properties to Json string
-            File.WriteAllText(FilePath, json); // save this string to file
+            File.WriteAllText(saveFile, json); // save this string to file
         }
-
+        
         static Player LoadGame(string filePath)
         {
             if (!File.Exists(filePath))
@@ -190,8 +189,8 @@ namespace DoSomething
                         "Forest",
                         "Cave",
                         "Castle",
+                        "Shop",
                         "Stats",
-                        (ShopCount % 5 == 0) ? "Shop" : null
                     };
                     options = options.Where(o => o != null).ToArray();
                     int selected = 0;
@@ -238,16 +237,14 @@ namespace DoSomething
                                 return;
                             case "Castle":
                                 Castle(Enemy, Player, rand);
-                                ShopCount++;
-                                return;
+                                break;
                             case "Stats":
                                 Player.ShowStats();
                                 Thread.Sleep(3000);
-                                return;
+                                break;
                             case "Shop":
                                 Shop(Player);
-                                ShopCount++;
-                                return;
+                                break;
                         }
                     }
                 } while (true);
@@ -257,7 +254,7 @@ namespace DoSomething
 
         static void PAUSEMenu(Player player)
         {
-            string[] options = { "Resume", "Stats", "Exit to Main Menu" };
+            string[] options = { "Resume", "Stats", "Save Game", "Exit to Main Menu" };
             int selected = 0;
             ConsoleKey key;
 
@@ -300,17 +297,29 @@ namespace DoSomething
                     PAUSEMenu(player);
                     break;
                 case 2:
+                    // Save Game
+                    Console.WriteLine("Saving game...");
+                    SaveGame(player, SaveFile);
+                    Console.WriteLine("Game saved!");
+                    Console.WriteLine("Press any key to return...");
+                    Console.ReadKey(true);
+                    PAUSEMenu(player);
+                    break;
+                case 3:
                     // Exit to main menu
+                    Console.WriteLine("Press Enter to continue...");
+                    while (Console.ReadKey(true).Key != ConsoleKey.Enter)
+                    {
+                        PAUSEMenu(player);
+                    }
                     StartUpMenu();
                     break;
             }
-
         }
 
 
-
-
         static void Forest(Enemy Enemy, Player Player, Random rand) // change ADD MAP
+          
         {
             Chest(Player);
 
@@ -447,7 +456,8 @@ namespace DoSomething
                 if (Player.GetHP() <= 0)
                 {
                     Console.WriteLine("You lost!");
-                    Thread.Sleep(1500);
+                    Thread.Sleep(2500);
+                    StartUpMenu();
                     break;
                 }
                 Thread.Sleep(1200);

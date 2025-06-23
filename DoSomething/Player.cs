@@ -57,7 +57,7 @@ namespace DoSomething
 
         public void ShowStats()
         {
-            Console.WriteLine($"HP: {this.HP} ATTACK: {this.ATTACK} CLASS: {this.CLASS} LVL: {this.LVL} XP: {this.XP} XPR: {this.XPR} Gold: {this.Gold}");
+            Console.WriteLine($"HP: {this.HP} ATTACK: {this.ATTACK} CLASS: {this.CLASS} LVL: {this.LVL} XP: {this.XP} XPR: {this.XPR}  GOLD: {this.Gold}");
         }
 
         public void LevelUp()
