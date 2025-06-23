@@ -17,6 +17,7 @@ namespace DoSomething
         static int GoblinXP = 5;
         static int SkeletonXP = 7;
         static int DragonXP = 20;
+        static int ShopCount = 0;
         static string SaveFile = @"\source\repos\RPGGame\SaveFile";
         static void Main(string[] args)
         {
@@ -230,11 +231,11 @@ namespace DoSomething
                             case "Forest":
                                 Forest(Enemy, Player, rand); // ADD MAP
                                 ShopCount++;
-                                return;
+                                break;
                             case "Cave":
                                 Cave(Enemy, Player, rand); // ADD MAP
                                 ShopCount++;
-                                return;
+                                break;
                             case "Castle":
                                 Castle(Enemy, Player, rand);
                                 break;
@@ -321,19 +322,14 @@ namespace DoSomething
         static void Forest(Enemy Enemy, Player Player, Random rand) // change ADD MAP
           
         {
-            Chest(Player);
-
-            Console.WriteLine($"You attacked by {Enemy.GetClass()}");
-            Battle( Player, Enemy, rand);
-
+            char[,] map = MapForest();
+            MoveOnMap(map, Player, rand);
         }
 
-        static void Cave(Enemy Enemy, Player Player, Random rand) // change ADD Map
+        static void Cave(Enemy Enemy, Player Player, Random rand)
         {
-            Chest(Player);
-
-            Console.WriteLine($"You attacked by {Enemy.GetClass()}");
-            Battle( Player, Enemy, rand);
+            char[,] map = MapCave();
+            MoveOnMap(map, Player, rand);
         }
 
         static void Castle(Enemy Enemy, Player Player, Random rand)
@@ -343,13 +339,41 @@ namespace DoSomething
 
         }
 
-        static void Chest(Player Player)
+        static void Chest(Player Player, char[,] map)
+        {
+            switch (map[0, 0])
+            {
+                case '1':
+                    ChestCastle(Player);
+                    break;
+                case '2':
+                    ChestCave(Player);
+                    break;
+                case '3':
+                    ChestForest(Player);
+                    break;
+            }
+        }
+
+        static void ChestForest(Player Player)
         {
             Console.WriteLine("You got 20 Gold");
             Player.SetGold(Player.GetGold() + 20);
         }
 
-        static void Battle(Player Player , Enemy Enemy, Random rand)
+        static void ChestCave(Player Player) 
+        {
+            Console.WriteLine("You got 40 Gold");
+            Player.SetGold(Player.GetGold() + 40);
+        }
+
+        static void ChestCastle(Player Player)
+        {
+            Console.WriteLine("You got 90 Gold");
+            Player.SetGold(Player.GetGold() + 90);
+        }
+
+        static void Battle(Player Player , Enemy Enemy, Random rand, int XPGOT)
         {
             bool enemyUsedPotion = false;
 
@@ -430,7 +454,7 @@ namespace DoSomething
 
                 if (Enemy.GetHP() <= 0)
                 {
-                    Player.LevelUp();
+                    Player.LevelUp(XPGOT);
                     Player.SetGold(Player.GetGold() + 3);
                     Console.WriteLine("You won!");
                     Thread.Sleep(1500);
@@ -592,7 +616,7 @@ namespace DoSomething
             // C - Chest || D - Dragon || G - Goblin
             char[,] map = new char[10, 10]
             {
-        { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
+        { '1', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
         { '#', 'P', ' ', ' ', '#', 'C', ' ', ' ', ' ', '#' },
         { '#', '#', '#', ' ', '#', ' ', ' ', '#', ' ', '#' },
         { '#', ' ', ' ', ' ', 'G', ' ', ' ', '#', 'G', '#' },
@@ -603,6 +627,43 @@ namespace DoSomething
         { '#', ' ', ' ', 'D', '#', ' ', 'C', '#', 'X', '#' },
         { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
             };
+
+            return map;
+        }
+
+        static char[,] MapCave()
+        {
+            char[,] map = new char[10, 10]
+{
+        { '2', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
+        { '#', 'P', '#', '#', ' ', 'S', 'C', '#', '#', '#' },
+        { '#', ' ', '#', '#', ' ', ' ', '#', '#', '#', '#' },
+        { '#', ' ', ' ', 'G', ' ', ' ', '#', '#', '#', '#' },
+        { '#', '#', '#', ' ', '#', '#', ' ', ' ', '#', '#' },
+        { '#', '#', '#', ' ', '#', '#', ' ', ' ', ' ', '#' },
+        { '#', 'G', ' ', ' ', ' ', ' ', 'G', ' ', ' ', '#' },
+        { '#', 'S', '#', '#', ' ', ' ', '#', '#', ' ', '#' },
+        { '#', 'C', '#', '#', ' ', ' ', '#', '#', 'X', '#' },
+        { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
+};
+            return map;
+        }
+
+        static char[,] MapForest()
+        {
+            char[,] map = new char[10, 10]
+{
+        { '3', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
+        { '#', 'P', ' ', ' ', ' ', '#', 'C', '#', 'X', '#' },
+        { '#', ' ', '#', ' ', ' ', ' ', 'G', '#', 'G', '#' },
+        { '#', '#', '#', '#', ' ', ' ', ' ', ' ', ' ', '#' },
+        { '#', 'C', '#', ' ', ' ', '#', '#', '#', '#', '#' },
+        { '#', 'G', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+        { '#', ' ', ' ', ' ', ' ', '#', '#', '#', ' ', '#' },
+        { '#', '#', '#', '#', ' ', '#', 'C', '#', ' ', '#' },
+        { '#', 'C', 'G', 'G', ' ', '#', ' ', 'G', ' ', '#' },
+        { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
+};
 
             return map;
         }
@@ -642,8 +703,7 @@ namespace DoSomething
                     case ConsoleKey.DownArrow: newY++; break;
                     case ConsoleKey.LeftArrow: newX--; break;
                     case ConsoleKey.RightArrow: newX++; break;
-                        Console.WriteLine("Game Quit.");
-                        return;
+                    case ConsoleKey.Escape: PAUSEMenu(Player); break;
                 }
 
                 // Check bounds and wall collision
@@ -656,10 +716,10 @@ namespace DoSomething
                 // Handle interactions
                 switch (destination)
                 {
-                    case 'D': Enemy EnemyD = new Enemy("Dragon"); Console.WriteLine($"you attacked by {EnemyD.GetClass()}"); Battle(Player, EnemyD, rand); break;
-                    case 'C': Chest(Player); Thread.Sleep(1000); break;
-                    case 'G': Enemy EnemyG = new Enemy("Goblin"); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
-                    case 'S': Enemy EnemyS = new Enemy("Skeleton"); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
+                    case 'D': Enemy EnemyD = new Enemy("Dragon"); Console.WriteLine($"you attacked by {EnemyD.GetClass()}"); Battle(Player, EnemyD, rand,30); break;
+                    case 'C': Chest(Player, map); Thread.Sleep(1000); break;
+                    case 'G': Enemy EnemyG = new Enemy("Goblin"); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand,5); break;
+                    case 'S': Enemy EnemyS = new Enemy("Skeleton"); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand,5); break;
                     case 'X':
                         Console.WriteLine("You reached the exit! Game Over.");
                         return;
