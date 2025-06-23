@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -60,17 +61,24 @@ namespace DoSomething
             Console.WriteLine($"HP: {this.HP} ATTACK: {this.ATTACK} CLASS: {this.CLASS} LVL: {this.LVL} XP: {this.XP} XPR: {this.XPR}  GOLD: {this.Gold}");
         }
 
-        public void LevelUp()
+        public void LevelUp(int XPGOT)
         {
-            if (this.XP >= this.XPR)
+            int currentLVL = this.GETLVL();
+            int currentXP = this.GETXP();
+            double requiredXP = this.GETXPR();
+
+            int totalXP = currentXP + XPGOT;
+
+            while (totalXP >= requiredXP)
             {
-                this.LVL++;
-                this.XP -= (int)this.XPR;
-                this.XPR *= 1.5;
-                this.HP += 5;
-                this.ATTACK += 2;
-                Console.WriteLine($"Congratulations! You leveled up to LVL {this.LVL}!");
+                totalXP -= (int)requiredXP;
+                currentLVL += 1;
+                requiredXP *= 1.25;
             }
+
+            this.SetLVL(currentLVL);
+            this.SetXP(totalXP);
+            this.SetXPR(requiredXP);
         }
     }
 }
