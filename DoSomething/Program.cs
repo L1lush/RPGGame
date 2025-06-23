@@ -27,76 +27,14 @@ namespace DoSomething
             //Test(Player, rand);
 
             //OpeningStory();
-            MainMusicPlayer(@"medieval_Sound.mp3");
+            MainMusicPlayer.Play(); // Play main music
             StartUpMenu();
         }
+        //music
+        static MusicPlayer MainMusicPlayer = new MusicPlayer("medieval_sound.mp3");
+        static MusicPlayer BattleMusicPlayer = new MusicPlayer("bttle_sound.mp3");
 
-        static bool MainMusicPlayerPlaying = true;
-        static bool MusicPlayerPlaying = true;
-        static void MainMusicPlayer(string path)
-        {
-            Task.Run(() =>
-            {
-                try
-                {
-                    string fullPath = Path.GetFullPath(path);
 
-                    using (var audioFile = new AudioFileReader(fullPath))
-                    using (var outputDevice = new WaveOutEvent())
-                    {
-                        outputDevice.Init(audioFile);
-                        outputDevice.Play();
-                        // Wait for playback to finish in this background task
-                        while (outputDevice.PlaybackState == PlaybackState.Playing)
-                        {
-                            Thread.Sleep(500);
-                            if(!MainMusicPlayerPlaying)
-                            {
-                                outputDevice.Stop();
-                                break;
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error playing audio: " + ex.Message);
-                }
-            });
-        }
-
-        static void MusicPlayer(string path)
-        {
-            Task.Run(() =>
-            {
-                try
-                {
-                    string fullPath = Path.GetFullPath(path);
-                    using (var audioFile = new AudioFileReader(fullPath))
-                    using (var outputDevice = new WaveOutEvent())
-                    {
-                        outputDevice.Init(audioFile);
-                        outputDevice.Play();
-                        // Wait for playback to finish in this background task
-                        while (outputDevice.PlaybackState == PlaybackState.Playing)
-                        {
-                            Thread.Sleep(500);
-                            if (!MusicPlayerPlaying)
-                            {
-                                outputDevice.Stop();
-                                MainMusicPlayerPlaying = true; // Resume main music
-                                MainMusicPlayer(@"medieval_Sound.mp3");
-                                break;
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error playing audio: " + ex.Message);
-                }
-            });
-        }
 
         static void StartUpMenu()
         {
@@ -419,9 +357,8 @@ namespace DoSomething
         static void Battle(Player Player , Enemy Enemy, Random rand)
         {
             bool enemyUsedPotion = false;
-            MainMusicPlayerPlaying = false; // Stop main music
-            MusicPlayer("Bttle_Sound.mp3");
-
+            MainMusicPlayer.Pause(); // Pause battle music
+            BattleMusicPlayer.Play(); // Play battle music
             while (Player.GetHP() > 0 && Enemy.GetHP() > 0)
             {
                 // Action selection menu
@@ -471,7 +408,8 @@ namespace DoSomething
                         if (num == 1)
                         {
                             Console.WriteLine("You ran away!");
-                            MusicPlayerPlaying = false; // Stop battle music
+                            BattleMusicPlayer.Pause(); // Pause battle music
+                            MainMusicPlayer.Play(); // Play main music again
                             Thread.Sleep(1000);
                             return;
                         }
@@ -503,7 +441,8 @@ namespace DoSomething
                     Player.LevelUp();
                     Player.SetGold(Player.GetGold() + 3);
                     Console.WriteLine("You won!");
-                    MusicPlayerPlaying = false; // Stop battle music
+                    BattleMusicPlayer.Pause(); // Pause battle music
+                    MainMusicPlayer.Play(); // Play main music again
                     Thread.Sleep(1500);
                     break;
                 }
@@ -527,7 +466,8 @@ namespace DoSomething
                 if (Player.GetHP() <= 0)
                 {
                     Console.WriteLine("You lost!");
-                    MusicPlayerPlaying = false; // Stop battle music
+                    BattleMusicPlayer.Pause(); // Pause battle music
+                    MainMusicPlayer.Play(); // Play main music again
                     Thread.Sleep(2500);
                     StartUpMenu();
                     break;
@@ -554,11 +494,11 @@ namespace DoSomething
             do
             {
                 Console.Clear();
-                Console.WriteLine($"╔═════════════════════════════════════════════╗");
-                Console.WriteLine($"║          RPG SHOP                           ║");
-                Console.WriteLine($"╠═════════════════════════════════════════════╣");
-                Console.WriteLine($"║   Gold: {Player.GetGold(),-28}        ║");
-                Console.WriteLine($"╠═════════════════════════════════════════════╣");
+                Console.WriteLine($"╔══════════════════════════════════════════════╗");
+                Console.WriteLine($"║           RPG SHOP                           ║");
+                Console.WriteLine($"╠══════════════════════════════════════════════╣");
+                Console.WriteLine($"║   Gold: {Player.GetGold(),-28}         ║");
+                Console.WriteLine($"╠══════════════════════════════════════════════╣");
                 for (int i = 0; i < shopOptions.Length; i++)
                 {
                     if (i == selected)
@@ -566,7 +506,7 @@ namespace DoSomething
                     else
                         Console.WriteLine($"║   {shopOptions[i],-28}   ║");
                 }
-                Console.WriteLine($"╚═════════════════════════════════════════════╝");
+                Console.WriteLine($"╚══════════════════════════════════════════════╝");
                 Console.WriteLine("Use ↑ ↓ to navigate. Enter to buy. Esc for pause.");
 
                 key = Console.ReadKey(true).Key;
