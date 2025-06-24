@@ -18,13 +18,13 @@ namespace DoSomething
         public int XPR { get; set; } = 30;
         public int Gold { get; set; } = 0;
         public int Positions { get; set; } = 5;
-        public Weapon[] Weapons { get; set; }
+        //public Weapon[] Weapons { get; set; }
 
         public Player() { }
         public Player(string CLASS)
         {
-            Weapons = new Weapon[Weapons[0].NumOfWeapons()];
-            this.CLASS = CLASS;
+            //Weapons = new Weapon[Weapons[0].NumOfWeapons()];
+            //this.CLASS = CLASS;
 
             switch (CLASS)
             {
@@ -143,34 +143,34 @@ namespace DoSomething
             this.SetXPR(requiredXP);
         }
 
-        public int BestATTACK()
-        {
-            int Highest_dmg = 0;
-            for (int i = 0; i < Weapons.Length; i++) 
-            {
-                if (Highest_dmg < Weapons[i].GetATTACK())
-                {
-                    Highest_dmg = Weapons[i].GetATTACK();
-                }
-            }
-            return Highest_dmg;
-        }
+        //public int BestATTACK()
+        //{
+        //    int Highest_dmg = 0;
+        //    for (int i = 0; i < Weapons.Length; i++) 
+        //    {
+        //        if (Highest_dmg < Weapons[i].GetATTACK())
+        //        {
+        //            Highest_dmg = Weapons[i].GetATTACK();
+        //        }
+        //    }
+        //    return Highest_dmg;
+        //}
 
-        public void AddWeapon(string name)
-        {
-            int place = FindPlaceWeapon();
-            Weapons[place].SetName(name);
+        //public void AddWeapon(string name)
+        //{
+        //    int place = FindPlaceWeapon();
+        //    Weapons[place].SetName(name);
 
-        }
-        private int FindPlaceWeapon()
-        {
-            int place = 0;
-            for (int i = 0; i < Weapons.Length; i++)
-            {
-                if (Weapons[i] == null)
-                    place = i;
-            }
-            return place;
-        }
+        //}
+        //private int FindPlaceWeapon()
+        //{
+        //    int place = 0;
+        //    for (int i = 0; i < Weapons.Length; i++)
+        //    {
+        //        if (Weapons[i] == null)
+        //            place = i;
+        //    }
+        //    return place;
+        //}
     }
 }
