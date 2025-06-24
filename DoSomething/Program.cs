@@ -9,15 +9,12 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.IO;
 using NAudio.Wave;
+using System.ComponentModel;
 
 namespace DoSomething
 {
     class Program
     {
-        static int Potions = 7;
-        static int GoblinXP = 5;
-        static int SkeletonXP = 7;
-        static int DragonXP = 20;
         static string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         static string gameFolder = Path.Combine(appData, "DoSomethingGame");
         static string saveFile = Path.Combine(gameFolder, "savegame.json");
@@ -233,7 +230,6 @@ namespace DoSomething
                         "Shop",
                         "Stats",
                     };
-                options = options.Where(o => o != null).ToArray();
                 int selected = 0;
                 ConsoleKey key;
 
@@ -270,10 +266,10 @@ namespace DoSomething
                         {
                             case "Forest":
                                 Forest(Enemy, player, rand); // ADD MAP
-                                return;
+                                break;
                             case "Cave":
                                 Cave(Enemy, player, rand); // ADD MAP
-                                return;
+                                break;
                             case "Castle":
                                 Castle(Enemy, player, rand);
                                 break;
@@ -358,7 +354,7 @@ namespace DoSomething
 
 
         static void Forest(Enemy Enemy, Player Player, Random rand) // change ADD MAP
-          
+
         {
             char[,] map = MapForest();
             MoveOnMap(map, Player, rand);
@@ -396,22 +392,22 @@ namespace DoSomething
         static void ChestForest(Player Player)
         {
             Console.WriteLine("You got 20 Gold");
-            Player.SetGold(Player.GetGold() + 20);
+            Player.AddGold(20);
         }
 
-        static void ChestCave(Player Player) 
+        static void ChestCave(Player Player)
         {
             Console.WriteLine("You got 40 Gold");
-            Player.SetGold(Player.GetGold() + 40);
+            Player.AddGold(40);
         }
 
         static void ChestCastle(Player Player)
         {
             Console.WriteLine("You got 90 Gold");
-            Player.SetGold(Player.GetGold() + 90);
+            Player.AddGold(90);
         }
 
-        static void Battle(Player Player , Enemy Enemy, Random rand, int XPGOT)
+        static void Battle(Player Player, Enemy Enemy, Random rand)
         {
             bool enemyUsedPotion = false;
             MainMusicPlayer.Pause(); // Pause battle music
@@ -422,7 +418,7 @@ namespace DoSomething
                 string[] actions = {
                     "Attack                     ",
                     "Run                        ",
-                   $"Use Potion ({Potions} left)        " 
+                   $"Use Potion ({Player.GetPositions()} left)        "
                 };
                 int selectedAction = 0;
                 ConsoleKey key;
@@ -432,6 +428,14 @@ namespace DoSomething
                     Console.WriteLine("╔═══════════════════════════════╗");
                     Console.WriteLine("║   Choose Your Action          ║");
                     Console.WriteLine("╠═══════════════════════════════╣");
+                    Console.WriteLine($"║   Player HP: {Player.GetHP(),-16} ║");
+                    Console.WriteLine($"║   Player Max HP: {Player.GetMaxHP(),-12} ║");
+                    Console.WriteLine($"║   Player ATTACK: {Player.GetATTACK(),-12} ║");
+                    Console.WriteLine($"║   Enemy HP: {Enemy.GetHP(),-16}  ║");
+                    Console.WriteLine($"║   Enemy ATTACK: {Enemy.GetATTACK(),-13} ║");
+                    Console.WriteLine("╠═══════════════════════════════╣");
+
+
                     for (int i = 0; i < actions.Length; i++)
                     {
                         if (i == selectedAction)
@@ -457,7 +461,7 @@ namespace DoSomething
                 switch (selectedAction)
                 {
                     case 0: // Attack
-                        Enemy.SetHP(Math.Max(0, Enemy.GetHP() - Player.GetATTACK()));
+                        Enemy.SubtractHP(Player.GetATTACK());
                         Console.WriteLine($"You attacked! Enemy HP is now {Enemy.GetHP()}");
                         break;
                     case 1: // Run
@@ -472,17 +476,17 @@ namespace DoSomething
                         }
                         else
                         {
-                            Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK()));
+                            Player.SubtractHP(Enemy.GetATTACK());
                             Console.WriteLine($"Failed to run! Enemy attacked for {Enemy.GetATTACK()} damage.");
                             Console.WriteLine($"Your HP: {Player.GetHP()}");
                         }
                         break;
                     case 2: // Use Potion
-                        if (Potions > 0)
+                        if (Player.GetPositions() > 0)
                         {
                             Console.WriteLine("You used a potion! (+20 HP)");
-                            Player.SetHP(Player.GetHP() + 20);
-                            Potions -= 1;
+                            Player.AddHP(20);
+                            Player.SubtractPositions(1);
                         }
                         else
                         {
@@ -495,8 +499,8 @@ namespace DoSomething
 
                 if (Enemy.GetHP() <= 0)
                 {
-                    Player.LevelUp(XPGOT);
-                    Player.SetGold(Player.GetGold() + 3);
+                    Player.LevelUp(Enemy.GetXp());
+                    Player.AddGold(3); // Add 3 gold for winning
                     Console.WriteLine("You won!");
                     BattleMusicPlayer.Pause(); // Pause battle music
                     MainMusicPlayer.Play(); // Play main music again
@@ -510,12 +514,12 @@ namespace DoSomething
                 if (Enemy.GetHP() <= 5 && !enemyUsedPotion)
                 {
                     Console.WriteLine("Enemy used a potion! (+5 HP)");
-                    Enemy.SetHP(Enemy.GetHP() + 5);
+                    Enemy.AddHP(5);
                     enemyUsedPotion = true;
                 }
                 else
                 {
-                    Player.SetHP(Math.Max(0, Player.GetHP() - Enemy.GetATTACK()));
+                    Player.SubtractHP(Enemy.GetATTACK());
                     Console.WriteLine($"Enemy attacked for {Enemy.GetATTACK()} damage.");
                     Console.WriteLine($"Your HP: {Player.GetHP()}");
                 }
@@ -523,6 +527,7 @@ namespace DoSomething
                 if (Player.GetHP() <= 0)
                 {
                     Console.WriteLine("You lost!");
+                    Console.WriteLine("Game Over! Returning to main menu...");
                     BattleMusicPlayer.Pause(); // Pause battle music
                     MainMusicPlayer.Play(); // Play main music again
                     Thread.Sleep(2500);
@@ -536,13 +541,13 @@ namespace DoSomething
         static void Shop(Player Player)
         {
             string[] shopOptions = {
-                "Knife (ATTACK 10) | Price: 30 gold      ",
-                "Sword (ATTACK 20) | Price: 60 gold      ",
-                "Big Sword (ATTACK 30) | Price: 90 gold  ",
-                "Potion (Restores 20 HP) | Price: 20 gold",
-                "Exit                                    "
+                "Knife (ATTACK 10) | Price: 35 gold       ",
+                "Sword (ATTACK 20) | Price: 80 gold       ",
+                "Big Sword (ATTACK 30) | Price: 120 gold  ",
+                "Potion (Restores 20 HP) | Price: 20 gold ",
+                "Exit                                     "
             };
-            int[] prices = { 30, 60, 90, 20, 0 };
+            int[] prices = { 35, 80, 120, 20, 0 };
             int[] attacks = { 10, 20, 30, 0, 0 };
             int selected = 0;
             ConsoleKey key;
@@ -551,11 +556,11 @@ namespace DoSomething
             do
             {
                 Console.Clear();
-                Console.WriteLine($"╔══════════════════════════════════════════════╗");
-                Console.WriteLine($"║           RPG SHOP                           ║");
-                Console.WriteLine($"╠══════════════════════════════════════════════╣");
-                Console.WriteLine($"║   Gold: {Player.GetGold(),-28}         ║");
-                Console.WriteLine($"╠══════════════════════════════════════════════╣");
+                Console.WriteLine($"╔═══════════════════════════════════════════════╗");
+                Console.WriteLine($"║           RPG SHOP                            ║");
+                Console.WriteLine($"╠═══════════════════════════════════════════════╣");
+                Console.WriteLine($"║   Gold: {Player.GetGold(),-28}          ║");
+                Console.WriteLine($"╠═══════════════════════════════════════════════╣");
                 for (int i = 0; i < shopOptions.Length; i++)
                 {
                     if (i == selected)
@@ -563,7 +568,7 @@ namespace DoSomething
                     else
                         Console.WriteLine($"║   {shopOptions[i],-28}   ║");
                 }
-                Console.WriteLine($"╚══════════════════════════════════════════════╝");
+                Console.WriteLine($"╚═══════════════════════════════════════════════╝");
                 Console.WriteLine("Use ↑ ↓ to navigate. Enter to buy. Esc for pause.");
 
                 key = Console.ReadKey(true).Key;
@@ -580,57 +585,48 @@ namespace DoSomething
                 {
                     if (selected == 4) // Exit
                         return;
-                    if(selected == 3) // Buy potion
+                    if (selected == 3) // Buy potion
                     {
                         if (Player.GetGold() >= prices[selected])
                         {
-                            if (Potions < 10)
+                            if (Player.GetPositions() < 10)
                             {
-                                Player.SetGold(Player.GetGold() - prices[selected]);
-                                Potions++;
+                                Player.SubtractGold(prices[selected]);
+                                Player.AddPositions(1);
                                 Console.Clear();
                                 Console.WriteLine("You bought a potion!");
-                                Console.WriteLine($"You now have {Potions} potions.");
-                                Console.WriteLine("Press any key to continue...");
-                                Console.ReadKey(true);
-                                Shop(Player);
+                                Console.WriteLine($"You now have {Player.GetPositions()} potions.");
+                                Thread.Sleep(1000);
                             }
                             else
                             {
                                 Console.Clear();
                                 Console.WriteLine("You can't carry more potions!");
-                                Console.WriteLine("Press any key to continue...");
-                                Console.ReadKey(true);
-                                Shop(Player);
+                                Thread.Sleep(1000);
                             }
                         }
                         else
                         {
                             Console.Clear();
                             Console.WriteLine("Not enough gold!");
-                            Console.WriteLine("Press any key to continue...");
-                            Console.ReadKey(true);
-                            Shop(Player);
+                            Thread.Sleep(1000);
                         }
+                        continue; // Skip further processing for potions
                     }
                     if (Player.GetGold() >= prices[selected])
                     {
-                        Player.SetGold(Player.GetGold() - prices[selected]);
+                        Player.SubtractGold(prices[selected]);
                         Player.SetATTACK(attacks[selected]);
                         Console.Clear();
                         Console.WriteLine($"You bought {shopOptions[selected].Split('|')[0].Trim()}!");
                         Console.WriteLine($"Your attack is now {attacks[selected]}.");
-                        Console.WriteLine("Press any key to continue...");
-                        Console.ReadKey(true);
-                        Shop(Player);
+                        Thread.Sleep(1000);
                     }
                     else
                     {
                         Console.Clear();
                         Console.WriteLine("Not enough gold!");
-                        Console.WriteLine("Press any key to continue...");
-                        Console.ReadKey(true);
-                        Shop(Player);
+                        Thread.Sleep(1000);
                     }
                 }
             } while (true);
@@ -685,27 +681,21 @@ namespace DoSomething
             Thread.Sleep(4000);
         }
 
-        static void Test(Player Player, Random rand)
-        {
-            char[,] map = MapCastle();
-            MoveOnMap(map, Player, rand);
-        }
-
         static char[,] MapCastle() // Create map for castle // later ADD for forest and cave
         {
             // C - Chest || D - Dragon || G - Goblin
             char[,] map = new char[10, 10]
             {
-        { '1', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
-        { '#', 'P', ' ', ' ', '#', 'C', ' ', ' ', ' ', '#' },
-        { '#', '#', '#', ' ', '#', ' ', ' ', '#', ' ', '#' },
-        { '#', ' ', ' ', ' ', 'G', ' ', ' ', '#', 'G', '#' },
-        { '#', ' ', '#', '#', '#', '#', ' ', '#', ' ', '#' },
-        { '#', ' ', '#', 'C', 'D', ' ', ' ', '#', 'G', '#' },
-        { '#', ' ', '#', '#', '#', '#', '#', '#', ' ', '#' },
-        { '#', ' ', '#', ' ', ' ', 'D', ' ', '#', ' ', '#' },
-        { '#', ' ', ' ', 'D', '#', ' ', 'C', '#', 'X', '#' },
-        { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
+                { '1', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
+                { '#', 'P', ' ', ' ', '#', 'C', ' ', ' ', ' ', '#' },
+                { '#', '#', '#', ' ', '#', ' ', ' ', '#', ' ', '#' },
+                { '#', ' ', ' ', ' ', 'G', ' ', ' ', '#', 'G', '#' },
+                { '#', ' ', '#', '#', '#', '#', ' ', '#', ' ', '#' },
+                { '#', ' ', '#', 'C', 'D', ' ', ' ', '#', 'G', '#' },
+                { '#', ' ', '#', '#', '#', '#', '#', '#', ' ', '#' },
+                { '#', ' ', '#', ' ', ' ', 'D', ' ', '#', ' ', '#' },
+                { '#', ' ', ' ', 'D', '#', ' ', 'C', '#', 'X', '#' },
+                { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
             };
 
             return map;
@@ -714,36 +704,36 @@ namespace DoSomething
         static char[,] MapCave()
         {
             char[,] map = new char[10, 10]
-{
-        { '2', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
-        { '#', 'P', '#', '#', ' ', 'S', 'C', '#', '#', '#' },
-        { '#', ' ', '#', '#', ' ', ' ', '#', '#', '#', '#' },
-        { '#', ' ', ' ', 'G', ' ', ' ', '#', '#', '#', '#' },
-        { '#', '#', '#', ' ', '#', '#', ' ', ' ', '#', '#' },
-        { '#', '#', '#', ' ', '#', '#', ' ', ' ', ' ', '#' },
-        { '#', 'G', ' ', ' ', ' ', ' ', 'G', ' ', ' ', '#' },
-        { '#', 'S', '#', '#', ' ', ' ', '#', '#', ' ', '#' },
-        { '#', 'C', '#', '#', ' ', ' ', '#', '#', 'X', '#' },
-        { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
-};
+            {
+                { '2', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
+                { '#', 'P', '#', '#', ' ', 'S', 'C', '#', '#', '#' },
+                { '#', ' ', '#', '#', ' ', ' ', '#', '#', '#', '#' },
+                { '#', ' ', ' ', 'G', ' ', ' ', '#', '#', '#', '#' },
+                { '#', '#', '#', ' ', '#', '#', ' ', ' ', '#', '#' },
+                { '#', '#', '#', ' ', '#', '#', ' ', ' ', ' ', '#' },
+                { '#', 'G', ' ', ' ', ' ', ' ', 'G', ' ', ' ', '#' },
+                { '#', 'S', '#', '#', ' ', ' ', '#', '#', ' ', '#' },
+                { '#', 'C', '#', '#', ' ', ' ', '#', '#', 'X', '#' },
+                { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
+            };
             return map;
         }
 
         static char[,] MapForest()
         {
             char[,] map = new char[10, 10]
-{
-        { '3', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
-        { '#', 'P', ' ', ' ', ' ', '#', 'C', '#', 'X', '#' },
-        { '#', ' ', '#', ' ', ' ', ' ', 'G', '#', 'G', '#' },
-        { '#', '#', '#', '#', ' ', ' ', ' ', ' ', ' ', '#' },
-        { '#', 'C', '#', ' ', ' ', '#', '#', '#', '#', '#' },
-        { '#', 'G', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
-        { '#', ' ', ' ', ' ', ' ', '#', '#', '#', ' ', '#' },
-        { '#', '#', '#', '#', ' ', '#', 'C', '#', ' ', '#' },
-        { '#', 'C', 'G', 'G', ' ', '#', ' ', 'G', ' ', '#' },
-        { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
-};
+            {
+                { '3', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
+                { '#', 'P', ' ', ' ', ' ', '#', 'C', '#', 'X', '#' },
+                { '#', ' ', '#', ' ', ' ', ' ', 'G', '#', 'G', '#' },
+                { '#', '#', '#', '#', ' ', ' ', ' ', ' ', ' ', '#' },
+                { '#', 'C', '#', ' ', ' ', '#', '#', '#', '#', '#' },
+                { '#', 'G', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+                { '#', ' ', ' ', ' ', ' ', '#', '#', '#', ' ', '#' },
+                { '#', '#', '#', '#', ' ', '#', 'C', '#', ' ', '#' },
+                { '#', 'C', 'G', 'G', ' ', '#', ' ', 'G', ' ', '#' },
+                { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
+            };
 
             return map;
         }
@@ -772,6 +762,8 @@ namespace DoSomething
                 PrintMap(map);
 
                 Console.WriteLine("Move: ↑ ↓ ← → ");
+                Console.WriteLine("Press Escape to pause.");
+                Console.WriteLine("'D' is Dragon, 'G' is Goblin, 'S' is Skeleton, 'C' is Chest, 'X' is Exit, 'P' is you.");
 
                 ConsoleKey key = Console.ReadKey(true).Key;
                 int newX = playerX, newY = playerY;
@@ -796,10 +788,10 @@ namespace DoSomething
                 // Handle interactions
                 switch (destination)
                 {
-                    case 'D': Enemy EnemyD = new Enemy("Dragon"); Console.WriteLine($"you attacked by {EnemyD.GetClass()}"); Battle(Player, EnemyD, rand,30); break;
-                    case 'C': Chest(Player, map); Thread.Sleep(1000); break;
-                    case 'G': Enemy EnemyG = new Enemy("Goblin"); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand,5); break;
-                    case 'S': Enemy EnemyS = new Enemy("Skeleton"); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand,5); break;
+                    case 'D': Enemy EnemyD = new Enemy("Dragon"); Console.WriteLine($"you attacked by {EnemyD.GetClass()}"); Battle(Player, EnemyD, rand); break;
+                    case 'C': Chest(Player, map); Thread.Sleep(500); break;
+                    case 'G': Enemy EnemyG = new Enemy("Goblin"); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
+                    case 'S': Enemy EnemyS = new Enemy("Skeleton"); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
                     case 'X':
                         Console.WriteLine("You reached the exit! Game Over.");
                         return;
