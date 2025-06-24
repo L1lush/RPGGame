@@ -352,7 +352,7 @@ namespace DoSomething
 
         static void StartNewGame()
         {
-            string[] classOptions = { "Knight", "Assassin" };
+            string[] classOptions = { "Knight", "Assassin", "Mage", "Archer" };
             int selectedClass = 0;
             ConsoleKey classKey;
             Console.CursorVisible = false;
