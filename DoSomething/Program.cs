@@ -49,6 +49,10 @@ namespace DoSomething
         static MusicPlayer CoinMusicPlayer = new MusicPlayer("coin_sound.mp3");
         static MusicPlayer ItemEquipMusicPlayer = new MusicPlayer("item_equip.mp3");
 
+        //Shop
+        static int shopVisitCount = 0;
+        static List<Weapon>? cachedShopWeapons = null;
+
 
 
         static void StartUpMenu()
@@ -451,7 +455,7 @@ namespace DoSomething
                                 Thread.Sleep(3000);
                                 break;
                             case "Shop":
-                                Shop(player);
+                                Shop(player, rand);
                                 break;
                         }
                     }
@@ -719,17 +723,64 @@ namespace DoSomething
             }
         }
 
-        static void Shop(Player Player)
+        static void Shop(Player Player, Random random)
         {
-            string[] shopOptions = {
-                "Knife (ATTACK 10) | Price: 30 gold       ",
-                "Sword (ATTACK 20) | Price: 70 gold       ",
-                "Big Sword (ATTACK 30) | Price: 100 gold  ",
-                "Potion (Restores 20 HP) | Price: 20 gold ",
-                "Exit                                     "
-            };
-            int[] prices = { 30, 70, 100, 20, 0 };
-            int[] attacks = { 10, 20, 30, 0, 0 };
+            shopVisitCount++;
+
+            if (shopVisitCount % 5 == 0 || cachedShopWeapons == null)
+            {
+                // Generate new shop weapons
+                int random1, random2, random3;
+                do
+                {
+                    random1 = random.Next(0, 7);
+                    random2 = random.Next(0, 7);
+                    random3 = random.Next(0, 7);
+                } while (random1 == random2 || random1 == random3 || random2 == random3);
+
+                Weapon weapon1 = new Weapon();
+                Weapon weapon2 = new Weapon();
+                Weapon weapon3 = new Weapon();
+
+                switch (random1)
+                {
+                    case 0: weapon1.SetType("Sword"); break;
+                    case 1: weapon1.SetType("Big Sword"); break;
+                    case 2: weapon1.SetType("Axe"); break;
+                    case 3: weapon1.SetType("Bow"); break;
+                    case 4: weapon1.SetType("Spear"); break;
+                    case 5: weapon1.SetType("Hammer"); break;
+                    case 6: weapon1.SetType("Dagger"); break;
+                }
+                switch (random2)
+                {
+                    case 0: weapon2.SetType("Sword"); break;
+                    case 1: weapon2.SetType("Big Sword"); break;
+                    case 2: weapon2.SetType("Axe"); break;
+                    case 3: weapon2.SetType("Bow"); break;
+                    case 4: weapon2.SetType("Spear"); break;
+                    case 5: weapon2.SetType("Hammer"); break;
+                    case 6: weapon2.SetType("Dagger"); break;
+                }
+                switch (random3)
+                {
+                    case 0: weapon3.SetType("Sword"); break;
+                    case 1: weapon3.SetType("Big Sword"); break;
+                    case 2: weapon3.SetType("Axe"); break;
+                    case 3: weapon3.SetType("Bow"); break;
+                    case 4: weapon3.SetType("Spear"); break;
+                    case 5: weapon3.SetType("Hammer"); break;
+                    case 6: weapon3.SetType("Dagger"); break;
+                }
+
+                cachedShopWeapons = new List<Weapon> { weapon1, weapon2, weapon3 };
+                shopVisitCount = 0;
+            }
+
+            List<Weapon> shopWeapons = new List<Weapon>(cachedShopWeapons);
+
+            string potionName = "Potion (Restores 20 HP)              ";
+            int potionPrice = 20;
             int selected = 0;
             ConsoleKey key;
 
@@ -740,23 +791,46 @@ namespace DoSomething
                 Console.WriteLine($"╔═══════════════════════════════════════════════╗");
                 Console.WriteLine($"║           RPG SHOP                            ║");
                 Console.WriteLine($"╠═══════════════════════════════════════════════╣");
-                Console.WriteLine($"║   Gold: {Player.GetGold(),-28}          ║");
+                Console.WriteLine($"║   Gold: {Player.GetGold(),-22}                ║");
+                Console.WriteLine($"║   Potions: {Player.GetPositions()} left                             ║");
+                Console.WriteLine($"║   Your weapon attak: {Player.GetWeapon().GetATTACK(),-25}║");
                 Console.WriteLine($"╠═══════════════════════════════════════════════╣");
-                for (int i = 0; i < shopOptions.Length; i++)
+
+                // Display weapons
+                for (int i = 0; i < shopWeapons.Count; i++)
                 {
+                    string weaponName = shopWeapons[i].GetName();
+                    int weaponAttack = shopWeapons[i].GetATTACK();
+                    int weaponPrice = shopWeapons[i].GetPrice();
+                    bool isEquipped = Player.GetWeapon() != null && Player.GetWeapon().GetName() == weaponName;
+                    string equippedText = isEquipped ? " (Equipped)" : "";
                     if (i == selected)
-                        Console.WriteLine($"║ ▶ {shopOptions[i],-28}   ║");
+                        Console.WriteLine($"║ ▶ {weaponName} (ATTACK {weaponAttack}) | Price: {weaponPrice} gold{equippedText,-11}║");
                     else
-                        Console.WriteLine($"║   {shopOptions[i],-28}   ║");
+                        Console.WriteLine($"║   {weaponName} (ATTACK {weaponAttack}) | Price: {weaponPrice} gold{equippedText,-11}║");
                 }
+                // Potion
+                int potionIndex = shopWeapons.Count;
+                if (selected == potionIndex)
+                    Console.WriteLine($"║ ▶ {potionName,-28}       ║");
+                else
+                    Console.WriteLine($"║   {potionName,-28}       ║");
+                // Exit
+                int exitIndex = potionIndex + 1;
+                if (selected == exitIndex)
+                    Console.WriteLine($"║ ▶ Exit{' ',-28}            ║");
+                else
+                    Console.WriteLine($"║   Exit{' ',-28}            ║");
+
                 Console.WriteLine($"╚═══════════════════════════════════════════════╝");
                 Console.WriteLine("Use ↑ ↓ to navigate. Enter to buy. Esc for pause.");
 
                 key = Console.ReadKey(true).Key;
+                int optionsCount = shopWeapons.Count + 2;
                 if (key == ConsoleKey.UpArrow)
-                    selected = (selected - 1 + shopOptions.Length) % shopOptions.Length;
+                    selected = (selected - 1 + optionsCount) % optionsCount;
                 else if (key == ConsoleKey.DownArrow)
-                    selected = (selected + 1) % shopOptions.Length;
+                    selected = (selected + 1) % optionsCount;
                 else if (key == ConsoleKey.Escape)
                 {
                     PAUSEMenu(Player);
@@ -764,15 +838,15 @@ namespace DoSomething
                 }
                 else if (key == ConsoleKey.Enter)
                 {
-                    if (selected == 4) // Exit
+                    if (selected == exitIndex) // Exit
                         return;
-                    if (selected == 3) // Buy potion
+                    if (selected == potionIndex) // Buy potion
                     {
-                        if (Player.GetGold() >= prices[selected])
+                        if (Player.GetGold() >= potionPrice)
                         {
                             if (Player.GetPositions() < 10)
                             {
-                                Player.SubtractGold(prices[selected]);
+                                Player.SubtractGold(potionPrice);
                                 Player.AddPositions(1);
                                 Console.Clear();
                                 Console.WriteLine("You bought a potion!");
@@ -797,23 +871,36 @@ namespace DoSomething
                         }
                         continue; // Skip further processing for potions
                     }
-                    if (Player.GetGold() >= prices[selected])
+                    // Weapon purchase
+                    if (selected < shopWeapons.Count)
                     {
-                        Player.SubtractGold(prices[selected]);
-                        Player.AddATTACK(attacks[selected]);
-                        Console.Clear();
-                        Console.WriteLine($"You bought {shopOptions[selected].Split('|')[0].Trim()}!");
-                        Console.WriteLine($"Your attack is now {attacks[selected]}.");
-                        ItemEquipMusicPlayer.Play(); // Play item equip sound
-                        Thread.Sleep(400);
-                        ItemEquipMusicPlayer.Pause(); // Stop item equip sound
-                        Thread.Sleep(1000);
-                    }
-                    else
-                    {
-                        Console.Clear();
-                        Console.WriteLine("Not enough gold!");
-                        Thread.Sleep(1000);
+                        Weapon weaponToBuy = shopWeapons[selected];
+                        int price = shopWeapons[selected].GetPrice();
+                        if (Player.GetWeapon() != null && Player.GetWeapon().GetATTACK() == weaponToBuy.GetATTACK())
+                        {
+                            Console.Clear();
+                            Console.WriteLine("You already have this weapon equipped!");
+                            Thread.Sleep(1000);
+                            continue;
+                        }
+                        if (Player.GetGold() >= price)
+                        {
+                            Player.SubtractGold(price);
+                            Player.RemoveWeapon(); // Remove current weapon
+                            Player.SetWeapon(weaponToBuy);
+                            Console.Clear();
+                            Console.WriteLine($"You bought and equipped {weaponToBuy.GetType().Name}!");
+                            ItemEquipMusicPlayer.Play(); // Play item equip sound
+                            Thread.Sleep(400);
+                            ItemEquipMusicPlayer.Pause(); // Stop item equip sound
+                            Thread.Sleep(1000);
+                        }
+                        else
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Not enough gold!");
+                            Thread.Sleep(1000);
+                        }
                     }
                 }
             } while (true);

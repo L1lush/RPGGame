@@ -18,26 +18,30 @@ namespace DoSomething
         public int XPR { get; set; } = 30;
         public int Gold { get; set; } = 0;
         public int Positions { get; set; } = 5;
-        //public Weapon[] Weapons { get; set; }
+        public Weapon Weapon { get; set; }
 
-        public Player() { }
+        public Player() 
+        {
+
+        }
         public Player(string CLASS)
         {
-            //Weapons = new Weapon[Weapons[0].NumOfWeapons()];
-            //this.CLASS = CLASS;
+            this.CLASS = CLASS;
+            this.Weapon = new Weapon(); 
 
             switch (CLASS)
             {
                 case "Knight":
-                    this.HP = 20;
-                    this.ATTACK = 5;
+                    this.HP = 15;
+                    Weapon.SetType("Sword");
                     break;
                 case "Assassin":
-                    this.HP = 15;
-                    this.ATTACK = 7;
+                    this.HP = 17;
+                    Weapon.SetType("Dagger");
                     break;
             }
 
+            this.ATTACK = Weapon.GetATTACK();
         }
 
         public void SetHP(int HP) { this.HP = HP; }
@@ -115,6 +119,23 @@ namespace DoSomething
             this.MaxHP += amount;
         }
 
+        public void SetWeapon(Weapon weapon) 
+        {
+            this.Weapon = weapon;
+            this.ATTACK += weapon.GetATTACK(); // Update ATTACK based on the weapon
+        }
+
+        public void RemoveWeapon() 
+        {
+            this.ATTACK -= this.Weapon.GetATTACK(); // Remove weapon's attack bonus
+            this.Weapon = new Weapon(); // Reset to default weapon
+        }
+
+        public Weapon GetWeapon() 
+        {
+            return this.Weapon;
+        }
+
         public void ShowStats()
         {
             Console.WriteLine($"HP: {this.HP}  Max Hp: {this.MaxHP} ATTACK: {this.ATTACK} CLASS: {this.CLASS} LVL: {this.LVL} XP: {this.XP} XPR: {this.XPR}  GOLD: {this.Gold}  Positions: {this.Positions}");
@@ -142,35 +163,5 @@ namespace DoSomething
             this.SetXP(totalXP);
             this.SetXPR(requiredXP);
         }
-
-        //public int BestATTACK()
-        //{
-        //    int Highest_dmg = 0;
-        //    for (int i = 0; i < Weapons.Length; i++) 
-        //    {
-        //        if (Highest_dmg < Weapons[i].GetATTACK())
-        //        {
-        //            Highest_dmg = Weapons[i].GetATTACK();
-        //        }
-        //    }
-        //    return Highest_dmg;
-        //}
-
-        //public void AddWeapon(string name)
-        //{
-        //    int place = FindPlaceWeapon();
-        //    Weapons[place].SetName(name);
-
-        //}
-        //private int FindPlaceWeapon()
-        //{
-        //    int place = 0;
-        //    for (int i = 0; i < Weapons.Length; i++)
-        //    {
-        //        if (Weapons[i] == null)
-        //            place = i;
-        //    }
-        //    return place;
-        //}
     }
 }
