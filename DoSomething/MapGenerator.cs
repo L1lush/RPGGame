@@ -17,7 +17,7 @@ namespace DoSomething
             // Enemies per map type
             Dictionary<string, char[]> enemyTypes = new()
         {
-            { "forest", new[] { 'G', 'O', 'T', 'S' } }, // Goblin, Orc, Troll, Slime
+            { "forest", new[] { 'G', 'O', 'T', 'L' } }, // Goblin, Orc, Troll, Slime
             { "cave",   new[] { 'S', 'B', 'L' } },      // Skeleton, Bandit, Slime
             { "castle", new[] { 'D', 'V' } }           // Dragon, Vampire
         };

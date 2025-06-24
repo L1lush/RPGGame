@@ -26,18 +26,18 @@ namespace DoSomething
             //Player Player = new Player("Knight");
             //Enemy Enemy = new Enemy("Goblin", 5);
 
-            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", 21, 21);
+            //char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", 21, 21);
 
-            // Print the map
-            for (int y = 0; y < map.GetLength(0); y++)
-            {
-                for (int x = 0; x < map.GetLength(1); x++)
-                {
-                    Console.Write($"{map[y, x]} ");
-                }
-                Console.WriteLine();
-            }
-            Console.ReadLine();
+            //// Print the map
+            //for (int y = 0; y < map.GetLength(0); y++)
+            //{
+            //    for (int x = 0; x < map.GetLength(1); x++)
+            //    {
+            //        Console.Write($"{map[y, x]} ");
+            //    }
+            //    Console.WriteLine();
+            //}
+            //Console.ReadLine();
 
             //OpeningStory();
             MainMusicPlayer.Play(); // Play main music
@@ -533,19 +533,22 @@ namespace DoSomething
         static void Forest(Player Player, Random rand)
 
         {
-            char[,] map = MapForest();
+            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", 21, 21);
+            map[0, 0] = '3';
             MoveOnMap(map, Player, rand);
         }
 
         static void Cave(Player Player, Random rand)
         {
-            char[,] map = MapCave();
+            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("cave", 21, 21);
+            map[0, 0] = '2';
             MoveOnMap(map, Player, rand);
         }
 
         static void Castle(Player Player, Random rand)
         {
-            char[,] map = MapCastle();
+            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("castle", 21, 21);
+            map[0, 0] = '1';
             MoveOnMap(map, Player, rand);
 
         }
@@ -945,74 +948,6 @@ namespace DoSomething
             Thread.Sleep(4000);
         }
 
-        static char[,] MapCastle()
-        {
-            // C - Chest || D - Dragon || G - Goblin
-            char[,] map = new char[20, 20]
-            {
-        { '1', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
-        { '#', 'P', ' ', ' ', ' ', 'C', ' ', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', 'C', ' ', ' ', ' ', '#' },
-        { '#', '#', '#', ' ', ' ', ' ', ' ', '#', ' ', '#', '#', ' ', '#', '#', '#', '#', ' ', '#', ' ', '#' },
-        { '#', ' ', ' ', ' ', 'G', ' ', ' ', '#', 'G', '#', ' ', ' ', ' ', ' ', 'G', ' ', ' ', '#', 'G', '#' },
-        { '#', ' ', '#', '#', '#', '#', ' ', '#', ' ', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', ' ', '#' },
-        { '#', ' ', '#', 'C', 'D', ' ', ' ', '#', 'G', '#', ' ', 'D', 'C', ' ', ' ', '#', ' ', '#', 'G', '#' },
-        { '#', ' ', '#', '#', '#', '#', '#', '#', ' ', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', ' ', '#' },
-        { '#', ' ', '#', ' ', ' ', 'D', ' ', '#', ' ', '#', ' ', ' ', ' ', 'D', ' ', '#', ' ', '#', ' ', '#' },
-        { '#', ' ', ' ', 'D', '#', ' ', 'C', '#', 'X', '#', ' ', 'D', '#', ' ', 'C', '#', ' ', '#', ' ', '#' },
-        { '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
-
-        { '#', ' ', ' ', ' ', ' ', '#', ' ', ' ', 'G', '#', ' ', ' ', '#', ' ', ' ', ' ', ' ', 'C', ' ', '#' },
-        { '#', ' ', 'C', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', ' ', '#' },
-        { '#', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', ' ', '#' },
-        { '#', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', '#', '#', '#', '#', ' ', '#', ' ', '#', '#', '#' },
-        { '#', ' ', ' ', ' ', ' ', ' ', 'D', '#', ' ', ' ', ' ', ' ', 'D', ' ', ' ', '#', ' ', ' ', ' ', '#' },
-        { '#', '#', '#', '#', '#', ' ', '#', '#', '#', '#', '#', '#', '#', ' ', '#', '#', '#', '#', '#', '#' },
-        { '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', 'C', ' ', 'G', ' ', ' ', ' ', ' ', ' ', 'C', ' ', ' ', '#' },
-        { '#', ' ', 'D', ' ', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', ' ', ' ', '#' },
-        { '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X', '#' },
-        { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
-            };
-
-            return map;
-        }
-
-        static char[,] MapCave()
-        {
-            char[,] map = new char[10, 10]
-            {
-                { '2', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
-                { '#', 'P', '#', '#', ' ', 'S', 'C', '#', '#', '#' },
-                { '#', ' ', '#', '#', ' ', ' ', '#', '#', '#', '#' },
-                { '#', ' ', ' ', 'G', ' ', ' ', '#', '#', '#', '#' },
-                { '#', '#', '#', ' ', '#', '#', ' ', ' ', '#', '#' },
-                { '#', '#', '#', ' ', '#', '#', ' ', ' ', ' ', '#' },
-                { '#', 'G', ' ', ' ', ' ', ' ', 'G', ' ', ' ', '#' },
-                { '#', 'S', '#', '#', ' ', ' ', '#', '#', ' ', '#' },
-                { '#', 'C', '#', '#', ' ', ' ', '#', '#', 'X', '#' },
-                { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
-            };
-            return map;
-        }
-
-        static char[,] MapForest()
-        {
-            char[,] map = new char[10, 10]
-            {
-                { '3', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
-                { '#', 'P', ' ', ' ', ' ', '#', 'C', '#', 'X', '#' },
-                { '#', ' ', '#', ' ', ' ', ' ', 'G', '#', 'G', '#' },
-                { '#', '#', '#', '#', ' ', ' ', ' ', ' ', ' ', '#' },
-                { '#', 'C', '#', ' ', ' ', '#', '#', '#', '#', '#' },
-                { '#', 'G', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
-                { '#', ' ', ' ', ' ', ' ', '#', '#', '#', ' ', '#' },
-                { '#', '#', '#', '#', ' ', '#', 'C', '#', ' ', '#' },
-                { '#', 'C', 'G', 'G', ' ', '#', ' ', 'G', ' ', '#' },
-                { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
-            };
-
-            return map;
-        }
-
         static void MoveOnMap(char[,] map, Player Player, Random rand) // this function Draw the map and player need to move by using arrows also if you touch letter it will call another function for battle or get Chest
         {
             int playerX = 0, playerY = 0;
@@ -1064,6 +999,11 @@ namespace DoSomething
                 switch (destination)
                 {
                     case 'D': Enemy EnemyD = new Enemy("Dragon", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyD.GetClass()}"); Battle(Player, EnemyD, rand); break;
+                    case 'O': Enemy EnemyO = new Enemy("Orc", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyO.GetClass()}"); Battle(Player, EnemyO, rand); break;
+                    case 'T': Enemy EnemyT = new Enemy("Troll", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyT.GetClass()}"); Battle(Player, EnemyT, rand); break;
+                    case 'V': Enemy EnemyV = new Enemy("Vampire", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyV.GetClass()}"); Battle(Player, EnemyV, rand); break;
+                    case 'L': Enemy EnemyL = new Enemy("Slime", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyL.GetClass()}"); Battle(Player, EnemyL, rand); break;
+                    case 'B': Enemy EnemyB = new Enemy("Bandit", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyB.GetClass()}"); Battle(Player, EnemyB, rand); break;
                     case 'C': Chest(Player, map); break;
                     case 'G': Enemy EnemyG = new Enemy("Goblin", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
                     case 'S': Enemy EnemyS = new Enemy("Skeleton", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
