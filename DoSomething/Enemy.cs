@@ -18,42 +18,42 @@ namespace DoSomething
             this.CLASS = CLASS;
             switch (CLASS)
             {
-                case "Goblin":
+                case "Goblin": //forest
                     this.HP = 20 + playerLevel * 3;
                     this.ATTACK = 5 + playerLevel;
                     this.Xp = 5 + playerLevel;
                     break;
-                case "Skeleton":
+                case "Skeleton": //cave
                     this.HP = 15 + playerLevel * 4;
                     this.ATTACK = 7 + playerLevel;
                     this.Xp = 7 + playerLevel;
                     break;
-                case "Dragon":
+                case "Dragon": //castle
                     this.HP = 60 + playerLevel * 10;
                     this.ATTACK = 15 + playerLevel * 2;
                     this.Xp = 20 + playerLevel * 2;
                     break;
-                case "Orc":
+                case "Orc": //forest
                     this.HP = 30 + playerLevel * 5;
                     this.ATTACK = 10 + playerLevel * 2;
                     this.Xp = 10 + playerLevel * 2;
                     break;
-                case "Troll":
+                case "Troll": //forest
                     this.HP = 50 + playerLevel * 7;
                     this.ATTACK = 12 + playerLevel * 2;
                     this.Xp = 15 + playerLevel * 2;
                     break;
-                case "Vampire":
+                case "Vampire": //castle
                     this.HP = 40 + playerLevel * 6;
                     this.ATTACK = 14 + playerLevel * 2;
                     this.Xp = 18 + playerLevel * 2;
                     break;
-                case "Slime":
+                case "Slime": // forest / cave
                     this.HP = 10 + playerLevel * 2;
                     this.ATTACK = 3 + playerLevel;
                     this.Xp = 3 + playerLevel;
                     break;
-                case "Bandit":
+                case "Bandit": //cave
                     this.HP = 25 + playerLevel * 4;
                     this.ATTACK = 8 + playerLevel * 2;
                     this.Xp = 8 + playerLevel * 2;
