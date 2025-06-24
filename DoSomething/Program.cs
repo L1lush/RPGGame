@@ -219,7 +219,6 @@ namespace DoSomething
         {
             Console.Clear();
             Console.WriteLine(player.GETLVL());
-            Enemy Enemy = GenerateClass();
             Random rand = new Random();
             while (true)
             {
@@ -258,20 +257,20 @@ namespace DoSomething
                     else if (key == ConsoleKey.Escape)
                     {
                         PAUSEMenu(player);
-                        return;
+                        continue;
                     }
                     else if (key == ConsoleKey.Enter)
                     {
                         switch (options[selected])
                         {
                             case "Forest":
-                                Forest(Enemy, player, rand); // ADD MAP
+                                Forest(player, rand); // ADD MAP
                                 break;
                             case "Cave":
-                                Cave(Enemy, player, rand); // ADD MAP
+                                Cave(player, rand); // ADD MAP
                                 break;
                             case "Castle":
-                                Castle(Enemy, player, rand);
+                                Castle(player, rand);
                                 break;
                             case "Stats":
                                 player.ShowStats();
@@ -353,20 +352,20 @@ namespace DoSomething
         }
 
 
-        static void Forest(Enemy Enemy, Player Player, Random rand) // change ADD MAP
+        static void Forest(Player Player, Random rand) // change ADD MAP
 
         {
             char[,] map = MapForest();
             MoveOnMap(map, Player, rand);
         }
 
-        static void Cave(Enemy Enemy, Player Player, Random rand)
+        static void Cave(Player Player, Random rand)
         {
             char[,] map = MapCave();
             MoveOnMap(map, Player, rand);
         }
 
-        static void Castle(Enemy Enemy, Player Player, Random rand)
+        static void Castle(Player Player, Random rand)
         {
             char[,] map = MapCastle();
             MoveOnMap(map, Player, rand);
@@ -391,20 +390,20 @@ namespace DoSomething
 
         static void ChestForest(Player Player)
         {
-            Console.WriteLine("You got 20 Gold");
-            Player.AddGold(20);
+            Console.WriteLine("You got 15 Gold");
+            Player.AddGold(15);
         }
 
         static void ChestCave(Player Player)
         {
-            Console.WriteLine("You got 40 Gold");
-            Player.AddGold(40);
+            Console.WriteLine("You got 30 Gold");
+            Player.AddGold(30);
         }
 
         static void ChestCastle(Player Player)
         {
-            Console.WriteLine("You got 90 Gold");
-            Player.AddGold(90);
+            Console.WriteLine("You got 45 Gold");
+            Player.AddGold(45);
         }
 
         static void Battle(Player Player, Enemy Enemy, Random rand)
@@ -541,13 +540,13 @@ namespace DoSomething
         static void Shop(Player Player)
         {
             string[] shopOptions = {
-                "Knife (ATTACK 10) | Price: 35 gold       ",
-                "Sword (ATTACK 20) | Price: 80 gold       ",
-                "Big Sword (ATTACK 30) | Price: 120 gold  ",
+                "Knife (ATTACK 10) | Price: 30 gold       ",
+                "Sword (ATTACK 20) | Price: 70 gold       ",
+                "Big Sword (ATTACK 30) | Price: 100 gold  ",
                 "Potion (Restores 20 HP) | Price: 20 gold ",
                 "Exit                                     "
             };
-            int[] prices = { 35, 80, 120, 20, 0 };
+            int[] prices = { 30, 70, 100, 20, 0 };
             int[] attacks = { 10, 20, 30, 0, 0 };
             int selected = 0;
             ConsoleKey key;
@@ -616,7 +615,7 @@ namespace DoSomething
                     if (Player.GetGold() >= prices[selected])
                     {
                         Player.SubtractGold(prices[selected]);
-                        Player.SetATTACK(attacks[selected]);
+                        Player.AddATTACK(attacks[selected]);
                         Console.Clear();
                         Console.WriteLine($"You bought {shopOptions[selected].Split('|')[0].Trim()}!");
                         Console.WriteLine($"Your attack is now {attacks[selected]}.");
@@ -630,16 +629,6 @@ namespace DoSomething
                     }
                 }
             } while (true);
-        }
-
-        static Enemy GenerateClass()
-        {
-            Enemy Enemy;
-            Random rand = new Random();
-            int num = rand.Next(0, 50);
-            if (num <= 24) { return new Enemy("Goblin"); }
-            else if (num <= 49) { return new Enemy("Skeleton"); }
-            else { return new Enemy("Dragon"); }
         }
 
         static void OpeningStory()
@@ -788,10 +777,10 @@ namespace DoSomething
                 // Handle interactions
                 switch (destination)
                 {
-                    case 'D': Enemy EnemyD = new Enemy("Dragon"); Console.WriteLine($"you attacked by {EnemyD.GetClass()}"); Battle(Player, EnemyD, rand); break;
+                    case 'D': Enemy EnemyD = new Enemy("Dragon", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyD.GetClass()}"); Battle(Player, EnemyD, rand); break;
                     case 'C': Chest(Player, map); Thread.Sleep(500); break;
-                    case 'G': Enemy EnemyG = new Enemy("Goblin"); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
-                    case 'S': Enemy EnemyS = new Enemy("Skeleton"); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
+                    case 'G': Enemy EnemyG = new Enemy("Goblin", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
+                    case 'S': Enemy EnemyS = new Enemy("Skeleton", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
                     case 'X':
                         Console.WriteLine("You reached the exit! Game Over.");
                         return;

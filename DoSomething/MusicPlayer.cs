@@ -34,10 +34,11 @@ namespace DoSomething
                 Task.Run(() =>
                 {
                     outputDevice.Play();
-                    while (outputDevice.PlaybackState != PlaybackState.Playing)
+                    outputDevice.PlaybackStopped += (s, e) =>
                     {
-                        Play();
-                    }
+                        audioFile.Position = 0;
+                        outputDevice.Play();
+                    };
                 });
             }
             catch (Exception ex)
