@@ -34,22 +34,22 @@ namespace DoSomething
                 case "Knight":
                     this.HP = 15;
                     this.CLASS = "Knight";
-                    Weapon.SetType("Sword");
+                    Weapon.SetType("Sword");//10
                     break;
                 case "Assassin":
                     this.HP = 17;
                     this.CLASS = "Assassin";
-                    Weapon.SetType("Dagger");
+                    Weapon.SetType("Dagger");//5
                     break;
                 case "Mage":
                     this.HP = 12;
                     this.CLASS = "Mage";
-                    Weapon.SetType("Dagger");
+                    Weapon.SetType("Dagger");//5
                     break;
                 case "Archer":
                     this.HP = 14;
                     this.CLASS = "Archer";
-                    Weapon.SetType("Bow");
+                    Weapon.SetType("Bow");//15
                     break;
             }
 
