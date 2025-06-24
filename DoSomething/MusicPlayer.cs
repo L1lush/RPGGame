@@ -34,10 +34,11 @@ namespace DoSomething
                 Task.Run(() =>
                 {
                     outputDevice.Play();
-                    while (outputDevice.PlaybackState != PlaybackState.Playing)
+                    outputDevice.PlaybackStopped += (s, e) =>
                     {
-                        Play();
-                    }
+                        audioFile.Position = 0;
+                        outputDevice.Play();
+                    };
                 });
             }
             catch (Exception ex)
@@ -56,14 +57,22 @@ namespace DoSomething
             outputDevice?.Pause();
         }
 
-        public void Setvolume(int volume)
+        public void SetMasterVolume(int volume)
         {
-            outputDevice.Volume = volume;
+            outputDevice.Volume = volume / 100f;
+        }
+        public int GetMasterVolume()
+        {
+            return (int)(outputDevice.Volume * 100f);
         }
 
+        public void Setvolume(int volume)
+        {
+            audioFile.Volume = volume / 100f;
+        }
         public int Getvolume()
         {
-            return (int)outputDevice.Volume;
+            return (int)(audioFile.Volume * 100);
         }
     }
 }
