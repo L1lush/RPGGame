@@ -33,11 +33,23 @@ namespace DoSomething
             {
                 case "Knight":
                     this.HP = 15;
+                    this.CLASS = "Knight";
                     Weapon.SetType("Sword");
                     break;
                 case "Assassin":
                     this.HP = 17;
+                    this.CLASS = "Assassin";
                     Weapon.SetType("Dagger");
+                    break;
+                case "Mage":
+                    this.HP = 12;
+                    this.CLASS = "Mage";
+                    Weapon.SetType("Dagger");
+                    break;
+                case "Archer":
+                    this.HP = 14;
+                    this.CLASS = "Archer";
+                    Weapon.SetType("Bow");
                     break;
             }
 
@@ -138,7 +150,7 @@ namespace DoSomething
 
         public void ShowStats()
         {
-            Console.WriteLine($"HP: {this.HP}  Max Hp: {this.MaxHP} ATTACK: {this.ATTACK} CLASS: {this.CLASS} LVL: {this.LVL} XP: {this.XP} XPR: {this.XPR}  GOLD: {this.Gold}  Positions: {this.Positions}");
+            Console.WriteLine($"HP: {this.HP}  Max Hp: {this.MaxHP} ATTACK: {this.ATTACK} CLASS: {this.CLASS} LVL: {this.LVL} XP: {this.XP} XPR: {this.XPR}  GOLD: {this.Gold}  Positions: {this.Positions} Weapon: {this.Weapon.GetName()}");
         }
 
         public void LevelUp(int XPGOT)

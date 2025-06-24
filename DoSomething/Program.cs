@@ -138,7 +138,12 @@ namespace DoSomething
         {
             try
             {
-                string json = JsonSerializer.Serialize(player, new JsonSerializerOptions { WriteIndented = true });
+                // Serialize both player and weapon
+                var saveData = new
+                {
+                    Player = player,
+                };
+                string json = JsonSerializer.Serialize(saveData, new JsonSerializerOptions { WriteIndented = true });
                 Console.WriteLine($"Saving to: {filePath}");
                 File.WriteAllText(filePath, json);
                 Console.WriteLine("Game saved successfully.");
@@ -360,7 +365,7 @@ namespace DoSomething
 
         static void StartNewGame()
         {
-            string[] classOptions = { "Knight", "Assassin" };
+            string[] classOptions = { "Knight", "Assassin", "Mage", "Archer" };
             int selectedClass = 0;
             ConsoleKey classKey;
             Console.CursorVisible = false;

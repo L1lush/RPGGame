@@ -9,10 +9,9 @@ namespace DoSomething
 {
     internal class Weapon
     {
-        private string name;
-        private int ATTACK;
-        private int price;
-
+        public string name { get; set; }
+        public int ATTACK { get; set; }
+        public int price { get; set; }
         public Weapon()
         {
         }
