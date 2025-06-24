@@ -24,27 +24,6 @@ namespace DoSomething
 
         static void Main(string[] args)
         {
-            char[,] map = VillageMap();
-            PrintMap(map);
-            Console.ReadLine();
-            //Random rand = new Random();
-            //Player Player = new Player("Knight");
-            //Enemy Enemy = new Enemy("Goblin", 5);
-
-            //char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", 21, 21);
-
-            //// Print the map
-            //for (int y = 0; y < map.GetLength(0); y++)
-            //{
-            //    for (int x = 0; x < map.GetLength(1); x++)
-            //    {
-            //        Console.Write($"{map[y, x]} ");
-            //    }
-            //    Console.WriteLine();
-            //}
-            //Console.ReadLine();
-
-            //OpeningStory();
             MainMusicPlayer.Play(); // Play main music
             StartUpMenu();
         }
@@ -163,6 +142,7 @@ namespace DoSomething
 
         static void LoadGame(string filePath)
         {
+          
             Player player = new Player(); // Initialize player to avoid null reference
             try
             {
@@ -172,7 +152,18 @@ namespace DoSomething
                 }
 
                 string json = File.ReadAllText(filePath);
-                player = JsonSerializer.Deserialize<Player>(json);
+                // Deserialize the save data object
+                var saveData = JsonSerializer.Deserialize<
+                    SaveData>(json);
+                if (saveData != null)
+                {
+                    player = saveData.Player;
+                    // If weapon is present in save, set it
+                    if (saveData.Weapon != null)
+                    {
+                        player.SetWeapon(saveData.Weapon);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -186,6 +177,13 @@ namespace DoSomething
                 return;
             }
             Game(player); // Start the game with the loaded player
+        }
+
+        // Helper class for load
+        private class SaveData
+        {
+            public Player Player { get; set; }
+            public Weapon Weapon { get; set; }
         }
 
         static void OpenSettings()
