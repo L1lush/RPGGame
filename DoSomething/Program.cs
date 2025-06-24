@@ -1,4 +1,5 @@
 ﻿using NAudio.Codecs;
+using NAudio.Dmo;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 using System.Security.Authentication;
 using System.Text;
@@ -22,6 +24,9 @@ namespace DoSomething
 
         static void Main(string[] args)
         {
+            char[,] map = VillageMap();
+            PrintMap(map);
+            Console.ReadLine();
             //Random rand = new Random();
             //Player Player = new Player("Knight");
             //Enemy Enemy = new Enemy("Goblin", 5);
@@ -1031,5 +1036,76 @@ namespace DoSomething
                 Console.WriteLine();
             }
         }
+
+        static char[,] VillageMap()
+        {
+            char[,] map = new char[10, 10];
+
+            // Fill with empty space
+            for (int y = 0; y < 10; y++)
+                for (int x = 0; x < 10; x++)
+                    map[y, x] = ' ';
+
+            // Outer walls
+            for (int i = 0; i < 10; i++)
+            {
+                map[0, i] = '#';
+                map[9, i] = '#';
+                map[i, 0] = '#';
+                map[i, 9] = '#';
+            }
+
+            // Place a villager inside a 3x3 house (centered at 3,3)
+            for (int y = 2; y <= 4; y++)
+                for (int x = 2; x <= 4; x++)
+                    map[y, x] = '#';
+
+            map[3, 3] = 'v';     // Villager in center
+            map[4, 3] = ' ';     // Door below
+
+            // Place casino at top right corner (1,7)
+            map[1, 7] = 'c';
+            map[0, 7] = '#'; map[2, 7] = '#';
+            map[1, 6] = '#'; map[1, 8] = '#';
+            map[2, 7] = ' '; // Casino door
+
+            // Place player at bottom center
+            map[8, 5] = 'P';
+
+            return map;
+        }
+
+        static void casino(Player player)
+        {
+            Console.WriteLine("write your stake");
+            int stake = int.Parse(Console.ReadLine());
+            if (stake > player.GetGold())
+                Console.WriteLine("not enough gold");
+
+            Random rand = new Random();
+            Console.WriteLine("you need to get bigger num");
+            int Diller = rand.Next(1, 7);
+            int Player = rand.Next(1, 7);
+
+            Console.WriteLine($"Diller turn he got {Diller}");
+            Console.WriteLine($"Your turn you got {Player}");
+            if (Player > Diller)
+            {
+                Console.WriteLine("you won");
+                Console.WriteLine($"you won {player.GetGold() * 2}");
+                player.AddGold(player.GetGold() * 2);
+            }
+            else if (Player == Diller)
+            {
+                Console.WriteLine("draw");
+
+            }
+            else
+            {
+                Console.WriteLine("you lost");
+                player.SubtractGold(player.GetGold());
+            }
+        }
+
     }
 }
