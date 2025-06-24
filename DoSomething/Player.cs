@@ -15,7 +15,7 @@ namespace DoSomething
         public string CLASS { get; set; }
         public int LVL { get; set; } = 1;
         public int XP { get; set; } = 0;
-        public int XPR { get; set; } = 10;
+        public int XPR { get; set; } = 30;
         public int Gold { get; set; } = 0;
         public int Positions { get; set; } = 5;
 

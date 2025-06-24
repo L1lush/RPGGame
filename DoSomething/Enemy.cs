@@ -13,26 +13,25 @@ namespace DoSomething
         private string CLASS;
         private int Xp;
 
-        public Enemy(string CLASS)
+        public Enemy(string CLASS, int playerLevel)
         {
             this.CLASS = CLASS;
-
             switch (CLASS)
             {
                 case "Goblin":
-                    this.HP = 20;
-                    this.ATTACK = 5;
-                    this.Xp = 5;
+                    this.HP = 20 + playerLevel * 3;
+                    this.ATTACK = 5 + playerLevel;
+                    this.Xp = 5 + playerLevel;
                     break;
                 case "Skeleton":
-                    this.HP = 15;
-                    this.ATTACK = 7;
-                    this.Xp = 7;
+                    this.HP = 15 + playerLevel * 4;
+                    this.ATTACK = 7 + playerLevel;
+                    this.Xp = 7 + playerLevel;
                     break;
                 case "Dragon":
-                    this.HP = 80;
-                    this.ATTACK = 15;
-                    this.Xp = 20;
+                    this.HP = 60 + playerLevel * 10;
+                    this.ATTACK = 15 + playerLevel * 2;
+                    this.Xp = 20 + playerLevel * 2;
                     break;
             }
         }

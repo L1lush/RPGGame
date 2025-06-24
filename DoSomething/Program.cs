@@ -33,6 +33,8 @@ namespace DoSomething
         //music
         static MusicPlayer MainMusicPlayer = new MusicPlayer("medieval_sound.mp3");
         static MusicPlayer BattleMusicPlayer = new MusicPlayer("bttle_sound.mp3");
+        static MusicPlayer CoinMusicPlayer = new MusicPlayer("coin_sound.mp3");
+        static MusicPlayer ItemEquipMusicPlayer = new MusicPlayer("item_equip.mp3");
 
 
 
@@ -110,9 +112,6 @@ namespace DoSomething
                                 ExitGame();
                                 return;
                         }
-
-                        Console.WriteLine("Press any key to return to menu...");
-                        Console.ReadKey(true);
                         break;
                 }
             }
@@ -164,7 +163,163 @@ namespace DoSomething
 
         static void OpenSettings()
         {
+            string[] options = { "Volume", "Back" };
+            int selected = 0;
+            ConsoleKey key;
+            Console.CursorVisible = false;
 
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("╔══════════════════════════════╗");
+                Console.WriteLine("║         SETTINGS             ║");
+                Console.WriteLine("╠══════════════════════════════╣");
+                for (int i = 0; i < options.Length; i++)
+                {
+                    if (i == selected)
+                        Console.WriteLine($"║ ▶ {options[i],-27}║");
+                    else
+                        Console.WriteLine($"║   {options[i],-27}║");
+                }
+                Console.WriteLine("╚══════════════════════════════╝");
+                Console.WriteLine("Use ↑ ↓ to navigate. Enter to select.");
+
+                key = Console.ReadKey(true).Key;
+                if (key == ConsoleKey.UpArrow)
+                    selected = (selected - 1 + options.Length) % options.Length;
+                else if (key == ConsoleKey.DownArrow)
+                    selected = (selected + 1) % options.Length;
+            } while (key != ConsoleKey.Enter);
+
+            switch (selected)
+            {
+                case 0:
+                    AdjustMainMusicVolume();
+                    break;
+                default:
+                    return;
+            }
+        }
+
+        static void AdjustMainMusicVolume()
+        {
+            int masterVolume = MainMusicPlayer.GetMasterVolume();
+            int mainVolume = MainMusicPlayer.Getvolume();
+            int battleVolume = BattleMusicPlayer.Getvolume();
+            int coinVolume = CoinMusicPlayer.Getvolume();
+            int itemEquipVolume = ItemEquipMusicPlayer.Getvolume();
+            int selected = 0;
+            string[] volumeOptions = 
+            {
+                "Master volume",
+                "Main Music   ",
+                "Battle Music ",
+                "Coin Sound   ",
+                "Item Equip   ",
+                "Back         " 
+            };
+            ConsoleKey key;
+            Console.CursorVisible = false;
+
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("╔═══════════════════════════╗");
+                Console.WriteLine("║      MUSIC VOLUME         ║");
+                Console.WriteLine("╠═══════════════════════════╣");
+                for (int i = 0; i < volumeOptions.Length; i++)
+                {
+                    string volumeDisplay = "";
+                    switch (i)
+                    {
+                        case 0: volumeDisplay = $": {masterVolume,3}"; break;
+                        case 1: volumeDisplay = $": {mainVolume,3}"; break;
+                        case 2: volumeDisplay = $": {battleVolume,3}"; break;
+                        case 3: volumeDisplay = $": {coinVolume,3}"; break;
+                        case 4: volumeDisplay = $": {itemEquipVolume,3}"; break;
+                        case 5: volumeDisplay = ""; break;
+                    }
+                    if (i == selected)
+                    {
+                        Console.WriteLine($"║ ▶ {volumeOptions[i]} {volumeDisplay,-10}║");
+                        switch (i)
+                        {
+                            case 0: break;
+                            case 1:
+                                MainMusicPlayer.Play();
+                                BattleMusicPlayer.Pause();
+                                CoinMusicPlayer.Pause();
+                                ItemEquipMusicPlayer.Pause();
+                                break;
+                            case 2:
+                                BattleMusicPlayer.Play();
+                                MainMusicPlayer.Pause();
+                                CoinMusicPlayer.Pause();
+                                ItemEquipMusicPlayer.Pause();
+                                break;
+                            case 3:
+                                CoinMusicPlayer.Play();
+                                MainMusicPlayer.Pause();
+                                BattleMusicPlayer.Pause();
+                                ItemEquipMusicPlayer.Pause();
+                                break;
+                            case 4: 
+                                ItemEquipMusicPlayer.Play();
+                                MainMusicPlayer.Pause();
+                                BattleMusicPlayer.Pause();
+                                CoinMusicPlayer.Pause();
+                                break;
+                            case 5:
+                                MainMusicPlayer.Play();
+                                ItemEquipMusicPlayer.Pause();
+                                BattleMusicPlayer.Pause();
+                                CoinMusicPlayer.Pause();
+                                break;
+                        }
+                    }
+                    else
+                        Console.WriteLine($"║   {volumeOptions[i]} {volumeDisplay,-10}║");
+                }
+                Console.WriteLine("╚═══════════════════════════╝");
+                Console.WriteLine("Use ↑ ↓ to select, ← → to adjust.");
+
+                key = Console.ReadKey(true).Key;
+                if (key == ConsoleKey.UpArrow)
+                    selected = (selected - 1 + volumeOptions.Length) % volumeOptions.Length;
+                else if (key == ConsoleKey.DownArrow)
+                    selected = (selected + 1) % volumeOptions.Length;
+                else if (key == ConsoleKey.LeftArrow)
+                {
+                    switch (selected)
+                    {
+                        case 0: masterVolume = Math.Max(0, masterVolume - 5); MainMusicPlayer.SetMasterVolume(masterVolume); break;
+                        case 1: mainVolume = Math.Max(0, mainVolume - 5); MainMusicPlayer.Setvolume(mainVolume); break;
+                        case 2: battleVolume = Math.Max(0, battleVolume - 5); BattleMusicPlayer.Setvolume(battleVolume); break;
+                        case 3: coinVolume = Math.Max(0, coinVolume - 5); CoinMusicPlayer.Setvolume(coinVolume); break;
+                        case 4: itemEquipVolume = Math.Max(0, itemEquipVolume - 5); ItemEquipMusicPlayer.Setvolume(itemEquipVolume); break;
+                    }
+                }
+                else if (key == ConsoleKey.RightArrow)
+                {
+                    switch (selected)
+                    {
+                        case 0: masterVolume = Math.Min(100, masterVolume + 5); MainMusicPlayer.SetMasterVolume(masterVolume); break;
+                        case 1: mainVolume = Math.Min(100, mainVolume + 5); MainMusicPlayer.Setvolume(mainVolume); break;
+                        case 2: battleVolume = Math.Min(100, battleVolume + 5); BattleMusicPlayer.Setvolume(battleVolume); break;
+                        case 3: coinVolume = Math.Min(100, coinVolume + 5); CoinMusicPlayer.Setvolume(coinVolume); break;
+                        case 4: itemEquipVolume = Math.Min(100, itemEquipVolume + 5); ItemEquipMusicPlayer.Setvolume(itemEquipVolume); break;
+                    }
+                }
+                else if(key == ConsoleKey.Enter && selected == 5)
+                {
+                    // Exit the volume adjustment menu
+                    MainMusicPlayer.Play();
+                    BattleMusicPlayer.Pause(); // Pause battle music
+                    CoinMusicPlayer.Pause(); // Pause coin sound
+                    ItemEquipMusicPlayer.Pause(); // Pause item equip sound
+                    OpenSettings();
+                }
+            } while (true);
         }
 
         static void ShowCredits()
@@ -219,7 +374,6 @@ namespace DoSomething
         {
             Console.Clear();
             Console.WriteLine(player.GETLVL());
-            Enemy Enemy = GenerateClass();
             Random rand = new Random();
             while (true)
             {
@@ -258,20 +412,20 @@ namespace DoSomething
                     else if (key == ConsoleKey.Escape)
                     {
                         PAUSEMenu(player);
-                        return;
+                        continue;
                     }
                     else if (key == ConsoleKey.Enter)
                     {
                         switch (options[selected])
                         {
                             case "Forest":
-                                Forest(Enemy, player, rand); // ADD MAP
+                                Forest(player, rand); // ADD MAP
                                 break;
                             case "Cave":
-                                Cave(Enemy, player, rand); // ADD MAP
+                                Cave(player, rand); // ADD MAP
                                 break;
                             case "Castle":
-                                Castle(Enemy, player, rand);
+                                Castle(player, rand);
                                 break;
                             case "Stats":
                                 player.ShowStats();
@@ -353,20 +507,20 @@ namespace DoSomething
         }
 
 
-        static void Forest(Enemy Enemy, Player Player, Random rand) // change ADD MAP
+        static void Forest(Player Player, Random rand) // change ADD MAP
 
         {
             char[,] map = MapForest();
             MoveOnMap(map, Player, rand);
         }
 
-        static void Cave(Enemy Enemy, Player Player, Random rand)
+        static void Cave(Player Player, Random rand)
         {
             char[,] map = MapCave();
             MoveOnMap(map, Player, rand);
         }
 
-        static void Castle(Enemy Enemy, Player Player, Random rand)
+        static void Castle(Player Player, Random rand)
         {
             char[,] map = MapCastle();
             MoveOnMap(map, Player, rand);
@@ -375,6 +529,7 @@ namespace DoSomething
 
         static void Chest(Player Player, char[,] map)
         {
+            bool playedSound = false;
             switch (map[0, 0])
             {
                 case '1':
@@ -387,24 +542,31 @@ namespace DoSomething
                     ChestForest(Player);
                     break;
             }
+            if(!playedSound)
+            {
+                CoinMusicPlayer.Play(); // Play coin sound
+                Thread.Sleep(400);
+                CoinMusicPlayer.Pause(); // Stop coin sound
+                playedSound = true;
+            }
         }
 
         static void ChestForest(Player Player)
         {
-            Console.WriteLine("You got 20 Gold");
-            Player.AddGold(20);
+            Console.WriteLine("You got 15 Gold");
+            Player.AddGold(15);
         }
 
         static void ChestCave(Player Player)
         {
-            Console.WriteLine("You got 40 Gold");
-            Player.AddGold(40);
+            Console.WriteLine("You got 30 Gold");
+            Player.AddGold(30);
         }
 
         static void ChestCastle(Player Player)
         {
-            Console.WriteLine("You got 90 Gold");
-            Player.AddGold(90);
+            Console.WriteLine("You got 45 Gold");
+            Player.AddGold(45);
         }
 
         static void Battle(Player Player, Enemy Enemy, Random rand)
@@ -541,13 +703,13 @@ namespace DoSomething
         static void Shop(Player Player)
         {
             string[] shopOptions = {
-                "Knife (ATTACK 10) | Price: 35 gold       ",
-                "Sword (ATTACK 20) | Price: 80 gold       ",
-                "Big Sword (ATTACK 30) | Price: 120 gold  ",
+                "Knife (ATTACK 10) | Price: 30 gold       ",
+                "Sword (ATTACK 20) | Price: 70 gold       ",
+                "Big Sword (ATTACK 30) | Price: 100 gold  ",
                 "Potion (Restores 20 HP) | Price: 20 gold ",
                 "Exit                                     "
             };
-            int[] prices = { 35, 80, 120, 20, 0 };
+            int[] prices = { 30, 70, 100, 20, 0 };
             int[] attacks = { 10, 20, 30, 0, 0 };
             int selected = 0;
             ConsoleKey key;
@@ -596,6 +758,9 @@ namespace DoSomething
                                 Console.Clear();
                                 Console.WriteLine("You bought a potion!");
                                 Console.WriteLine($"You now have {Player.GetPositions()} potions.");
+                                ItemEquipMusicPlayer.Play(); // Play item equip sound
+                                Thread.Sleep(400);
+                                ItemEquipMusicPlayer.Pause(); // Stop item equip sound
                                 Thread.Sleep(1000);
                             }
                             else
@@ -616,10 +781,13 @@ namespace DoSomething
                     if (Player.GetGold() >= prices[selected])
                     {
                         Player.SubtractGold(prices[selected]);
-                        Player.SetATTACK(attacks[selected]);
+                        Player.AddATTACK(attacks[selected]);
                         Console.Clear();
                         Console.WriteLine($"You bought {shopOptions[selected].Split('|')[0].Trim()}!");
                         Console.WriteLine($"Your attack is now {attacks[selected]}.");
+                        ItemEquipMusicPlayer.Play(); // Play item equip sound
+                        Thread.Sleep(400);
+                        ItemEquipMusicPlayer.Pause(); // Stop item equip sound
                         Thread.Sleep(1000);
                     }
                     else
@@ -630,16 +798,6 @@ namespace DoSomething
                     }
                 }
             } while (true);
-        }
-
-        static Enemy GenerateClass()
-        {
-            Enemy Enemy;
-            Random rand = new Random();
-            int num = rand.Next(0, 50);
-            if (num <= 24) { return new Enemy("Goblin"); }
-            else if (num <= 49) { return new Enemy("Skeleton"); }
-            else { return new Enemy("Dragon"); }
         }
 
         static void OpeningStory()
@@ -788,10 +946,10 @@ namespace DoSomething
                 // Handle interactions
                 switch (destination)
                 {
-                    case 'D': Enemy EnemyD = new Enemy("Dragon"); Console.WriteLine($"you attacked by {EnemyD.GetClass()}"); Battle(Player, EnemyD, rand); break;
-                    case 'C': Chest(Player, map); Thread.Sleep(500); break;
-                    case 'G': Enemy EnemyG = new Enemy("Goblin"); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
-                    case 'S': Enemy EnemyS = new Enemy("Skeleton"); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
+                    case 'D': Enemy EnemyD = new Enemy("Dragon", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyD.GetClass()}"); Battle(Player, EnemyD, rand); break;
+                    case 'C': Chest(Player, map); break;
+                    case 'G': Enemy EnemyG = new Enemy("Goblin", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
+                    case 'S': Enemy EnemyS = new Enemy("Skeleton", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
                     case 'X':
                         Console.WriteLine("You reached the exit! Game Over.");
                         return;
