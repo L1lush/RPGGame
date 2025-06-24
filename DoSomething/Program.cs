@@ -168,6 +168,8 @@ namespace DoSomething
             ConsoleKey key;
             Console.CursorVisible = false;
 
+            bool running = true;
+
             do
             {
                 Console.Clear();
@@ -189,16 +191,20 @@ namespace DoSomething
                     selected = (selected - 1 + options.Length) % options.Length;
                 else if (key == ConsoleKey.DownArrow)
                     selected = (selected + 1) % options.Length;
-            } while (key != ConsoleKey.Enter);
+                if(key == ConsoleKey.Enter)
+                {
+                    switch (selected)
+                    {
+                        case 0:
+                            AdjustMainMusicVolume();
+                            break;
+                        default:
+                            running = false; // Exit settings menu
+                            break;
+                    }
+                }
 
-            switch (selected)
-            {
-                case 0:
-                    AdjustMainMusicVolume();
-                    break;
-                default:
-                    return;
-            }
+            } while (running);
         }
 
         static void AdjustMainMusicVolume()
@@ -317,7 +323,7 @@ namespace DoSomething
                     BattleMusicPlayer.Pause(); // Pause battle music
                     CoinMusicPlayer.Pause(); // Pause coin sound
                     ItemEquipMusicPlayer.Pause(); // Pause item equip sound
-                    OpenSettings();
+                    break;
                 }
             } while (true);
         }

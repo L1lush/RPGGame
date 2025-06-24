@@ -33,6 +33,31 @@ namespace DoSomething
                     this.ATTACK = 15 + playerLevel * 2;
                     this.Xp = 20 + playerLevel * 2;
                     break;
+                case "Orc":
+                    this.HP = 30 + playerLevel * 5;
+                    this.ATTACK = 10 + playerLevel * 2;
+                    this.Xp = 10 + playerLevel * 2;
+                    break;
+                case "Troll":
+                    this.HP = 50 + playerLevel * 7;
+                    this.ATTACK = 12 + playerLevel * 2;
+                    this.Xp = 15 + playerLevel * 2;
+                    break;
+                case "Vampire":
+                    this.HP = 40 + playerLevel * 6;
+                    this.ATTACK = 14 + playerLevel * 2;
+                    this.Xp = 18 + playerLevel * 2;
+                    break;
+                case "Slime":
+                    this.HP = 10 + playerLevel * 2;
+                    this.ATTACK = 3 + playerLevel;
+                    this.Xp = 3 + playerLevel;
+                    break;
+                case "Bandit":
+                    this.HP = 25 + playerLevel * 4;
+                    this.ATTACK = 8 + playerLevel * 2;
+                    this.Xp = 8 + playerLevel * 2;
+                    break;
             }
         }
 
