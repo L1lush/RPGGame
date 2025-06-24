@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 using System.Security.Authentication;
@@ -18,15 +20,14 @@ namespace DoSomething
 {
     class Program
     {
+        static Quest killEnemies = new Quest("Monster Slayer", "Kill 5 enemies.", 5);
+        static Quest openChests = new Quest("Treasure Hunter", "Open 3 chests.", 3);
         static string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         static string gameFolder = Path.Combine(appData, "DoSomethingGame");
         static string saveFile = Path.Combine(gameFolder, "savegame.json");
-
+        static char[,] villageMap = VillageMap();
         static void Main(string[] args)
         {
-            char[,] map = VillageMap();
-            PrintMap(map);
-            Console.ReadLine();
             //Random rand = new Random();
             //Player Player = new Player("Knight");
             //Enemy Enemy = new Enemy("Goblin", 5);
@@ -414,7 +415,7 @@ namespace DoSomething
                         "Forest",
                         "Cave",
                         "Castle",
-                        "Shop",
+                        "Village",
                         "Stats",
                     };
                 int selected = 0;
@@ -452,10 +453,10 @@ namespace DoSomething
                         switch (options[selected])
                         {
                             case "Forest":
-                                Forest(player, rand); // ADD MAP
+                                Forest(player, rand);
                                 break;
                             case "Cave":
-                                Cave(player, rand); // ADD MAP
+                                Cave(player, rand); 
                                 break;
                             case "Castle":
                                 Castle(player, rand);
@@ -464,8 +465,8 @@ namespace DoSomething
                                 player.ShowStats();
                                 Thread.Sleep(3000);
                                 break;
-                            case "Shop":
-                                Shop(player, rand);
+                            case "Village":
+                                MoveOnMap(villageMap, player, rand);
                                 break;
                         }
                     }
@@ -703,6 +704,7 @@ namespace DoSomething
                     BattleMusicPlayer.Pause(); // Pause battle music
                     MainMusicPlayer.Play(); // Play main music again
                     Thread.Sleep(1500);
+                    EnemyKilled(ref killEnemies);
                     break;
                 }
 
@@ -960,6 +962,7 @@ namespace DoSomething
 
         static void MoveOnMap(char[,] map, Player Player, Random rand) // this function Draw the map and player need to move by using arrows also if you touch letter it will call another function for battle or get Chest
         {
+
             int playerX = 0, playerY = 0;
 
             // Find player start position
@@ -1014,10 +1017,13 @@ namespace DoSomething
                     case 'V': Enemy EnemyV = new Enemy("Vampire", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyV.GetClass()}"); Battle(Player, EnemyV, rand); break;
                     case 'L': Enemy EnemyL = new Enemy("Slime", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyL.GetClass()}"); Battle(Player, EnemyL, rand); break;
                     case 'B': Enemy EnemyB = new Enemy("Bandit", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyB.GetClass()}"); Battle(Player, EnemyB, rand); break;
-                    case 'C': Chest(Player, map); break;
+                    case 'C': ChestOpened(ref openChests); Chest(Player, map); break;
+                    case 'c': Casino(Player); break;
+                    case 's': Shop(Player, rand); break;
+                    case 'v': TalkToVillager(ref killEnemies, ref openChests, Player); break;
                     case 'G': Enemy EnemyG = new Enemy("Goblin", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
                     case 'S': Enemy EnemyS = new Enemy("Skeleton", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
-                    case 'X':
+                    case 'X': villageMap = VillageMap();
                         Console.WriteLine("You reached the exit! Game Over.");
                         return;
                 }
@@ -1046,12 +1052,10 @@ namespace DoSomething
         {
             char[,] map = new char[10, 10];
 
-            // Fill with empty space
             for (int y = 0; y < 10; y++)
                 for (int x = 0; x < 10; x++)
                     map[y, x] = ' ';
 
-            // Outer walls
             for (int i = 0; i < 10; i++)
             {
                 map[0, i] = '#';
@@ -1060,56 +1064,267 @@ namespace DoSomething
                 map[i, 9] = '#';
             }
 
-            // Place a villager inside a 3x3 house (centered at 3,3)
             for (int y = 2; y <= 4; y++)
                 for (int x = 2; x <= 4; x++)
                     map[y, x] = '#';
 
-            map[3, 3] = 'v';     // Villager in center
-            map[4, 3] = ' ';     // Door below
+            map[3, 3] = 'v';  
+            map[4, 3] = ' ';  
 
-            // Place casino at top right corner (1,7)
             map[1, 7] = 'c';
             map[0, 7] = '#'; map[2, 7] = '#';
             map[1, 6] = '#'; map[1, 8] = '#';
-            map[2, 7] = ' '; // Casino door
+            map[2, 7] = ' ';
 
-            // Place player at bottom center
+            for (int y = 6; y <= 8; y++)
+                for (int x = 1; x <= 3; x++)
+                    map[y, x] = '#';
+
+            map[7, 2] = 's';   
+            map[6, 2] = ' ';   
+
             map[8, 5] = 'P';
-
+            map[0, 0] = '4';
+            map[8, 8] = 'X';
             return map;
         }
 
-        static void casino(Player player)
+        static void Casino(Player player)
         {
-            Console.WriteLine("write your stake");
-            int stake = int.Parse(Console.ReadLine());
+            string[] lines =
+            {
+        "╔════════════════════════════════════╗",
+        "║            🎰 CASINO 🎰            ║",
+        "╠════════════════════════════════════╣",
+        "║     Blackjack                      ║",
+        "║     Dice Duel                     ║",
+        "║     Exit                           ║",
+        "╚════════════════════════════════════╝"
+    };
+
+            int selectedIndex = 0;
+            int menuStartRow = 3;
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.CursorVisible = false;
+
+            while (true)
+            {
+                Console.Clear();
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string line = lines[i];
+
+                    if (i >= menuStartRow && i < menuStartRow + 3)
+                    {
+                        int optionIndex = i - menuStartRow;
+                        if (optionIndex == selectedIndex)
+                            line = line.Substring(0, 3) + "▶" + line.Substring(4);
+                        else
+                            line = line.Substring(0, 3) + " " + line.Substring(4);
+                    }
+
+                    Console.WriteLine(line);
+                }
+
+                Console.WriteLine("Use ↑ ↓ to navigate. Press Enter to select.");
+
+                var key = Console.ReadKey(true).Key;
+
+                switch (key)
+                {
+                    case ConsoleKey.DownArrow:
+                        selectedIndex = (selectedIndex + 1) % 3;
+                        break;
+                    case ConsoleKey.UpArrow:
+                        selectedIndex = (selectedIndex - 1 + 3) % 3;
+                        break;
+                    case ConsoleKey.Enter:
+                        Console.Clear();
+                        switch (selectedIndex)
+                        {
+                            case 0:
+                                Blackjack(player);
+                                break;
+                            case 1:
+                                DiceDuel(player);
+                                break;
+                            case 2:
+                                return; // Exit
+                        }
+                        Console.WriteLine("Press any key to return to the casino menu...");
+                        Console.ReadKey(true);
+                        break;
+                }
+            }
+        }
+
+        static void Blackjack(Player player)
+        {
+            Console.WriteLine("♠️ Welcome to Blackjack!");
+            Console.Write("Enter your stake: ");
+            if (!int.TryParse(Console.ReadLine(), out int stake) || stake <= 0)
+            {
+                Console.WriteLine("Invalid stake.");
+                return;
+            }
+
             if (stake > player.GetGold())
-                Console.WriteLine("not enough gold");
+            {
+                Console.WriteLine("Not enough gold.");
+                return;
+            }
 
             Random rand = new Random();
-            Console.WriteLine("you need to get bigger num");
-            int Diller = rand.Next(1, 7);
-            int Player = rand.Next(1, 7);
+            int playerTotal = rand.Next(2, 12) + rand.Next(2, 12);
+            int dealerTotal = rand.Next(14, 22);
 
-            Console.WriteLine($"Diller turn he got {Diller}");
-            Console.WriteLine($"Your turn you got {Player}");
-            if (Player > Diller)
+            Console.WriteLine($"You drew cards totaling: {playerTotal}");
+            Console.WriteLine($"Dealer's total: {dealerTotal}");
+
+            if (playerTotal > 21)
             {
-                Console.WriteLine("you won");
-                Console.WriteLine($"you won {player.GetGold() * 2}");
-                player.AddGold(player.GetGold() * 2);
+                Console.WriteLine("Bust! You lost.");
+                player.SubtractGold(stake);
             }
-            else if (Player == Diller)
+            else if (dealerTotal > 21 || playerTotal > dealerTotal)
             {
-                Console.WriteLine("draw");
-
+                Console.WriteLine("You win!");
+                player.AddGold(stake);
+            }
+            else if (playerTotal == dealerTotal)
+            {
+                Console.WriteLine("Push. It's a draw.");
             }
             else
             {
-                Console.WriteLine("you lost");
-                player.SubtractGold(player.GetGold());
+                Console.WriteLine("Dealer wins. You lost.");
+                player.SubtractGold(stake);
             }
+        }
+
+        static void DiceDuel(Player player) 
+        {
+            Console.WriteLine("🎲 Welcome to Dice Duel!");
+            Console.Write("Enter your stake: ");
+            if (!int.TryParse(Console.ReadLine(), out int stake) || stake <= 0)
+            {
+                Console.WriteLine("Invalid stake.");
+                return;
+            }
+
+            if (stake > player.GetGold())
+            {
+                Console.WriteLine("Not enough gold.");
+                return;
+            }
+
+            Random rand = new Random();
+            int dealerRoll = rand.Next(1, 7);
+            int playerRoll = rand.Next(1, 7);
+
+            Console.WriteLine($"Dealer rolled: {dealerRoll}");
+            Console.WriteLine($"You rolled: {playerRoll}");
+
+            if (playerRoll > dealerRoll)
+            {
+                Console.WriteLine("🎉 You win!");
+                Console.WriteLine($"You won {stake} gold!");
+                player.AddGold(stake);
+            }
+            else if (playerRoll == dealerRoll)
+            {
+                Console.WriteLine("It's a draw! Your gold is returned.");
+            }
+            else
+            {
+                Console.WriteLine("💸 You lost!");
+                Console.WriteLine($"You lost {stake} gold!");
+                player.SubtractGold(stake);
+            }
+        }
+
+        static void AcceptQuest(ref Quest quest)
+        {
+            if (!quest.IsAccepted)
+            {
+                quest.IsAccepted = true;
+                Console.WriteLine($"✅ You accepted the quest: {quest.Name}");
+            }
+            else
+            {
+                Console.WriteLine($"You already accepted the quest: {quest.Name}");
+            }
+        }
+
+        static void RewardQuest(ref Quest quest, Player Player)
+        {
+            if (quest.IsCompleted && !quest.IsRewarded)
+            {
+                quest.IsRewarded = true;
+                Player.AddGold(100);
+                Player.SetXP(Player.GETXP() + 50);
+                Console.WriteLine($"🏆 You received 100 gold and 50 XP for completing '{quest.Name}'!");
+            }
+        }
+
+        static void TalkToVillager(ref Quest killQuest, ref Quest chestQuest, Player Player)
+        {
+            Console.WriteLine("Villager: Hello! I have some tasks for you.");
+
+            // Kill enemies quest
+            if (!killQuest.IsAccepted)
+            {
+                Console.WriteLine("1) Accept 'Kill 5 enemies' quest");
+            }
+            else
+            {
+                killQuest.ShowStatus();
+                if (killQuest.IsCompleted && !killQuest.IsRewarded)
+                    Console.WriteLine("You can turn in this quest.");
+            }
+
+            // Open chests quest
+            if (!chestQuest.IsAccepted)
+            {
+                Console.WriteLine("2) Accept 'Open 3 chests' quest");
+            }
+            else
+            {
+                chestQuest.ShowStatus();
+                if (chestQuest.IsCompleted && !chestQuest.IsRewarded)
+                    Console.WriteLine("You can turn in this quest.");
+            }
+
+            Console.WriteLine("Choose an option or press any other key to exit:");
+
+            var key = Console.ReadKey(true).Key;
+            switch (key)
+            {
+                case ConsoleKey.D1:
+                    AcceptQuest(ref killQuest);
+                    break;
+                case ConsoleKey.D2:
+                    AcceptQuest(ref chestQuest);
+                    break;
+                case ConsoleKey.T: // Turn in quests (example key)
+                    if (killQuest.IsCompleted && !killQuest.IsRewarded)
+                        RewardQuest(ref killQuest, Player);
+                    if (chestQuest.IsCompleted && !chestQuest.IsRewarded)
+                        RewardQuest(ref chestQuest, Player);
+                    break;
+                default:
+                    Console.WriteLine("Leaving villager.");
+                    break;
+            }
+        }
+        static void EnemyKilled(ref Quest killQuest)
+        {
+            killQuest.AddProgress();
+        }
+
+        static void ChestOpened(ref Quest chestQuest)
+        {
+            chestQuest.AddProgress();
         }
 
     }
