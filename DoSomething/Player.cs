@@ -19,6 +19,8 @@ namespace DoSomething
         public int Gold { get; set; } = 0;
         public int Positions { get; set; } = 5;
         public Weapon Weapon { get; set; }
+        private List<Achievement> achievements = new List<Achievement>();
+        public bool FirstKill = true;
 
         public Player() 
         {
@@ -174,6 +176,55 @@ namespace DoSomething
             this.SetLVL(currentLVL);
             this.SetXP(totalXP);
             this.SetXPR(requiredXP);
+        }
+
+        public void AddAchievement(Achievement achievement)
+        {
+            achievements.Add(achievement);
+        }
+
+        public void UnlockAchievement(string title)
+        {
+            var achievement = achievements.FirstOrDefault(a => a.Title == title);
+            if (achievement != null && !achievement.Unlocked)
+                achievement.Unlock();
+        }
+
+        public bool CheckIfUnlocked(string title)
+        {
+            var achievement = achievements.FirstOrDefault(a => a.Title == title);
+            return achievement != null && achievement.Unlocked;
+        }
+
+        public bool IsAllAchievementsCompleted(Player player)
+        {
+            return player.GetAchievements().All(a => a.Unlocked);
+        }
+
+        public List<Achievement> GetAchievements()
+        {
+            return achievements;
+        }
+
+        public void ShowAchievements()
+        {
+            Console.Clear();
+            Console.WriteLine("🏅 Your Achievements:");
+            foreach (var a in achievements)
+            {
+                Console.ForegroundColor = a.Unlocked ? ConsoleColor.Green : ConsoleColor.DarkGray;
+                Console.WriteLine($"- {a.Title}: {a.Description} {(a.Unlocked ? "✅" : "❌")}");
+            }
+            Console.ResetColor();
+            Console.WriteLine("\nPress any key to return...");
+            Console.ReadKey(true);
+        }
+
+        public void CheckFirstKill()
+        {
+            if (FirstKill == true)
+                UnlockAchievement("First Blood");
+            FirstKill = false;
         }
     }
 }

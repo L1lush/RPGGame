@@ -58,9 +58,14 @@ namespace DoSomething
                     this.ATTACK = 9 + playerLevel * 2;
                     this.Xp = 8 + playerLevel * 2;
                     break;
+                case "Boss":
+                    this.HP = 500;
+                    this.ATTACK = 40;
+                    this.Xp = 100;
+                    break;
             }
         }
-
+        
         public void SetHP(int HP) { this.HP = HP; }
         public int GetHP() { return this.HP; }
         public void AddHP(int amount)
