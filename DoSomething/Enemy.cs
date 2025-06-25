@@ -29,22 +29,22 @@ namespace DoSomething
                     this.Xp = 7 + playerLevel;
                     break;
                 case "Dragon": //castle
-                    this.HP = 55 + playerLevel * 8;
+                    this.HP = 40 + playerLevel * 4;
                     this.ATTACK = 18 + playerLevel * 2;
                     this.Xp = 20 + playerLevel * 2;
                     break;
                 case "Orc"://forest
-                    this.HP = 28 + playerLevel * 4;
+                    this.HP = 28 + playerLevel * 3;
                     this.ATTACK = 11 + playerLevel * 2;
                     this.Xp = 10 + playerLevel * 2;
                     break;
                 case "Troll": //forest
-                    this.HP = 42 + playerLevel * 6;
+                    this.HP = 30 + playerLevel * 3;
                     this.ATTACK = 13 + playerLevel * 2;
                     this.Xp = 15 + playerLevel * 2;
                     break;
                 case "Vampire"://castle
-                    this.HP = 36 + playerLevel * 5;
+                    this.HP = 36 + playerLevel * 3;
                     this.ATTACK = 15 + playerLevel * 2;
                     this.Xp = 18 + playerLevel * 2;
                     break;
