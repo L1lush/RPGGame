@@ -391,17 +391,13 @@ namespace DoSomething
             Player.AddAchievement(new Achievement("Gold Digger", "Collect 100+ gold"));
             Player.AddAchievement(new Achievement("High Roller", "Win 500+ gold in one casino game"));
             Player.AddAchievement(new Achievement("Explorer", "walk in all the map"));
+            Player.AddAchievement(new Achievement("Legend", "Completed all the Achievements"));
+            Player.AddAchievement(new Achievement("Blacksmith", "Upgrade your waepon"));
             Game(Player); // Start the game with the selected class
         }
 
         static void Game(Player player)
         {
-            if (player.IsAllAchievementsCompleted(player) && !player.CheckIfUnlocked("Legend"))
-            {
-                player.UnlockAchievement("Legend");
-                Console.WriteLine("Legend Achievement Unlocked!");
-                Thread.Sleep(1000);
-            }
             Console.Clear();
             Console.WriteLine(player.GETLVL());
             Random rand = new Random();
@@ -411,8 +407,10 @@ namespace DoSomething
                         "Forest",
                         "Cave",
                         "Castle",
+                        "Boss Fight",
                         "Village",
                         "Stats",
+                        "Achievements",
                     };
                 int selected = 0;
                 ConsoleKey key;
@@ -463,6 +461,19 @@ namespace DoSomething
                                 break;
                             case "Village":
                                 MoveOnMap(villageMap, player, rand);
+                                break;
+                            case "Achievements":
+                                if (player.IsAllAchievementsCompleted(player) && !player.CheckIfUnlocked("Legend"))
+                                {
+                                    player.UnlockAchievement("Legend");
+                                    Console.WriteLine("Legend Achievement Unlocked!");
+                                    Thread.Sleep(1000);
+                                    Console.Clear();
+                                }
+                                player.ShowAchievements();
+                                break;
+                            case "Boss Fight":
+                                BossFight(player, rand);
                                 break;
                         }
                     }
@@ -557,7 +568,12 @@ namespace DoSomething
             char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("castle", 21, 21);
             map[0, 0] = '1';
             MoveOnMap(map, Player, rand);
+        }
 
+        static void BossFight(Player Player, Random rand) 
+        {
+            char[,] map = BossMap();
+            MoveOnMap(map, Player, rand);
         }
 
         static void Chest(Player Player, char[,] map)
@@ -743,10 +759,10 @@ namespace DoSomething
 
         static void Shop(Player Player, Random random)
         {
-            if (Player.GetGold() >= 100)
+            if (Player.GetGold() >= 100 && !Player.CheckIfUnlocked("Gold Digger"))
             {
                 Player.UnlockAchievement("Gold Digger");
-                Console.WriteLine("Gold Digger Achievement Unlock");
+                Console.WriteLine("Achievement Unlocked: Gold Digger!");
                 Thread.Sleep(1000);
                 Console.Clear();
             }
@@ -768,36 +784,10 @@ namespace DoSomething
                 Weapon weapon2 = new Weapon();
                 Weapon weapon3 = new Weapon();
 
-                switch (random1)
-                {
-                    case 0: weapon1.SetType("Sword"); break;
-                    case 1: weapon1.SetType("Big Sword"); break;
-                    case 2: weapon1.SetType("Axe"); break;
-                    case 3: weapon1.SetType("Bow"); break;
-                    case 4: weapon1.SetType("Spear"); break;
-                    case 5: weapon1.SetType("Hammer"); break;
-                    case 6: weapon1.SetType("Dagger"); break;
-                }
-                switch (random2)
-                {
-                    case 0: weapon2.SetType("Sword"); break;
-                    case 1: weapon2.SetType("Big Sword"); break;
-                    case 2: weapon2.SetType("Axe"); break;
-                    case 3: weapon2.SetType("Bow"); break;
-                    case 4: weapon2.SetType("Spear"); break;
-                    case 5: weapon2.SetType("Hammer"); break;
-                    case 6: weapon2.SetType("Dagger"); break;
-                }
-                switch (random3)
-                {
-                    case 0: weapon3.SetType("Sword"); break;
-                    case 1: weapon3.SetType("Big Sword"); break;
-                    case 2: weapon3.SetType("Axe"); break;
-                    case 3: weapon3.SetType("Bow"); break;
-                    case 4: weapon3.SetType("Spear"); break;
-                    case 5: weapon3.SetType("Hammer"); break;
-                    case 6: weapon3.SetType("Dagger"); break;
-                }
+                string[] types = { "Sword", "Big Sword", "Axe", "Bow", "Spear", "Hammer", "Dagger" };
+                weapon1.SetType(types[random1]);
+                weapon2.SetType(types[random2]);
+                weapon3.SetType(types[random3]);
 
                 cachedShopWeapons = new List<Weapon> { weapon1, weapon2, weapon3 };
                 shopVisitCount = 0;
@@ -805,21 +795,22 @@ namespace DoSomething
 
             List<Weapon> shopWeapons = new List<Weapon>(cachedShopWeapons);
 
-            string potionName = "Potion (Restores 20 HP)              ";
+            string potionName = "Potion (Restores 20 HP)";
             int potionPrice = 20;
             int selected = 0;
             ConsoleKey key;
 
             Console.CursorVisible = false;
+
             do
             {
                 Console.Clear();
                 Console.WriteLine($"╔═══════════════════════════════════════════════╗");
-                Console.WriteLine($"║           RPG SHOP                            ║");
+                Console.WriteLine($"║                 RPG SHOP                     ║");
                 Console.WriteLine($"╠═══════════════════════════════════════════════╣");
                 Console.WriteLine($"║   Gold: {Player.GetGold(),-22}                ║");
-                Console.WriteLine($"║   Potions: {Player.GetPositions()} left                             ║");
-                Console.WriteLine($"║   Your weapon attak: {Player.GetWeapon().GetATTACK(),-25}║");
+                Console.WriteLine($"║   Potions: {Player.GetPositions()} left                            ║");
+                Console.WriteLine($"║   Your weapon attack: {Player.GetWeapon().GetATTACK(),-21}║");
                 Console.WriteLine($"╠═══════════════════════════════════════════════╣");
 
                 // Display weapons
@@ -835,24 +826,35 @@ namespace DoSomething
                     else
                         Console.WriteLine($"║   {weaponName} (ATTACK {weaponAttack}) | Price: {weaponPrice} gold{equippedText,-11}║");
                 }
-                // Potion
+
                 int potionIndex = shopWeapons.Count;
+                int upgradeIndex = potionIndex + 1;
+                int exitIndex = potionIndex + 2;
+
+                // Potion
                 if (selected == potionIndex)
-                    Console.WriteLine($"║ ▶ {potionName,-28}       ║");
+                    Console.WriteLine($"║ ▶ {potionName,-28}                         ║");
                 else
-                    Console.WriteLine($"║   {potionName,-28}       ║");
+                    Console.WriteLine($"║   {potionName,-28}                         ║");
+
+                // Upgrade Weapon
+                if (selected == upgradeIndex)
+                    Console.WriteLine($"║ ▶ Upgrade Weapon (+10 ATK) | 100 gold      ║");
+                else
+                    Console.WriteLine($"║   Upgrade Weapon (+10 ATK) | 100 gold      ║");
+
                 // Exit
-                int exitIndex = potionIndex + 1;
                 if (selected == exitIndex)
-                    Console.WriteLine($"║ ▶ Exit{' ',-28}            ║");
+                    Console.WriteLine($"║ ▶ Exit{' ',-28}                            ║");
                 else
-                    Console.WriteLine($"║   Exit{' ',-28}            ║");
+                    Console.WriteLine($"║   Exit{' ',-28}                            ║");
 
                 Console.WriteLine($"╚═══════════════════════════════════════════════╝");
                 Console.WriteLine("Use ↑ ↓ to navigate. Enter to buy. Esc for pause.");
 
                 key = Console.ReadKey(true).Key;
-                int optionsCount = shopWeapons.Count + 2;
+                int optionsCount = shopWeapons.Count + 3;
+
                 if (key == ConsoleKey.UpArrow)
                     selected = (selected - 1 + optionsCount) % optionsCount;
                 else if (key == ConsoleKey.DownArrow)
@@ -864,9 +866,10 @@ namespace DoSomething
                 }
                 else if (key == ConsoleKey.Enter)
                 {
-                    if (selected == exitIndex) // Exit
+                    if (selected == exitIndex)
                         return;
-                    if (selected == potionIndex) // Buy potion
+
+                    if (selected == potionIndex)
                     {
                         if (Player.GetGold() >= potionPrice)
                         {
@@ -877,9 +880,9 @@ namespace DoSomething
                                 Console.Clear();
                                 Console.WriteLine("You bought a potion!");
                                 Console.WriteLine($"You now have {Player.GetPositions()} potions.");
-                                ItemEquipMusicPlayer.Play(); // Play item equip sound
+                                ItemEquipMusicPlayer.Play();
                                 Thread.Sleep(400);
-                                ItemEquipMusicPlayer.Pause(); // Stop item equip sound
+                                ItemEquipMusicPlayer.Pause();
                                 Thread.Sleep(1000);
                             }
                             else
@@ -895,13 +898,50 @@ namespace DoSomething
                             Console.WriteLine("Not enough gold!");
                             Thread.Sleep(1000);
                         }
-                        continue; // Skip further processing for potions
+                        continue;
                     }
-                    // Weapon purchase
-                    if (selected < shopWeapons.Count)
+
+                    else if (selected == upgradeIndex)
+                    {
+                        int upgradeCost = 100;
+                        if (Player.GetWeapon() == null)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("You don't have a weapon to upgrade!");
+                            Thread.Sleep(1000);
+                        }
+                        else if (Player.GetGold() < upgradeCost)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Not enough gold to upgrade!");
+                            Thread.Sleep(1000);
+                        }
+                        else
+                        {
+                            Player.SubtractGold(upgradeCost);
+                            Player.AddATTACK(10);
+                            Console.Clear();
+                            Console.WriteLine("Weapon upgraded! +10 Attack.");
+                            ItemEquipMusicPlayer.Play();
+                            Thread.Sleep(400);
+                            ItemEquipMusicPlayer.Pause();
+                            Thread.Sleep(1000);
+
+                            if (!Player.CheckIfUnlocked("Blacksmith"))
+                            {
+                                Player.UnlockAchievement("Blacksmith");
+                                Console.WriteLine("Achievement Unlocked: Blacksmith!");
+                                Thread.Sleep(1000);
+                            }
+                        }
+                        continue;
+                    }
+
+                    else if (selected < shopWeapons.Count)
                     {
                         Weapon weaponToBuy = shopWeapons[selected];
-                        int price = shopWeapons[selected].GetPrice();
+                        int price = weaponToBuy.GetPrice();
+
                         if (Player.GetWeapon() != null && Player.GetWeapon().GetATTACK() == weaponToBuy.GetATTACK())
                         {
                             Console.Clear();
@@ -909,16 +949,17 @@ namespace DoSomething
                             Thread.Sleep(1000);
                             continue;
                         }
+
                         if (Player.GetGold() >= price)
                         {
                             Player.SubtractGold(price);
-                            Player.RemoveWeapon(); // Remove current weapon
+                            Player.RemoveWeapon();
                             Player.SetWeapon(weaponToBuy);
                             Console.Clear();
-                            Console.WriteLine($"You bought and equipped {weaponToBuy.GetType().Name}!");
-                            ItemEquipMusicPlayer.Play(); // Play item equip sound
+                            Console.WriteLine($"You bought and equipped {weaponToBuy.GetName()}!");
+                            ItemEquipMusicPlayer.Play();
                             Thread.Sleep(400);
-                            ItemEquipMusicPlayer.Pause(); // Stop item equip sound
+                            ItemEquipMusicPlayer.Pause();
                             Thread.Sleep(1000);
                         }
                         else
@@ -1032,6 +1073,7 @@ namespace DoSomething
                     case 'c': Casino(Player); break;
                     case 's': Shop(Player, rand); break;
                     case 'v': TalkToVillager(ref killEnemies, ref openChests, Player); break;
+                    case 'b': Enemy Enemyb = new Enemy("Boss", Player.GETLVL()); Console.WriteLine($"you attacked by {Enemyb.GetClass()}"); Battle(Player, Enemyb, rand); break;
                     case 'G': Enemy EnemyG = new Enemy("Goblin", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
                     case 'S': Enemy EnemyS = new Enemy("Skeleton", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
                     case 'X': villageMap = VillageMap();
@@ -1547,6 +1589,17 @@ namespace DoSomething
                 Thread.Sleep(1000);
                 Console.Clear();
             }
+        }
+
+        static char[,] BossMap()
+        {
+            char[,] map =
+            { {'#','#','#','#','#','#', },
+              {'#','P',' ','b','X','#', },
+              {'#','#','#','#','#','#', },
+            };
+
+            return map;
         }
     }
 }
