@@ -8,6 +8,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
@@ -28,22 +29,6 @@ namespace DoSomething
         static char[,] villageMap = VillageMap();
         static void Main(string[] args)
         {
-            //Random rand = new Random();
-            //Player Player = new Player("Knight");
-            //Enemy Enemy = new Enemy("Goblin", 5);
-
-            //char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", 21, 21);
-
-            //// Print the map
-            //for (int y = 0; y < map.GetLength(0); y++)
-            //{
-            //    for (int x = 0; x < map.GetLength(1); x++)
-            //    {
-            //        Console.Write($"{map[y, x]} ");
-            //    }
-            //    Console.WriteLine();
-            //}
-            //Console.ReadLine();
 
             //OpeningStory();
             MainMusicPlayer.Play(); // Play main music
@@ -219,7 +204,7 @@ namespace DoSomething
                     selected = (selected - 1 + options.Length) % options.Length;
                 else if (key == ConsoleKey.DownArrow)
                     selected = (selected + 1) % options.Length;
-                if(key == ConsoleKey.Enter)
+                if (key == ConsoleKey.Enter)
                 {
                     switch (selected)
                     {
@@ -243,14 +228,14 @@ namespace DoSomething
             int coinVolume = CoinMusicPlayer.Getvolume();
             int itemEquipVolume = ItemEquipMusicPlayer.Getvolume();
             int selected = 0;
-            string[] volumeOptions = 
+            string[] volumeOptions =
             {
                 "Master volume",
                 "Main Music   ",
                 "Battle Music ",
                 "Coin Sound   ",
                 "Item Equip   ",
-                "Back         " 
+                "Back         "
             };
             ConsoleKey key;
             Console.CursorVisible = false;
@@ -297,7 +282,7 @@ namespace DoSomething
                                 BattleMusicPlayer.Pause();
                                 ItemEquipMusicPlayer.Pause();
                                 break;
-                            case 4: 
+                            case 4:
                                 ItemEquipMusicPlayer.Play();
                                 MainMusicPlayer.Pause();
                                 BattleMusicPlayer.Pause();
@@ -344,7 +329,7 @@ namespace DoSomething
                         case 4: itemEquipVolume = Math.Min(100, itemEquipVolume + 5); ItemEquipMusicPlayer.Setvolume(itemEquipVolume); break;
                     }
                 }
-                else if(key == ConsoleKey.Enter && selected == 5)
+                else if (key == ConsoleKey.Enter && selected == 5)
                 {
                     // Exit the volume adjustment menu
                     MainMusicPlayer.Play();
@@ -371,6 +356,7 @@ namespace DoSomething
 
         static void StartNewGame()
         {
+
             string[] classOptions = { "Knight", "Assassin", "Mage", "Archer" };
             int selectedClass = 0;
             ConsoleKey classKey;
@@ -401,11 +387,21 @@ namespace DoSomething
             } while (classKey != ConsoleKey.Enter);
 
             Player Player = new Player(classOptions[selectedClass]);
+            Player.AddAchievement(new Achievement("First Blood", "Win your first battle"));
+            Player.AddAchievement(new Achievement("Gold Digger", "Collect 100+ gold"));
+            Player.AddAchievement(new Achievement("High Roller", "Win 500+ gold in one casino game"));
+            Player.AddAchievement(new Achievement("Explorer", "walk in all the map"));
             Game(Player); // Start the game with the selected class
         }
 
         static void Game(Player player)
         {
+            if (player.IsAllAchievementsCompleted(player) && !player.CheckIfUnlocked("Legend"))
+            {
+                player.UnlockAchievement("Legend");
+                Console.WriteLine("Legend Achievement Unlocked!");
+                Thread.Sleep(1000);
+            }
             Console.Clear();
             Console.WriteLine(player.GETLVL());
             Random rand = new Random();
@@ -456,7 +452,7 @@ namespace DoSomething
                                 Forest(player, rand);
                                 break;
                             case "Cave":
-                                Cave(player, rand); 
+                                Cave(player, rand);
                                 break;
                             case "Castle":
                                 Castle(player, rand);
@@ -579,7 +575,7 @@ namespace DoSomething
                     ChestForest(Player);
                     break;
             }
-            if(!playedSound)
+            if (!playedSound)
             {
                 CoinMusicPlayer.Play(); // Play coin sound
                 Thread.Sleep(400);
@@ -704,6 +700,13 @@ namespace DoSomething
                     BattleMusicPlayer.Pause(); // Pause battle music
                     MainMusicPlayer.Play(); // Play main music again
                     Thread.Sleep(1500);
+                    if (!Player.CheckIfUnlocked("First Blood"))
+                    {
+                        Player.CheckFirstKill();
+                        Console.WriteLine("First Blood Achievement Unlocked!");
+                        Thread.Sleep(1000);
+                        Console.Clear();
+                    }
                     EnemyKilled(ref killEnemies);
                     break;
                 }
@@ -740,6 +743,14 @@ namespace DoSomething
 
         static void Shop(Player Player, Random random)
         {
+            if (Player.GetGold() >= 100)
+            {
+                Player.UnlockAchievement("Gold Digger");
+                Console.WriteLine("Gold Digger Achievement Unlock");
+                Thread.Sleep(1000);
+                Console.Clear();
+            }
+
             shopVisitCount++;
 
             if (shopVisitCount % 5 == 0 || cachedShopWeapons == null)
@@ -1033,6 +1044,7 @@ namespace DoSomething
                 playerX = newX;
                 playerY = newY;
                 map[playerY, playerX] = 'P';
+                CheckExplorer(map, Player);
             }
         }
 
@@ -1068,8 +1080,8 @@ namespace DoSomething
                 for (int x = 2; x <= 4; x++)
                     map[y, x] = '#';
 
-            map[3, 3] = 'v';  
-            map[4, 3] = ' ';  
+            map[3, 3] = 'v';
+            map[4, 3] = ' ';
 
             map[1, 7] = 'c';
             map[0, 7] = '#'; map[2, 7] = '#';
@@ -1080,8 +1092,8 @@ namespace DoSomething
                 for (int x = 1; x <= 3; x++)
                     map[y, x] = '#';
 
-            map[7, 2] = 's';   
-            map[6, 2] = ' ';   
+            map[7, 2] = 's';
+            map[6, 2] = ' ';
 
             map[8, 5] = 'P';
             map[0, 0] = '4';
@@ -1097,30 +1109,34 @@ namespace DoSomething
         "║            🎰 CASINO 🎰            ║",
         "╠════════════════════════════════════╣",
         "║     Blackjack                      ║",
-        "║     Dice Duel                     ║",
+        "║     Dice Duel                      ║",
+        "║     Roulette                       ║",
         "║     Exit                           ║",
         "╚════════════════════════════════════╝"
     };
 
             int selectedIndex = 0;
             int menuStartRow = 3;
+            int totalOptions = 4;
+
             Console.OutputEncoding = Encoding.UTF8;
             Console.CursorVisible = false;
 
             while (true)
             {
                 Console.Clear();
+
                 for (int i = 0; i < lines.Length; i++)
                 {
                     string line = lines[i];
 
-                    if (i >= menuStartRow && i < menuStartRow + 3)
+                    if (i >= menuStartRow && i < menuStartRow + totalOptions)
                     {
                         int optionIndex = i - menuStartRow;
                         if (optionIndex == selectedIndex)
-                            line = line.Substring(0, 3) + "▶" + line.Substring(4);
+                            line = line.Substring(0, 4) + "▶" + line.Substring(5);
                         else
-                            line = line.Substring(0, 3) + " " + line.Substring(4);
+                            line = line.Substring(0, 4) + " " + line.Substring(5);
                     }
 
                     Console.WriteLine(line);
@@ -1133,10 +1149,10 @@ namespace DoSomething
                 switch (key)
                 {
                     case ConsoleKey.DownArrow:
-                        selectedIndex = (selectedIndex + 1) % 3;
+                        selectedIndex = (selectedIndex + 1) % totalOptions;
                         break;
                     case ConsoleKey.UpArrow:
-                        selectedIndex = (selectedIndex - 1 + 3) % 3;
+                        selectedIndex = (selectedIndex - 1 + totalOptions) % totalOptions;
                         break;
                     case ConsoleKey.Enter:
                         Console.Clear();
@@ -1149,9 +1165,13 @@ namespace DoSomething
                                 DiceDuel(player);
                                 break;
                             case 2:
-                                return; // Exit
+                                Roulette(player);
+                                break;
+                            case 3:
+                                return; // Exit casino
                         }
-                        Console.WriteLine("Press any key to return to the casino menu...");
+
+                        Console.WriteLine("\nPress any key to return to the casino menu...");
                         Console.ReadKey(true);
                         break;
                 }
@@ -1200,9 +1220,18 @@ namespace DoSomething
                 Console.WriteLine("Dealer wins. You lost.");
                 player.SubtractGold(stake);
             }
+
+            if (stake >= 500 && !player.CheckIfUnlocked("High Roller"))
+            {
+                player.UnlockAchievement("High Roller");
+                Console.WriteLine("🏆 High Roller Achievement Unlocked!");
+                Thread.Sleep(1000);
+                Console.Clear();
+            }
+
         }
 
-        static void DiceDuel(Player player) 
+        static void DiceDuel(Player player)
         {
             Console.WriteLine("🎲 Welcome to Dice Duel!");
             Console.Write("Enter your stake: ");
@@ -1241,7 +1270,178 @@ namespace DoSomething
                 Console.WriteLine($"You lost {stake} gold!");
                 player.SubtractGold(stake);
             }
+
+            if (stake >= 500 && !player.CheckIfUnlocked("High Roller"))
+            {
+                player.UnlockAchievement("High Roller");
+                Console.WriteLine("🏆 High Roller Achievement Unlocked!");
+                Thread.Sleep(1000);
+                Console.Clear();
+            }
         }
+
+        static void Roulette(Player player)
+        {
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.CursorVisible = false;
+
+            string[] betOptions =
+            {
+        "╔════════════════════════════════════╗",
+        "║            🎡 ROULETTE 🎡           ║",
+        "╠════════════════════════════════════╣",
+        "║     Bet on Red                    ║",
+        "║     Bet on Black                  ║",
+        "║     Bet on a Number (0–36)        ║",
+        "║     Exit                          ║",
+        "╚════════════════════════════════════╝"
+    };
+
+            int selectedIndex = 0;
+            int menuStartRow = 3;
+
+            while (true)
+            {
+                Console.Clear();
+                for (int i = 0; i < betOptions.Length; i++)
+                {
+                    string line = betOptions[i];
+
+                    if (i >= menuStartRow && i < menuStartRow + 4)
+                    {
+                        int optionIndex = i - menuStartRow;
+                        if (optionIndex == selectedIndex)
+                            line = line.Substring(0, 3) + "▶" + line.Substring(4);
+                        else
+                            line = line.Substring(0, 3) + " " + line.Substring(4);
+                    }
+
+                    Console.WriteLine(line);
+                }
+
+                Console.WriteLine("\nUse ↑ ↓ to choose your bet. Press Enter to select.");
+                var key = Console.ReadKey(true).Key;
+
+                switch (key)
+                {
+                    case ConsoleKey.UpArrow:
+                        selectedIndex = (selectedIndex - 1 + 4) % 4;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        selectedIndex = (selectedIndex + 1) % 4;
+                        break;
+                    case ConsoleKey.Enter:
+                        Console.Clear();
+                        if (selectedIndex == 3)
+                            return; // Exit
+
+                        Console.Write("Enter your stake: ");
+                        if (!int.TryParse(Console.ReadLine(), out int stake) || stake <= 0)
+                        {
+                            Console.WriteLine("Invalid stake. Press any key...");
+                            Console.ReadKey(true);
+                            continue;
+                        }
+
+                        if (stake > player.GetGold())
+                        {
+                            Console.WriteLine("Not enough gold. Press any key...");
+                            Console.ReadKey(true);
+                            continue;
+                        }
+
+                        string betType = selectedIndex == 0 ? "Red" : selectedIndex == 1 ? "Black" : "Number";
+                        int betNumber = -1;
+
+                        if (betType == "Number")
+                        {
+                            Console.Write("Enter a number to bet on (0-36): ");
+                            if (!int.TryParse(Console.ReadLine(), out betNumber) || betNumber < 0 || betNumber > 36)
+                            {
+                                Console.WriteLine("Invalid number. Press any key...");
+                                Console.ReadKey(true);
+                                continue;
+                            }
+                        }
+
+                        // Simulate spin
+                        Console.WriteLine("\nSpinning...");
+                        Thread.Sleep(1500);
+
+                        Random rand = new Random();
+                        int resultNumber = rand.Next(0, 37);
+                        string resultColor = GetRouletteColor(resultNumber);
+                        Console.WriteLine($"\n🎲 The ball lands on: {resultNumber} ({resultColor})\n");
+
+                        bool win = false;
+                        int winnings = 0;
+
+                        if (betType == "Red" || betType == "Black")
+                        {
+                            if (resultColor == betType)
+                            {
+                                win = true;
+                                winnings = stake;
+                                player.AddGold(winnings);
+                            }
+                            else
+                            {
+                                player.SubtractGold(stake);
+                            }
+                        }
+                        else if (betType == "Number")
+                        {
+                            if (resultNumber == betNumber)
+                            {
+                                win = true;
+                                winnings = stake * 36;
+                                player.AddGold(winnings);
+                            }
+                            else
+                            {
+                                player.SubtractGold(stake);
+                            }
+                        }
+
+                        if (stake >= 500 && !player.CheckIfUnlocked("High Roller"))
+                        {
+                            player.UnlockAchievement("High Roller");
+                            Console.WriteLine("🏆 High Roller Achievement Unlocked!");
+                            Thread.Sleep(1000);
+                            Console.Clear();
+                        }
+
+                        if (win)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine($"🎉 You WON {winnings} gold!");
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("💸 You lost your stake.");
+                        }
+
+                        Console.ResetColor();
+                        Console.WriteLine("\nPress any key to return to the roulette table...");
+                        Console.ReadKey(true);
+                        break;
+                }
+            }
+        }
+
+        static string GetRouletteColor(int number)
+        {
+            if (number == 0)
+                return "Green";
+
+            int[] redNumbers = {
+        1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36
+    };
+
+            return redNumbers.Contains(number) ? "Red" : "Black";
+        }
+
 
         static void AcceptQuest(ref Quest quest)
         {
@@ -1327,5 +1527,26 @@ namespace DoSomething
             chestQuest.AddProgress();
         }
 
+        static void CheckExplorer(char[,] map, Player player)
+        {
+            for (int i = 0; i < map.GetLength(0); i++)
+            {
+                for (int j = 0; j < map.GetLength(1); j++)
+                {
+                    if (map[i, j] == ' ')
+                    {
+                        return; // There's still unexplored space
+                    }
+                }
+            }
+
+            if (!player.CheckIfUnlocked("Explorer"))
+            {
+                player.UnlockAchievement("Explorer");
+                Console.WriteLine("🏆 Explorer Achievement Unlocked!");
+                Thread.Sleep(1000);
+                Console.Clear();
+            }
+        }
     }
 }

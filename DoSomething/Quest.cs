@@ -60,6 +60,14 @@ namespace DoSomething
                 Console.WriteLine($"Quest completed: {Name}");
             }
         }
+
+        public void ResetQuest()
+        {
+            Progress = 0;
+            IsAccepted = false;
+            IsCompleted = false;
+            IsRewarded = false;
+        }
     }
 
 }
