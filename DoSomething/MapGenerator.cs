@@ -2,15 +2,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DoSomething
-{
+{ 
     internal static class MapGenerator
     {
+
         public static char[,] GenerateMazeWithChestsAndEnemies(string mapType, int width = 20, int height = 20)
         {
+
             char[,] map;
             Random rand = new Random();
 

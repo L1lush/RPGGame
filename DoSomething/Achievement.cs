@@ -25,7 +25,8 @@ namespace DoSomething
             {
                 Unlocked = true;
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"\n🏆 Achievement Unlocked: {Title} - {Description}");
+                Console.WriteLine($"🏆 Achievement Unlocked: {Title} - {Description}");
+                Thread.Sleep(2000);
                 Console.ResetColor();
             }
         }

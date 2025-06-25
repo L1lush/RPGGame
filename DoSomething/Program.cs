@@ -600,7 +600,6 @@ namespace DoSomething
 
 
         static void Forest(Player Player, Random rand)
-
         {
             char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", 21, 21);
             map[0, 0] = '3';
@@ -1050,7 +1049,10 @@ namespace DoSomething
 
                 Console.WriteLine("Move: ↑ ↓ ← → ");
                 Console.WriteLine("Press Escape to pause.");
-                Console.WriteLine("'D' Dragon, 'G' Goblin, 'S' Skeleton, 'O' Orc, 'T' Troll, 'V' Vampire, 'L' Slime, 'B' Bandit, 'C' Chest, 'X' Exit, 'P' you.");
+                if(map[0, 0] != '4')
+                    Console.WriteLine("'D' Dragon, 'G' Goblin, 'S' Skeleton, 'O' Orc, 'T' Troll, 'V' Vampire, 'L' Slime, 'B' Bandit, 'C' Chest, 'X' Exit, 'P' you, 'b' Boss.");
+                else
+                    Console.WriteLine("'c' Casino, 's' Shop, 'v' to talk to Villager, 'P' you.");
 
                 ConsoleKey key = Console.ReadKey(true).Key;
                 int newX = playerX, newY = playerY;
@@ -1094,10 +1096,36 @@ namespace DoSomething
                 }
 
                 // Move player
-                map[playerY, playerX] = '.';
+                if (map[0, 0] != '4' && (destination != 'C' || destination != 'c' || destination != 's' || destination != 'v' || destination != 'b'))
+                {
+                    map[playerY, playerX] = '.';
+                }
+                else
+                {
+                    if (destination == 'c' || destination == 's' || destination == 'v')
+                    {
+                        map[playerY, playerX] = destination; // Keep the current tile if it's a special location
+                       
+                        int oldX = newX, oldY = newY; // Store old position
+
+                        switch (key)
+                        {
+                            case ConsoleKey.UpArrow: oldY++; break;
+                            case ConsoleKey.DownArrow: oldY--; break;
+                            case ConsoleKey.LeftArrow: oldX++; break;
+                            case ConsoleKey.RightArrow: oldX--; break;
+                        }
+                        newX = oldX; // Reset newX to oldX
+                        newY = oldY; // Reset newY to oldY
+                    }
+                    else
+                    {
+                        map[playerY, playerX] = ' '; // Clear the tile if it's not a special location
+                    }
+                }
                 playerX = newX;
                 playerY = newY;
-                map[playerY, playerX] = 'P';
+                map[playerY, playerX] = 'P'; // Place player on the new tile
                 CheckExplorer(map, Player);
             }
         }
@@ -1159,15 +1187,15 @@ namespace DoSomething
         {
             string[] lines =
             {
-        "╔════════════════════════════════════╗",
-        "║            🎰 CASINO 🎰            ║",
-        "╠════════════════════════════════════╣",
-        "║     Blackjack                      ║",
-        "║     Dice Duel                      ║",
-        "║     Roulette                       ║",
-        "║     Exit                           ║",
-        "╚════════════════════════════════════╝"
-    };
+                "╔════════════════════════════════════╗",
+                "║            🎰 CASINO 🎰            ║",
+                "╠════════════════════════════════════╣",
+                "║     Blackjack                      ║",
+                "║     Dice Duel                      ║",
+                "║     Roulette                       ║",
+                "║     Exit                           ║",
+                "╚════════════════════════════════════╝"
+            };
 
             int selectedIndex = 0;
             int menuStartRow = 3;
@@ -1341,15 +1369,15 @@ namespace DoSomething
 
             string[] betOptions =
             {
-        "╔════════════════════════════════════╗",
-        "║            🎡 ROULETTE 🎡           ║",
-        "╠════════════════════════════════════╣",
-        "║     Bet on Red                    ║",
-        "║     Bet on Black                  ║",
-        "║     Bet on a Number (0–36)        ║",
-        "║     Exit                          ║",
-        "╚════════════════════════════════════╝"
-    };
+                "╔════════════════════════════════════╗",
+                "║            🎡 ROULETTE 🎡           ║",
+                "╠════════════════════════════════════╣",
+                "║     Bet on Red                    ║",
+                "║     Bet on Black                  ║",
+                "║     Bet on a Number (0–36)        ║",
+                "║     Exit                          ║",
+                "╚════════════════════════════════════╝"
+            };
 
             int selectedIndex = 0;
             int menuStartRow = 3;
@@ -1373,7 +1401,7 @@ namespace DoSomething
                     Console.WriteLine(line);
                 }
 
-                Console.WriteLine("\nUse ↑ ↓ to choose your bet. Press Enter to select.");
+                Console.WriteLine("Use ↑ ↓ to choose your bet. Press Enter to select.");
                 var key = Console.ReadKey(true).Key;
 
                 switch (key)
@@ -1425,7 +1453,7 @@ namespace DoSomething
                         Random rand = new Random();
                         int resultNumber = rand.Next(0, 37);
                         string resultColor = GetRouletteColor(resultNumber);
-                        Console.WriteLine($"\n🎲 The ball lands on: {resultNumber} ({resultColor})\n");
+                        Console.WriteLine($"🎲 The ball lands on: {resultNumber} ({resultColor})");
 
                         bool win = false;
                         int winnings = 0;
@@ -1490,8 +1518,8 @@ namespace DoSomething
                 return "Green";
 
             int[] redNumbers = {
-        1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36
-    };
+                1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36
+            };
 
             return redNumbers.Contains(number) ? "Red" : "Black";
         }
