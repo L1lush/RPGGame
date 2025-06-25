@@ -29,8 +29,6 @@ namespace DoSomething
         static char[,] villageMap = VillageMap();
         static void Main(string[] args)
         {
-
-            //OpeningStory();
             MainMusicPlayer.Play(); // Play main music
             StartUpMenu();
         }
@@ -149,6 +147,7 @@ namespace DoSomething
 
         static void LoadGame(string filePath)
         {
+          
             Player player = new Player(); // Initialize player to avoid null reference
             try
             {
@@ -158,7 +157,18 @@ namespace DoSomething
                 }
 
                 string json = File.ReadAllText(filePath);
-                player = JsonSerializer.Deserialize<Player>(json);
+                // Deserialize the save data object
+                var saveData = JsonSerializer.Deserialize<
+                    SaveData>(json);
+                if (saveData != null)
+                {
+                    player = saveData.Player;
+                    // If weapon is present in save, set it
+                    if (saveData.Weapon != null)
+                    {
+                        player.SetWeapon(saveData.Weapon);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -172,6 +182,13 @@ namespace DoSomething
                 return;
             }
             Game(player); // Start the game with the loaded player
+        }
+
+        // Helper class for load
+        private class SaveData
+        {
+            public Player Player { get; set; }
+            public Weapon Weapon { get; set; }
         }
 
         static void OpenSettings()
@@ -386,6 +403,8 @@ namespace DoSomething
 
             } while (classKey != ConsoleKey.Enter);
 
+            OpeningStory();
+
             Player Player = new Player(classOptions[selectedClass]);
             Player.AddAchievement(new Achievement("First Blood", "Win your first battle"));
             Player.AddAchievement(new Achievement("Gold Digger", "Collect 100+ gold"));
@@ -394,6 +413,38 @@ namespace DoSomething
             Player.AddAchievement(new Achievement("Legend", "Completed all the Achievements"));
             Player.AddAchievement(new Achievement("Blacksmith", "Upgrade your waepon"));
             Game(Player); // Start the game with the selected class
+        }
+
+        static void OpeningStory()
+        {
+            Console.Clear();
+            MainMusicPlayer.Pause(); // Pause main music
+            string[] storyLines = new[]
+            {
+                "Long ago, the world of Eldrath was united under the immortal king Valdaran and powered by the ancient Heartstones.",
+                "",
+                "But betrayal shattered the empire.",
+                "The Heartstones were lost.",
+                "The world broke.",
+                "",
+                "Now, centuries later, chaos reigns.",
+                "Monsters roam, kingdoms crumble, and the gods remain silent.",
+                "",
+                "You awaken with a strange mark — a sign of forgotten power.",
+                "The Heartstones call once more.",
+                "And they call for you...", 
+                "to rule the world.",
+                "",
+                "Your journey begins now."
+            };
+
+            foreach (string line in storyLines)
+            {
+                Console.WriteLine(line);
+                Thread.Sleep(2000);
+            }
+            Console.ReadKey(true);
+            MainMusicPlayer.Play(); // Resume main music
         }
 
         static void Game(Player player)
@@ -973,45 +1024,6 @@ namespace DoSomething
             } while (true);
         }
 
-        static void OpeningStory()
-        {
-            Console.WriteLine("Kael, Son of a God");
-            Console.WriteLine("Press Enter to skip the intro or any other key to watch the story...");
-
-            ConsoleKey key = Console.ReadKey(true).Key;
-            if (key == ConsoleKey.Enter)
-            {
-                Console.Clear();
-                return;
-            }
-
-            Console.Clear();
-            ShowStoryLine("Kael was raised as an ordinary villager — quiet, kind, and curious.");
-            ShowStoryLine("The people of Nerith Hollow treated him like family, but Kael always felt different.");
-            ShowStoryLine("He had no memory of his real parents, only a pendant he wore since birth — glowing faintly when he was near danger.");
-            ShowStoryLine("What he didn't know was that he is the son of the god Aetherion...");
-            ShowStoryLine("The ancient god of balance and light. Aetherion had fallen in love with a mortal woman, Kael’s mother.");
-            ShowStoryLine("To protect them from divine enemies, he sealed his power and hid Kael in the mortal world.");
-
-            Console.WriteLine();
-            ShowStoryLine("One night, under a blood-red moon, shadow beasts from the Umbraverse descended upon the village...");
-            ShowStoryLine("The skies cracked with lightning, and flames swallowed the homes Kael knew.");
-            ShowStoryLine("He fought to save his friends, but he was too weak — forced to watch as the monsters slaughtered everyone he loved.");
-            ShowStoryLine("In that moment of pain, rage, and sorrow, something awoke inside him...");
-            ShowStoryLine("Time slowed, the pendant shattered, and divine energy surged through him.");
-            ShowStoryLine("He destroyed the creatures with light that came from within his own body.");
-            ShowStoryLine("When he awoke, the village was ash.");
-
-            Console.WriteLine();
-            Thread.Sleep(3000);
-            Console.Clear();
-        }
-        static void ShowStoryLine(string text)
-        {
-            Console.WriteLine(text);
-            Thread.Sleep(4000);
-        }
-
         static void MoveOnMap(char[,] map, Player Player, Random rand) // this function Draw the map and player need to move by using arrows also if you touch letter it will call another function for battle or get Chest
         {
 
@@ -1038,7 +1050,7 @@ namespace DoSomething
 
                 Console.WriteLine("Move: ↑ ↓ ← → ");
                 Console.WriteLine("Press Escape to pause.");
-                Console.WriteLine("'D' is Dragon, 'G' is Goblin, 'S' is Skeleton, 'C' is Chest, 'X' is Exit, 'P' is you.");
+                Console.WriteLine("'D' Dragon, 'G' Goblin, 'S' Skeleton, 'O' Orc, 'T' Troll, 'V' Vampire, 'L' Slime, 'B' Bandit, 'C' Chest, 'X' Exit, 'P' you.");
 
                 ConsoleKey key = Console.ReadKey(true).Key;
                 int newX = playerX, newY = playerY;
