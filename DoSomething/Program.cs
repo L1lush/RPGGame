@@ -852,16 +852,25 @@ namespace DoSomething
 
             Console.CursorVisible = false;
 
+
             do
             {
                 Console.Clear();
-                Console.WriteLine($"╔═══════════════════════════════════════════════╗");
-                Console.WriteLine($"║                 RPG SHOP                     ║");
-                Console.WriteLine($"╠═══════════════════════════════════════════════╣");
-                Console.WriteLine($"║   Gold: {Player.GetGold(),-22}                ║");
-                Console.WriteLine($"║   Potions: {Player.GetPositions()} left                            ║");
-                Console.WriteLine($"║   Your weapon attack: {Player.GetWeapon().GetATTACK(),-21}║");
-                Console.WriteLine($"╠═══════════════════════════════════════════════╣");
+                // Replace the shop display section with this for perfect ║ alignment
+                Console.WriteLine($"╔══════════════════════════════════════════════════════════════╗");
+                Console.WriteLine($"║                        RPG SHOP                              ║");
+                Console.WriteLine($"╠══════════════════════════════════════════════════════════════╣");
+                Console.WriteLine($"║   Gold: {Player.GetGold(),-22}                               ║");
+                if(Player.GetPositions() >= 10)
+                {
+                    Console.WriteLine($"║   Potions: {Player.GetPositions()} left                                           ║");
+                }
+                else
+                {
+                    Console.WriteLine($"║   Potions: {Player.GetPositions()} left                                            ║");
+                }
+                Console.WriteLine($"║   Your weapon attack: {Player.GetWeapon().GetATTACK(),-21}                  ║");
+                Console.WriteLine($"╠══════════════════════════════════════════════════════════════╣");
 
                 // Display weapons
                 for (int i = 0; i < shopWeapons.Count; i++)
@@ -871,10 +880,8 @@ namespace DoSomething
                     int weaponPrice = shopWeapons[i].GetPrice();
                     bool isEquipped = Player.GetWeapon() != null && Player.GetWeapon().GetName() == weaponName;
                     string equippedText = isEquipped ? " (Equipped)" : "";
-                    if (i == selected)
-                        Console.WriteLine($"║ ▶ {weaponName} (ATTACK {weaponAttack}) | Price: {weaponPrice} gold{equippedText,-11}║");
-                    else
-                        Console.WriteLine($"║   {weaponName} (ATTACK {weaponAttack}) | Price: {weaponPrice} gold{equippedText,-11}║");
+                    string line = $"{(i == selected ? "▶" : " ")} {weaponName} (ATTACK {weaponAttack}) | Price: {weaponPrice} gold{equippedText}";
+                    Console.WriteLine($"║ {line,-61}║");
                 }
 
                 int potionIndex = shopWeapons.Count;
@@ -882,24 +889,18 @@ namespace DoSomething
                 int exitIndex = potionIndex + 2;
 
                 // Potion
-                if (selected == potionIndex)
-                    Console.WriteLine($"║ ▶ {potionName,-28}                         ║");
-                else
-                    Console.WriteLine($"║   {potionName,-28}                         ║");
+                string potionLine = $"{(selected == potionIndex ? "▶" : " ")} {potionName}";
+                Console.WriteLine($"║ {potionLine,-61}║");
 
                 // Upgrade Weapon
-                if (selected == upgradeIndex)
-                    Console.WriteLine($"║ ▶ Upgrade Weapon (+10 ATK) | 100 gold      ║");
-                else
-                    Console.WriteLine($"║   Upgrade Weapon (+10 ATK) | 100 gold      ║");
+                string upgradeLine = $"{(selected == upgradeIndex ? "▶" : " ")} Upgrade Weapon (+10 ATK) | 100 gold";
+                Console.WriteLine($"║ {upgradeLine,-61}║");
 
                 // Exit
-                if (selected == exitIndex)
-                    Console.WriteLine($"║ ▶ Exit{' ',-28}                            ║");
-                else
-                    Console.WriteLine($"║   Exit{' ',-28}                            ║");
+                string exitLine = $"{(selected == exitIndex ? "▶" : " ")} Exit";
+                Console.WriteLine($"║ {exitLine,-61}║");
 
-                Console.WriteLine($"╚═══════════════════════════════════════════════╝");
+                Console.WriteLine($"╚══════════════════════════════════════════════════════════════╝");
                 Console.WriteLine("Use ↑ ↓ to navigate. Enter to buy. Esc for pause.");
 
                 key = Console.ReadKey(true).Key;
@@ -1096,7 +1097,7 @@ namespace DoSomething
                 }
 
                 // Move player
-                if (map[0, 0] != '4' && (destination != 'C' || destination != 'c' || destination != 's' || destination != 'v' || destination != 'b'))
+                if (map[0, 0] != '4' && (destination != 'c' || destination != 's' || destination != 'v'))
                 {
                     map[playerY, playerX] = '.';
                 }
@@ -1370,12 +1371,12 @@ namespace DoSomething
             string[] betOptions =
             {
                 "╔════════════════════════════════════╗",
-                "║            🎡 ROULETTE 🎡           ║",
+                "║            🎡 ROULETTE 🎡          ║",
                 "╠════════════════════════════════════╣",
-                "║     Bet on Red                    ║",
-                "║     Bet on Black                  ║",
-                "║     Bet on a Number (0–36)        ║",
-                "║     Exit                          ║",
+                "║     Bet on Red                     ║",
+                "║     Bet on Black                   ║",
+                "║     Bet on a Number (0–36)         ║",
+                "║     Exit                           ║",
                 "╚════════════════════════════════════╝"
             };
 
@@ -1447,7 +1448,7 @@ namespace DoSomething
                         }
 
                         // Simulate spin
-                        Console.WriteLine("\nSpinning...");
+                        Console.WriteLine("Spinning...");
                         Thread.Sleep(1500);
 
                         Random rand = new Random();
