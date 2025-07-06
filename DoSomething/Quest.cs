@@ -27,8 +27,11 @@ namespace DoSomething
             IsRewarded = false;
         }
 
-        public void AddProgress(int amount = 1)
+        public void AddProgress()
         {
+            int amount = 1;
+
+
             if (!IsAccepted || IsCompleted) return;
 
             Progress += amount;

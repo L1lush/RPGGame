@@ -600,7 +600,6 @@ namespace DoSomething
 
 
         static void Forest(Player Player, Random rand)
-
         {
             char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", 21, 21);
             map[0, 0] = '3';
@@ -853,16 +852,25 @@ namespace DoSomething
 
             Console.CursorVisible = false;
 
+
             do
             {
                 Console.Clear();
-                Console.WriteLine($"╔═══════════════════════════════════════════════╗");
-                Console.WriteLine($"║                 RPG SHOP                     ║");
-                Console.WriteLine($"╠═══════════════════════════════════════════════╣");
-                Console.WriteLine($"║   Gold: {Player.GetGold(),-22}                ║");
-                Console.WriteLine($"║   Potions: {Player.GetPositions()} left                            ║");
-                Console.WriteLine($"║   Your weapon attack: {Player.GetWeapon().GetATTACK(),-21}║");
-                Console.WriteLine($"╠═══════════════════════════════════════════════╣");
+                // Replace the shop display section with this for perfect ║ alignment
+                Console.WriteLine($"╔══════════════════════════════════════════════════════════════╗");
+                Console.WriteLine($"║                        RPG SHOP                              ║");
+                Console.WriteLine($"╠══════════════════════════════════════════════════════════════╣");
+                Console.WriteLine($"║   Gold: {Player.GetGold(),-22}                               ║");
+                if(Player.GetPositions() >= 10)
+                {
+                    Console.WriteLine($"║   Potions: {Player.GetPositions()} left                                           ║");
+                }
+                else
+                {
+                    Console.WriteLine($"║   Potions: {Player.GetPositions()} left                                            ║");
+                }
+                Console.WriteLine($"║   Your weapon attack: {Player.GetWeapon().GetATTACK(),-21}                  ║");
+                Console.WriteLine($"╠══════════════════════════════════════════════════════════════╣");
 
                 // Display weapons
                 for (int i = 0; i < shopWeapons.Count; i++)
@@ -872,10 +880,8 @@ namespace DoSomething
                     int weaponPrice = shopWeapons[i].GetPrice();
                     bool isEquipped = Player.GetWeapon() != null && Player.GetWeapon().GetName() == weaponName;
                     string equippedText = isEquipped ? " (Equipped)" : "";
-                    if (i == selected)
-                        Console.WriteLine($"║ ▶ {weaponName} (ATTACK {weaponAttack}) | Price: {weaponPrice} gold{equippedText,-11}║");
-                    else
-                        Console.WriteLine($"║   {weaponName} (ATTACK {weaponAttack}) | Price: {weaponPrice} gold{equippedText,-11}║");
+                    string line = $"{(i == selected ? "▶" : " ")} {weaponName} (ATTACK {weaponAttack}) | Price: {weaponPrice} gold{equippedText}";
+                    Console.WriteLine($"║ {line,-61}║");
                 }
 
                 int potionIndex = shopWeapons.Count;
@@ -883,24 +889,18 @@ namespace DoSomething
                 int exitIndex = potionIndex + 2;
 
                 // Potion
-                if (selected == potionIndex)
-                    Console.WriteLine($"║ ▶ {potionName,-28}                         ║");
-                else
-                    Console.WriteLine($"║   {potionName,-28}                         ║");
+                string potionLine = $"{(selected == potionIndex ? "▶" : " ")} {potionName}";
+                Console.WriteLine($"║ {potionLine,-61}║");
 
                 // Upgrade Weapon
-                if (selected == upgradeIndex)
-                    Console.WriteLine($"║ ▶ Upgrade Weapon (+10 ATK) | 100 gold      ║");
-                else
-                    Console.WriteLine($"║   Upgrade Weapon (+10 ATK) | 100 gold      ║");
+                string upgradeLine = $"{(selected == upgradeIndex ? "▶" : " ")} Upgrade Weapon (+10 ATK) | 100 gold";
+                Console.WriteLine($"║ {upgradeLine,-61}║");
 
                 // Exit
-                if (selected == exitIndex)
-                    Console.WriteLine($"║ ▶ Exit{' ',-28}                            ║");
-                else
-                    Console.WriteLine($"║   Exit{' ',-28}                            ║");
+                string exitLine = $"{(selected == exitIndex ? "▶" : " ")} Exit";
+                Console.WriteLine($"║ {exitLine,-61}║");
 
-                Console.WriteLine($"╚═══════════════════════════════════════════════╝");
+                Console.WriteLine($"╚══════════════════════════════════════════════════════════════╝");
                 Console.WriteLine("Use ↑ ↓ to navigate. Enter to buy. Esc for pause.");
 
                 key = Console.ReadKey(true).Key;
@@ -1050,7 +1050,10 @@ namespace DoSomething
 
                 Console.WriteLine("Move: ↑ ↓ ← → ");
                 Console.WriteLine("Press Escape to pause.");
-                Console.WriteLine("'D' Dragon, 'G' Goblin, 'S' Skeleton, 'O' Orc, 'T' Troll, 'V' Vampire, 'L' Slime, 'B' Bandit, 'C' Chest, 'X' Exit, 'P' you.");
+                if(map[0, 0] != '4')
+                    Console.WriteLine("'D' Dragon, 'G' Goblin, 'S' Skeleton, 'O' Orc, 'T' Troll, 'V' Vampire, 'L' Slime, 'B' Bandit, 'C' Chest, 'X' Exit, 'P' you, 'b' Boss.");
+                else
+                    Console.WriteLine("'c' Casino, 's' Shop, 'v' to talk to Villager, 'P' you.");
 
                 ConsoleKey key = Console.ReadKey(true).Key;
                 int newX = playerX, newY = playerY;
@@ -1094,10 +1097,36 @@ namespace DoSomething
                 }
 
                 // Move player
-                map[playerY, playerX] = '.';
+                if (map[0, 0] != '4' && (destination != 'c' || destination != 's' || destination != 'v'))
+                {
+                    map[playerY, playerX] = '.';
+                }
+                else
+                {
+                    if (destination == 'c' || destination == 's' || destination == 'v')
+                    {
+                        map[playerY, playerX] = destination; // Keep the current tile if it's a special location
+                       
+                        int oldX = newX, oldY = newY; // Store old position
+
+                        switch (key)
+                        {
+                            case ConsoleKey.UpArrow: oldY++; break;
+                            case ConsoleKey.DownArrow: oldY--; break;
+                            case ConsoleKey.LeftArrow: oldX++; break;
+                            case ConsoleKey.RightArrow: oldX--; break;
+                        }
+                        newX = oldX; // Reset newX to oldX
+                        newY = oldY; // Reset newY to oldY
+                    }
+                    else
+                    {
+                        map[playerY, playerX] = ' '; // Clear the tile if it's not a special location
+                    }
+                }
                 playerX = newX;
                 playerY = newY;
-                map[playerY, playerX] = 'P';
+                map[playerY, playerX] = 'P'; // Place player on the new tile
                 CheckExplorer(map, Player);
             }
         }
@@ -1159,15 +1188,15 @@ namespace DoSomething
         {
             string[] lines =
             {
-        "╔════════════════════════════════════╗",
-        "║            🎰 CASINO 🎰            ║",
-        "╠════════════════════════════════════╣",
-        "║     Blackjack                      ║",
-        "║     Dice Duel                      ║",
-        "║     Roulette                       ║",
-        "║     Exit                           ║",
-        "╚════════════════════════════════════╝"
-    };
+                "╔════════════════════════════════════╗",
+                "║            🎰 CASINO 🎰            ║",
+                "╠════════════════════════════════════╣",
+                "║     Blackjack                      ║",
+                "║     Dice Duel                      ║",
+                "║     Roulette                       ║",
+                "║     Exit                           ║",
+                "╚════════════════════════════════════╝"
+            };
 
             int selectedIndex = 0;
             int menuStartRow = 3;
@@ -1341,15 +1370,15 @@ namespace DoSomething
 
             string[] betOptions =
             {
-        "╔════════════════════════════════════╗",
-        "║            🎡 ROULETTE 🎡           ║",
-        "╠════════════════════════════════════╣",
-        "║     Bet on Red                    ║",
-        "║     Bet on Black                  ║",
-        "║     Bet on a Number (0–36)        ║",
-        "║     Exit                          ║",
-        "╚════════════════════════════════════╝"
-    };
+                "╔════════════════════════════════════╗",
+                "║            🎡 ROULETTE 🎡          ║",
+                "╠════════════════════════════════════╣",
+                "║     Bet on Red                     ║",
+                "║     Bet on Black                   ║",
+                "║     Bet on a Number (0–36)         ║",
+                "║     Exit                           ║",
+                "╚════════════════════════════════════╝"
+            };
 
             int selectedIndex = 0;
             int menuStartRow = 3;
@@ -1373,7 +1402,7 @@ namespace DoSomething
                     Console.WriteLine(line);
                 }
 
-                Console.WriteLine("\nUse ↑ ↓ to choose your bet. Press Enter to select.");
+                Console.WriteLine("Use ↑ ↓ to choose your bet. Press Enter to select.");
                 var key = Console.ReadKey(true).Key;
 
                 switch (key)
@@ -1419,13 +1448,13 @@ namespace DoSomething
                         }
 
                         // Simulate spin
-                        Console.WriteLine("\nSpinning...");
+                        Console.WriteLine("Spinning...");
                         Thread.Sleep(1500);
 
                         Random rand = new Random();
                         int resultNumber = rand.Next(0, 37);
                         string resultColor = GetRouletteColor(resultNumber);
-                        Console.WriteLine($"\n🎲 The ball lands on: {resultNumber} ({resultColor})\n");
+                        Console.WriteLine($"🎲 The ball lands on: {resultNumber} ({resultColor})");
 
                         bool win = false;
                         int winnings = 0;
@@ -1490,8 +1519,8 @@ namespace DoSomething
                 return "Green";
 
             int[] redNumbers = {
-        1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36
-    };
+                1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36
+            };
 
             return redNumbers.Contains(number) ? "Red" : "Black";
         }
