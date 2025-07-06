@@ -20,6 +20,8 @@ namespace DoSomething
         public int Positions { get; set; } = 5;
         public Weapon Weapon { get; set; }
         public List<achievement> Achievements { get; set; } = new List<achievement>();
+
+        //stats
         public int Kills { get; set; } = 0;
         public int GoldCollected { get; set; } = 0;
         public int WeaponEquiped { get; set; } = 0;
