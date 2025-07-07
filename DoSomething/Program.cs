@@ -449,12 +449,12 @@ namespace DoSomething
             while (true)
             {
                 string[] options = {
-                        "Forest",
-                        "Cave",
-                        "Castle",
-                        "Boss Fight",
-                        "Village",
-                    };
+            "Cave",           // Swapped
+            "Forest (LVL 3)", // Swapped + level display
+            "Castle (LVL 5)",
+            "Boss Fight (LVL 10)",
+            "Village",
+        };
                 int selected = 0;
                 ConsoleKey key;
 
@@ -489,35 +489,50 @@ namespace DoSomething
                     {
                         switch (options[selected])
                         {
-                            case "Forest":
-                                Forest(player, rand);
+                            case "Forest (LVL 3)":
+                                if (player.GETLVL() >= 3)
+                                    Forest(player, rand);
+                                else
+                                {
+                                    Console.WriteLine("You need to be at least LVL 3 to enter the Forest!");
+                                    Thread.Sleep(1500);
+                                }
                                 break;
                             case "Cave":
                                 Cave(player, rand);
                                 break;
-                            case "Castle":
-                                Castle(player, rand);
-                                break;
-                            case "Stats":
-                                player.ShowStats();
-                                Thread.Sleep(3000);
+                            case "Castle (LVL 5)":
+                                if (player.GETLVL() >= 5)
+                                    Castle(player, rand);
+                                else
+                                {
+                                    Console.WriteLine("You need to be at least LVL 5 to enter the Castle!");
+                                    Thread.Sleep(1500);
+                                }
                                 break;
                             case "Village":
                                 MoveOnMap(villageMap, player, rand);
                                 break;
-                            case "Boss Fight":
-                                BossFight(player, rand);
+                            case "Boss Fight (LVL 10)":
+                                if (player.GETLVL() >= 10)
+                                    BossFight(player, rand);
+                                else
+                                {
+                                    Console.WriteLine("You need to be at least LVL 10 for Boss Fight!");
+                                    Thread.Sleep(1500);
+                                }
                                 break;
                         }
                     }
                 } while (true);
-
             }
         }
 
+
         static void PAUSEMenu(Player player)
         {
-            string[] options = { "Resume", "Stats", "Save Game", "See Achievements", "Exit to Main Menu" };
+            string[] options = { "Resume", "Stats", "Achievements", "Save Game", "Exit to Main Menu" };
+          
             int selected = 0;
             ConsoleKey key;
 
@@ -531,7 +546,7 @@ namespace DoSomething
                 for (int i = 0; i < options.Length; i++)
                 {
                     if (i == selected)
-                        Console.WriteLine($"║ ▶ {options[i],-17}   ║");// -17 is for alignment
+                        Console.WriteLine($"║ ▶ {options[i],-17}   ║");
                     else
                         Console.WriteLine($"║   {options[i],-17}   ║");
                 }
@@ -549,18 +564,28 @@ namespace DoSomething
             switch (selected)
             {
                 case 0:
-                    // Resume game
                     Console.Clear();
                     return;
                 case 1:
-                    // Show stats
                     player.ShowStats();
                     Console.WriteLine("Press any key to return...");
                     Console.ReadKey(true);
                     PAUSEMenu(player);
                     break;
                 case 2:
-                    // Save Game
+                    if (player.IsAllAchievementsCompleted(player) && !player.CheckIfUnlocked("Legend"))
+                    {
+                        player.UnlockAchievement("Legend");
+                        Console.WriteLine("Legend Achievement Unlocked!");
+                        Thread.Sleep(1000);
+                        Console.Clear();
+                    }
+                    player.ShowAchievements();
+                    Console.WriteLine("Press any key to return...");
+                    Console.ReadKey(true);
+                    PAUSEMenu(player);
+                    break;
+                case 3:
                     Console.WriteLine("Saving game...");
                     SaveGame(player, saveFile);
                     Console.WriteLine("Game saved!");
@@ -586,6 +611,7 @@ namespace DoSomething
                     break;
             }
         }
+
 
 
         static void Forest(Player Player, Random rand)
@@ -1593,7 +1619,7 @@ namespace DoSomething
                 {
                     if (map[i, j] == ' ')
                     {
-                        return; // There's still unexplored space
+                        return;
                     }
                 }
             }
