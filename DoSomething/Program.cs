@@ -48,16 +48,16 @@ namespace DoSomething
         {
             string[] lines =
             {
-            "╔════════════════════════════════════╗",
-            "║          ⚔️RPG MAIN MENU ⚔️        ║",
-            "╠════════════════════════════════════╣",
-            "║     Start New Game                 ║",
-            "║     Load Game                      ║",
-            "║     Settings                       ║",
-            "║     Credits                        ║",
-            "║     Exit                           ║",
-            "╚════════════════════════════════════╝"
-        };
+                "╔════════════════════════════════════╗",
+                "║          ⚔️RPG MAIN MENU ⚔️        ║",
+                "╠════════════════════════════════════╣",
+                "║     Start New Game                 ║",
+                "║     Load Game                      ║",
+                "║     Settings                       ║",
+                "║     Credits                        ║",
+                "║     Exit                           ║",
+                "╚════════════════════════════════════╝"
+            };
 
             int selectedIndex = 0;
             int menuStartRow = 3;
@@ -406,12 +406,6 @@ namespace DoSomething
             OpeningStory();
 
             Player Player = new Player(classOptions[selectedClass]);
-            Player.AddAchievement(new Achievement("First Blood", "Win your first battle"));
-            Player.AddAchievement(new Achievement("Gold Digger", "Collect 100+ gold"));
-            Player.AddAchievement(new Achievement("High Roller", "Win 500+ gold in one casino game"));
-            Player.AddAchievement(new Achievement("Explorer", "walk in all the map"));
-            Player.AddAchievement(new Achievement("Legend", "Completed all the Achievements"));
-            Player.AddAchievement(new Achievement("Blacksmith", "Upgrade your waepon"));
             Game(Player); // Start the game with the selected class
         }
 
@@ -538,6 +532,7 @@ namespace DoSomething
         static void PAUSEMenu(Player player)
         {
             string[] options = { "Resume", "Stats", "Achievements", "Save Game", "Exit to Main Menu" };
+          
             int selected = 0;
             ConsoleKey key;
 
@@ -598,9 +593,20 @@ namespace DoSomething
                     Console.ReadKey(true);
                     PAUSEMenu(player);
                     break;
+                case 3:
+                    Console.WriteLine(player.ShowAchievements());
+                    Console.WriteLine("Press any key to return...");
+                    Console.ReadKey(true);
+                    PAUSEMenu(player);
+                    break;
                 case 4:
+                    // Exit to main menu
                     Console.WriteLine("Press Enter to continue...");
-                    while (Console.ReadKey(true).Key != ConsoleKey.Enter) { }
+                    while (Console.ReadKey(true).Key != ConsoleKey.Enter)
+                    {
+                        PAUSEMenu(player);
+                    }
+                    SaveGame(player, saveFile); // Save the game before exiting
                     StartUpMenu();
                     break;
             }
@@ -609,9 +615,13 @@ namespace DoSomething
 
 
         static void Forest(Player Player, Random rand)
-
         {
             char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", 21, 21);
+            Player.ForestVisits += 1;
+            if(Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
+            {
+                Player.UnlockAchievement("Explorer");
+            }
             map[0, 0] = '3';
             MoveOnMap(map, Player, rand);
         }
@@ -619,6 +629,11 @@ namespace DoSomething
         static void Cave(Player Player, Random rand)
         {
             char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("cave", 21, 21);
+            Player.CaveVisits += 1; 
+            if (Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
+            {
+                Player.UnlockAchievement("Explorer");
+            }
             map[0, 0] = '2';
             MoveOnMap(map, Player, rand);
         }
@@ -626,12 +641,22 @@ namespace DoSomething
         static void Castle(Player Player, Random rand)
         {
             char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("castle", 21, 21);
+            Player.CastleVisits += 1; 
+            if (Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
+            {
+                Player.UnlockAchievement("Explorer");
+            }
             map[0, 0] = '1';
             MoveOnMap(map, Player, rand);
         }
 
         static void BossFight(Player Player, Random rand) 
         {
+            Player.BossFightVisits += 1; 
+            if (Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
+            {
+                Player.UnlockAchievement("Explorer");
+            }
             char[,] map = BossMap();
             MoveOnMap(map, Player, rand);
         }
@@ -776,14 +801,15 @@ namespace DoSomething
                     BattleMusicPlayer.Pause(); // Pause battle music
                     MainMusicPlayer.Play(); // Play main music again
                     Thread.Sleep(1500);
-                    if (!Player.CheckIfUnlocked("First Blood"))
-                    {
-                        Player.CheckFirstKill();
-                        Console.WriteLine("First Blood Achievement Unlocked!");
-                        Thread.Sleep(1000);
-                        Console.Clear();
-                    }
                     EnemyKilled(ref killEnemies);
+
+                    Player.Kills += 1; // Increment kills
+                    if (Player.Kills == 1)
+                    {
+                        Console.WriteLine("Achievement unlocked: First Blood!");
+                        Player.UnlockAchievement("First Blood");
+                        Thread.Sleep(2000);
+                    }
                     break;
                 }
 
@@ -819,13 +845,7 @@ namespace DoSomething
 
         static void Shop(Player Player, Random random)
         {
-            if (Player.GetGold() >= 100 && !Player.CheckIfUnlocked("Gold Digger"))
-            {
-                Player.UnlockAchievement("Gold Digger");
-                Console.WriteLine("Achievement Unlocked: Gold Digger!");
-                Thread.Sleep(1000);
-                Console.Clear();
-            }
+            Player.ShopVisits += 1;
 
             shopVisitCount++;
 
@@ -862,16 +882,25 @@ namespace DoSomething
 
             Console.CursorVisible = false;
 
+
             do
             {
                 Console.Clear();
-                Console.WriteLine($"╔═══════════════════════════════════════════════╗");
-                Console.WriteLine($"║                 RPG SHOP                     ║");
-                Console.WriteLine($"╠═══════════════════════════════════════════════╣");
-                Console.WriteLine($"║   Gold: {Player.GetGold(),-22}                ║");
-                Console.WriteLine($"║   Potions: {Player.GetPositions()} left                            ║");
-                Console.WriteLine($"║   Your weapon attack: {Player.GetWeapon().GetATTACK(),-21}║");
-                Console.WriteLine($"╠═══════════════════════════════════════════════╣");
+                // Replace the shop display section with this for perfect ║ alignment
+                Console.WriteLine($"╔══════════════════════════════════════════════════════════════╗");
+                Console.WriteLine($"║                        RPG SHOP                              ║");
+                Console.WriteLine($"╠══════════════════════════════════════════════════════════════╣");
+                Console.WriteLine($"║   Gold: {Player.GetGold(),-22}                               ║");
+                if(Player.GetPositions() >= 10)
+                {
+                    Console.WriteLine($"║   Potions: {Player.GetPositions()} left                                           ║");
+                }
+                else
+                {
+                    Console.WriteLine($"║   Potions: {Player.GetPositions()} left                                            ║");
+                }
+                Console.WriteLine($"║   Your weapon attack: {Player.GetWeapon().GetATTACK(),-21}                  ║");
+                Console.WriteLine($"╠══════════════════════════════════════════════════════════════╣");
 
                 // Display weapons
                 for (int i = 0; i < shopWeapons.Count; i++)
@@ -881,10 +910,8 @@ namespace DoSomething
                     int weaponPrice = shopWeapons[i].GetPrice();
                     bool isEquipped = Player.GetWeapon() != null && Player.GetWeapon().GetName() == weaponName;
                     string equippedText = isEquipped ? " (Equipped)" : "";
-                    if (i == selected)
-                        Console.WriteLine($"║ ▶ {weaponName} (ATTACK {weaponAttack}) | Price: {weaponPrice} gold{equippedText,-11}║");
-                    else
-                        Console.WriteLine($"║   {weaponName} (ATTACK {weaponAttack}) | Price: {weaponPrice} gold{equippedText,-11}║");
+                    string line = $"{(i == selected ? "▶" : " ")} {weaponName} (ATTACK {weaponAttack}) | Price: {weaponPrice} gold{equippedText}";
+                    Console.WriteLine($"║ {line,-61}║");
                 }
 
                 int potionIndex = shopWeapons.Count;
@@ -892,24 +919,18 @@ namespace DoSomething
                 int exitIndex = potionIndex + 2;
 
                 // Potion
-                if (selected == potionIndex)
-                    Console.WriteLine($"║ ▶ {potionName,-28}                         ║");
-                else
-                    Console.WriteLine($"║   {potionName,-28}                         ║");
+                string potionLine = $"{(selected == potionIndex ? "▶" : " ")} {potionName}";
+                Console.WriteLine($"║ {potionLine,-61}║");
 
                 // Upgrade Weapon
-                if (selected == upgradeIndex)
-                    Console.WriteLine($"║ ▶ Upgrade Weapon (+10 ATK) | 100 gold      ║");
-                else
-                    Console.WriteLine($"║   Upgrade Weapon (+10 ATK) | 100 gold      ║");
+                string upgradeLine = $"{(selected == upgradeIndex ? "▶" : " ")} Upgrade Weapon (+10 ATK) | 100 gold";
+                Console.WriteLine($"║ {upgradeLine,-61}║");
 
                 // Exit
-                if (selected == exitIndex)
-                    Console.WriteLine($"║ ▶ Exit{' ',-28}                            ║");
-                else
-                    Console.WriteLine($"║   Exit{' ',-28}                            ║");
+                string exitLine = $"{(selected == exitIndex ? "▶" : " ")} Exit";
+                Console.WriteLine($"║ {exitLine,-61}║");
 
-                Console.WriteLine($"╚═══════════════════════════════════════════════╝");
+                Console.WriteLine($"╚══════════════════════════════════════════════════════════════╝");
                 Console.WriteLine("Use ↑ ↓ to navigate. Enter to buy. Esc for pause.");
 
                 key = Console.ReadKey(true).Key;
@@ -986,13 +1007,6 @@ namespace DoSomething
                             Thread.Sleep(400);
                             ItemEquipMusicPlayer.Pause();
                             Thread.Sleep(1000);
-
-                            if (!Player.CheckIfUnlocked("Blacksmith"))
-                            {
-                                Player.UnlockAchievement("Blacksmith");
-                                Console.WriteLine("Achievement Unlocked: Blacksmith!");
-                                Thread.Sleep(1000);
-                            }
                         }
                         continue;
                     }
@@ -1059,7 +1073,10 @@ namespace DoSomething
 
                 Console.WriteLine("Move: ↑ ↓ ← → ");
                 Console.WriteLine("Press Escape to pause.");
-                Console.WriteLine("'D' Dragon, 'G' Goblin, 'S' Skeleton, 'O' Orc, 'T' Troll, 'V' Vampire, 'L' Slime, 'B' Bandit, 'C' Chest, 'X' Exit, 'P' you.");
+                if(map[0, 0] != '4')
+                    Console.WriteLine("'D' Dragon, 'G' Goblin, 'S' Skeleton, 'O' Orc, 'T' Troll, 'V' Vampire, 'L' Slime, 'B' Bandit, 'C' Chest, 'X' Exit, 'P' you, 'b' Boss.");
+                else
+                    Console.WriteLine("'c' Casino, 's' Shop, 'v' to talk to Villager, 'P' you.");
 
                 ConsoleKey key = Console.ReadKey(true).Key;
                 int newX = playerX, newY = playerY;
@@ -1103,10 +1120,36 @@ namespace DoSomething
                 }
 
                 // Move player
-                map[playerY, playerX] = '.';
+                if (map[0, 0] != '4' && (destination != 'c' || destination != 's' || destination != 'v'))
+                {
+                    map[playerY, playerX] = '.';
+                }
+                else
+                {
+                    if (destination == 'c' || destination == 's' || destination == 'v')
+                    {
+                        map[playerY, playerX] = destination; // Keep the current tile if it's a special location
+                       
+                        int oldX = newX, oldY = newY; // Store old position
+
+                        switch (key)
+                        {
+                            case ConsoleKey.UpArrow: oldY++; break;
+                            case ConsoleKey.DownArrow: oldY--; break;
+                            case ConsoleKey.LeftArrow: oldX++; break;
+                            case ConsoleKey.RightArrow: oldX--; break;
+                        }
+                        newX = oldX; // Reset newX to oldX
+                        newY = oldY; // Reset newY to oldY
+                    }
+                    else
+                    {
+                        map[playerY, playerX] = ' '; // Clear the tile if it's not a special location
+                    }
+                }
                 playerX = newX;
                 playerY = newY;
-                map[playerY, playerX] = 'P';
+                map[playerY, playerX] = 'P'; // Place player on the new tile
                 CheckExplorer(map, Player);
             }
         }
@@ -1168,15 +1211,15 @@ namespace DoSomething
         {
             string[] lines =
             {
-        "╔════════════════════════════════════╗",
-        "║            🎰 CASINO 🎰            ║",
-        "╠════════════════════════════════════╣",
-        "║     Blackjack                      ║",
-        "║     Dice Duel                      ║",
-        "║     Roulette                       ║",
-        "║     Exit                           ║",
-        "╚════════════════════════════════════╝"
-    };
+                "╔════════════════════════════════════╗",
+                "║            🎰 CASINO 🎰            ║",
+                "╠════════════════════════════════════╣",
+                "║     Blackjack                      ║",
+                "║     Dice Duel                      ║",
+                "║     Roulette                       ║",
+                "║     Exit                           ║",
+                "╚════════════════════════════════════╝"
+            };
 
             int selectedIndex = 0;
             int menuStartRow = 3;
@@ -1284,13 +1327,6 @@ namespace DoSomething
                 player.SubtractGold(stake);
             }
 
-            if (stake >= 500 && !player.CheckIfUnlocked("High Roller"))
-            {
-                player.UnlockAchievement("High Roller");
-                Console.WriteLine("🏆 High Roller Achievement Unlocked!");
-                Thread.Sleep(1000);
-                Console.Clear();
-            }
 
         }
 
@@ -1334,13 +1370,6 @@ namespace DoSomething
                 player.SubtractGold(stake);
             }
 
-            if (stake >= 500 && !player.CheckIfUnlocked("High Roller"))
-            {
-                player.UnlockAchievement("High Roller");
-                Console.WriteLine("🏆 High Roller Achievement Unlocked!");
-                Thread.Sleep(1000);
-                Console.Clear();
-            }
         }
 
         static void Roulette(Player player)
@@ -1350,15 +1379,15 @@ namespace DoSomething
 
             string[] betOptions =
             {
-        "╔════════════════════════════════════╗",
-        "║            🎡 ROULETTE 🎡           ║",
-        "╠════════════════════════════════════╣",
-        "║     Bet on Red                    ║",
-        "║     Bet on Black                  ║",
-        "║     Bet on a Number (0–36)        ║",
-        "║     Exit                          ║",
-        "╚════════════════════════════════════╝"
-    };
+                "╔════════════════════════════════════╗",
+                "║            🎡 ROULETTE 🎡          ║",
+                "╠════════════════════════════════════╣",
+                "║     Bet on Red                     ║",
+                "║     Bet on Black                   ║",
+                "║     Bet on a Number (0–36)         ║",
+                "║     Exit                           ║",
+                "╚════════════════════════════════════╝"
+            };
 
             int selectedIndex = 0;
             int menuStartRow = 3;
@@ -1382,7 +1411,7 @@ namespace DoSomething
                     Console.WriteLine(line);
                 }
 
-                Console.WriteLine("\nUse ↑ ↓ to choose your bet. Press Enter to select.");
+                Console.WriteLine("Use ↑ ↓ to choose your bet. Press Enter to select.");
                 var key = Console.ReadKey(true).Key;
 
                 switch (key)
@@ -1428,13 +1457,13 @@ namespace DoSomething
                         }
 
                         // Simulate spin
-                        Console.WriteLine("\nSpinning...");
+                        Console.WriteLine("Spinning...");
                         Thread.Sleep(1500);
 
                         Random rand = new Random();
                         int resultNumber = rand.Next(0, 37);
                         string resultColor = GetRouletteColor(resultNumber);
-                        Console.WriteLine($"\n🎲 The ball lands on: {resultNumber} ({resultColor})\n");
+                        Console.WriteLine($"🎲 The ball lands on: {resultNumber} ({resultColor})");
 
                         bool win = false;
                         int winnings = 0;
@@ -1466,14 +1495,6 @@ namespace DoSomething
                             }
                         }
 
-                        if (stake >= 500 && !player.CheckIfUnlocked("High Roller"))
-                        {
-                            player.UnlockAchievement("High Roller");
-                            Console.WriteLine("🏆 High Roller Achievement Unlocked!");
-                            Thread.Sleep(1000);
-                            Console.Clear();
-                        }
-
                         if (win)
                         {
                             Console.ForegroundColor = ConsoleColor.Green;
@@ -1499,8 +1520,8 @@ namespace DoSomething
                 return "Green";
 
             int[] redNumbers = {
-        1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36
-    };
+                1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36
+            };
 
             return redNumbers.Contains(number) ? "Red" : "Black";
         }
@@ -1603,13 +1624,6 @@ namespace DoSomething
                 }
             }
 
-            if (!player.CheckIfUnlocked("Explorer"))
-            {
-                player.UnlockAchievement("Explorer");
-                Console.WriteLine("🏆 Explorer Achievement Unlocked!");
-                Thread.Sleep(1000);
-                Console.Clear();
-            }
         }
 
         static char[,] BossMap()

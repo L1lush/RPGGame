@@ -6,13 +6,17 @@ using System.Threading.Tasks;
 
 namespace DoSomething
 {
-    internal class Achievement
+    internal class achievement
     {
-        public string Title { get; }
-        public string Description { get; }
-        public bool Unlocked { get; private set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public bool Unlocked { get; set; }
 
-        public Achievement(string title, string description)
+        public achievement()
+        {
+
+        }
+        public achievement(string title, string description)
         {
             Title = title;
             Description = description;
@@ -25,7 +29,8 @@ namespace DoSomething
             {
                 Unlocked = true;
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"\n🏆 Achievement Unlocked: {Title} - {Description}");
+                Console.WriteLine($"🏆 Achievement Unlocked: {Title} - {Description}");
+                Thread.Sleep(2000);
                 Console.ResetColor();
             }
         }
