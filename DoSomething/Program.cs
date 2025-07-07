@@ -573,14 +573,7 @@ namespace DoSomething
                     PAUSEMenu(player);
                     break;
                 case 2:
-                    if (player.IsAllAchievementsCompleted(player) && !player.CheckIfUnlocked("Legend"))
-                    {
-                        player.UnlockAchievement("Legend");
-                        Console.WriteLine("Legend Achievement Unlocked!");
-                        Thread.Sleep(1000);
-                        Console.Clear();
-                    }
-                    player.ShowAchievements();
+                    Console.WriteLine(player.ShowAchievements());
                     Console.WriteLine("Press any key to return...");
                     Console.ReadKey(true);
                     PAUSEMenu(player);
@@ -589,12 +582,6 @@ namespace DoSomething
                     Console.WriteLine("Saving game...");
                     SaveGame(player, saveFile);
                     Console.WriteLine("Game saved!");
-                    Console.WriteLine("Press any key to return...");
-                    Console.ReadKey(true);
-                    PAUSEMenu(player);
-                    break;
-                case 3:
-                    Console.WriteLine(player.ShowAchievements());
                     Console.WriteLine("Press any key to return...");
                     Console.ReadKey(true);
                     PAUSEMenu(player);
