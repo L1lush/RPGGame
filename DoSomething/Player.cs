@@ -19,17 +19,26 @@ namespace DoSomething
         public int Gold { get; set; } = 0;
         public int Positions { get; set; } = 5;
         public Weapon Weapon { get; set; }
-        private List<Achievement> achievements = new List<Achievement>();
-        public bool FirstKill = true;
+        public List<achievement> Achievements { get; set; } = new List<achievement>();
 
-        public Player() 
+        //stats
+        public int Kills { get; set; } = 0;
+        public int GoldCollected { get; set; } = 0;
+        public int WeaponEquiped { get; set; } = 0;
+        public int ShopVisits { get; set; } = 0;
+        public int ForestVisits { get; set; } = 0;
+        public int CaveVisits { get; set; } = 0;
+        public int CastleVisits { get; set; } = 0;
+        public int BossFightVisits { get; set; } = 0;
+
+        public Player()
         {
 
         }
         public Player(string CLASS)
         {
             this.CLASS = CLASS;
-            this.Weapon = new Weapon(); 
+            this.Weapon = new Weapon();
 
             switch (CLASS)
             {
@@ -56,6 +65,15 @@ namespace DoSomething
             }
 
             this.ATTACK = Weapon.GetATTACK();
+
+            Achievements = new List<achievement>
+            {
+                new achievement("First Blood", "Defeat your first enemy."),
+                new achievement("Treasure Hunter", "Collect 100 gold."),
+                new achievement("Master of Arms", "Equip a weapon."),
+                new achievement("Level Up", "Reach level 5."),
+                new achievement("Explorer", "Visit all locations.")
+            };
         }
 
         public void SetHP(int HP) { this.HP = HP; }
@@ -101,6 +119,12 @@ namespace DoSomething
         public void AddGold(int amount)
         {
             this.Gold += amount;
+            GoldCollected += amount; // Track total gold collected
+
+            if(GoldCollected >= 100)
+            {
+                UnlockAchievement("Treasure Hunter"); // Unlock achievement for collecting 100 gold
+            }
         }
         public void SubtractGold(int amount)
         {
@@ -133,19 +157,24 @@ namespace DoSomething
             this.MaxHP += amount;
         }
 
-        public void SetWeapon(Weapon weapon) 
+        public void SetWeapon(Weapon weapon)
         {
             this.Weapon = weapon;
             this.ATTACK += weapon.GetATTACK(); // Update ATTACK based on the weapon
+            WeaponEquiped += 1;
+            if (WeaponEquiped == 1)
+            {
+                UnlockAchievement("Master of Arms"); // Unlock achievement for equipping a weapon
+            }
         }
 
-        public void RemoveWeapon() 
+        public void RemoveWeapon()
         {
             this.ATTACK -= this.Weapon.GetATTACK(); // Remove weapon's attack bonus
             this.Weapon = new Weapon(); // Reset to default weapon
         }
 
-        public Weapon GetWeapon() 
+        public Weapon GetWeapon()
         {
             return this.Weapon;
         }
@@ -176,55 +205,31 @@ namespace DoSomething
             this.SetLVL(currentLVL);
             this.SetXP(totalXP);
             this.SetXPR(requiredXP);
-        }
 
-        public void AddAchievement(Achievement achievement)
-        {
-            achievements.Add(achievement);
+            if(currentLVL == 5)
+            {
+                UnlockAchievement("Level Up"); // Unlock achievement for reaching level 5
+            }
         }
-
         public void UnlockAchievement(string title)
         {
-            var achievement = achievements.FirstOrDefault(a => a.Title == title);
-            if (achievement != null && !achievement.Unlocked)
-                achievement.Unlock();
-        }
-
-        public bool CheckIfUnlocked(string title)
-        {
-            var achievement = achievements.FirstOrDefault(a => a.Title == title);
-            return achievement != null && achievement.Unlocked;
-        }
-
-        public bool IsAllAchievementsCompleted(Player player)
-        {
-            return player.GetAchievements().All(a => a.Unlocked);
-        }
-
-        public List<Achievement> GetAchievements()
-        {
-            return achievements;
-        }
-
-        public void ShowAchievements()
-        {
-            Console.Clear();
-            Console.WriteLine("🏅 Your Achievements:");
-            foreach (var a in achievements)
+            var ach = Achievements.FirstOrDefault(a => a.Title == title);
+            if (ach != null && !ach.Unlocked)
             {
-                Console.ForegroundColor = a.Unlocked ? ConsoleColor.Green : ConsoleColor.DarkGray;
-                Console.WriteLine($"- {a.Title}: {a.Description} {(a.Unlocked ? "✅" : "❌")}");
+                ach.Unlock();
+                Console.WriteLine($"Achievement unlocked: {ach.Title} - {ach.Description}");
             }
-            Console.ResetColor();
-            Console.WriteLine("\nPress any key to return...");
-            Console.ReadKey(true);
         }
 
-        public void CheckFirstKill()
+        public string ShowAchievements()
         {
-            if (FirstKill == true)
-                UnlockAchievement("First Blood");
-            FirstKill = false;
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Achievements:");
+            foreach (var ach in Achievements)
+            {
+                sb.AppendLine($"{ach.Title} - {ach.Description} (Unlocked: {ach.Unlocked})");
+            }
+            return sb.ToString();
         }
     }
 }

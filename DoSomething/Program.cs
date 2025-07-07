@@ -48,16 +48,16 @@ namespace DoSomething
         {
             string[] lines =
             {
-            "╔════════════════════════════════════╗",
-            "║          ⚔️RPG MAIN MENU ⚔️        ║",
-            "╠════════════════════════════════════╣",
-            "║     Start New Game                 ║",
-            "║     Load Game                      ║",
-            "║     Settings                       ║",
-            "║     Credits                        ║",
-            "║     Exit                           ║",
-            "╚════════════════════════════════════╝"
-        };
+                "╔════════════════════════════════════╗",
+                "║          ⚔️RPG MAIN MENU ⚔️        ║",
+                "╠════════════════════════════════════╣",
+                "║     Start New Game                 ║",
+                "║     Load Game                      ║",
+                "║     Settings                       ║",
+                "║     Credits                        ║",
+                "║     Exit                           ║",
+                "╚════════════════════════════════════╝"
+            };
 
             int selectedIndex = 0;
             int menuStartRow = 3;
@@ -406,12 +406,6 @@ namespace DoSomething
             OpeningStory();
 
             Player Player = new Player(classOptions[selectedClass]);
-            Player.AddAchievement(new Achievement("First Blood", "Win your first battle"));
-            Player.AddAchievement(new Achievement("Gold Digger", "Collect 100+ gold"));
-            Player.AddAchievement(new Achievement("High Roller", "Win 500+ gold in one casino game"));
-            Player.AddAchievement(new Achievement("Explorer", "walk in all the map"));
-            Player.AddAchievement(new Achievement("Legend", "Completed all the Achievements"));
-            Player.AddAchievement(new Achievement("Blacksmith", "Upgrade your waepon"));
             Game(Player); // Start the game with the selected class
         }
 
@@ -460,8 +454,6 @@ namespace DoSomething
                         "Castle",
                         "Boss Fight",
                         "Village",
-                        "Stats",
-                        "Achievements",
                     };
                 int selected = 0;
                 ConsoleKey key;
@@ -513,16 +505,6 @@ namespace DoSomething
                             case "Village":
                                 MoveOnMap(villageMap, player, rand);
                                 break;
-                            case "Achievements":
-                                if (player.IsAllAchievementsCompleted(player) && !player.CheckIfUnlocked("Legend"))
-                                {
-                                    player.UnlockAchievement("Legend");
-                                    Console.WriteLine("Legend Achievement Unlocked!");
-                                    Thread.Sleep(1000);
-                                    Console.Clear();
-                                }
-                                player.ShowAchievements();
-                                break;
                             case "Boss Fight":
                                 BossFight(player, rand);
                                 break;
@@ -535,7 +517,7 @@ namespace DoSomething
 
         static void PAUSEMenu(Player player)
         {
-            string[] options = { "Resume", "Stats", "Save Game", "Exit to Main Menu" };
+            string[] options = { "Resume", "Stats", "Save Game", "See Achievements", "Exit to Main Menu" };
             int selected = 0;
             ConsoleKey key;
 
@@ -587,12 +569,19 @@ namespace DoSomething
                     PAUSEMenu(player);
                     break;
                 case 3:
+                    Console.WriteLine(player.ShowAchievements());
+                    Console.WriteLine("Press any key to return...");
+                    Console.ReadKey(true);
+                    PAUSEMenu(player);
+                    break;
+                case 4:
                     // Exit to main menu
                     Console.WriteLine("Press Enter to continue...");
                     while (Console.ReadKey(true).Key != ConsoleKey.Enter)
                     {
                         PAUSEMenu(player);
                     }
+                    SaveGame(player, saveFile); // Save the game before exiting
                     StartUpMenu();
                     break;
             }
@@ -602,6 +591,11 @@ namespace DoSomething
         static void Forest(Player Player, Random rand)
         {
             char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", 21, 21);
+            Player.ForestVisits += 1;
+            if(Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
+            {
+                Player.UnlockAchievement("Explorer");
+            }
             map[0, 0] = '3';
             MoveOnMap(map, Player, rand);
         }
@@ -609,6 +603,11 @@ namespace DoSomething
         static void Cave(Player Player, Random rand)
         {
             char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("cave", 21, 21);
+            Player.CaveVisits += 1; 
+            if (Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
+            {
+                Player.UnlockAchievement("Explorer");
+            }
             map[0, 0] = '2';
             MoveOnMap(map, Player, rand);
         }
@@ -616,12 +615,22 @@ namespace DoSomething
         static void Castle(Player Player, Random rand)
         {
             char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("castle", 21, 21);
+            Player.CastleVisits += 1; 
+            if (Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
+            {
+                Player.UnlockAchievement("Explorer");
+            }
             map[0, 0] = '1';
             MoveOnMap(map, Player, rand);
         }
 
         static void BossFight(Player Player, Random rand) 
         {
+            Player.BossFightVisits += 1; 
+            if (Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
+            {
+                Player.UnlockAchievement("Explorer");
+            }
             char[,] map = BossMap();
             MoveOnMap(map, Player, rand);
         }
@@ -766,14 +775,15 @@ namespace DoSomething
                     BattleMusicPlayer.Pause(); // Pause battle music
                     MainMusicPlayer.Play(); // Play main music again
                     Thread.Sleep(1500);
-                    if (!Player.CheckIfUnlocked("First Blood"))
-                    {
-                        Player.CheckFirstKill();
-                        Console.WriteLine("First Blood Achievement Unlocked!");
-                        Thread.Sleep(1000);
-                        Console.Clear();
-                    }
                     EnemyKilled(ref killEnemies);
+
+                    Player.Kills += 1; // Increment kills
+                    if (Player.Kills == 1)
+                    {
+                        Console.WriteLine("Achievement unlocked: First Blood!");
+                        Player.UnlockAchievement("First Blood");
+                        Thread.Sleep(2000);
+                    }
                     break;
                 }
 
@@ -809,13 +819,7 @@ namespace DoSomething
 
         static void Shop(Player Player, Random random)
         {
-            if (Player.GetGold() >= 100 && !Player.CheckIfUnlocked("Gold Digger"))
-            {
-                Player.UnlockAchievement("Gold Digger");
-                Console.WriteLine("Achievement Unlocked: Gold Digger!");
-                Thread.Sleep(1000);
-                Console.Clear();
-            }
+            Player.ShopVisits += 1;
 
             shopVisitCount++;
 
@@ -977,13 +981,6 @@ namespace DoSomething
                             Thread.Sleep(400);
                             ItemEquipMusicPlayer.Pause();
                             Thread.Sleep(1000);
-
-                            if (!Player.CheckIfUnlocked("Blacksmith"))
-                            {
-                                Player.UnlockAchievement("Blacksmith");
-                                Console.WriteLine("Achievement Unlocked: Blacksmith!");
-                                Thread.Sleep(1000);
-                            }
                         }
                         continue;
                     }
@@ -1304,13 +1301,6 @@ namespace DoSomething
                 player.SubtractGold(stake);
             }
 
-            if (stake >= 500 && !player.CheckIfUnlocked("High Roller"))
-            {
-                player.UnlockAchievement("High Roller");
-                Console.WriteLine("🏆 High Roller Achievement Unlocked!");
-                Thread.Sleep(1000);
-                Console.Clear();
-            }
 
         }
 
@@ -1354,13 +1344,6 @@ namespace DoSomething
                 player.SubtractGold(stake);
             }
 
-            if (stake >= 500 && !player.CheckIfUnlocked("High Roller"))
-            {
-                player.UnlockAchievement("High Roller");
-                Console.WriteLine("🏆 High Roller Achievement Unlocked!");
-                Thread.Sleep(1000);
-                Console.Clear();
-            }
         }
 
         static void Roulette(Player player)
@@ -1484,14 +1467,6 @@ namespace DoSomething
                             {
                                 player.SubtractGold(stake);
                             }
-                        }
-
-                        if (stake >= 500 && !player.CheckIfUnlocked("High Roller"))
-                        {
-                            player.UnlockAchievement("High Roller");
-                            Console.WriteLine("🏆 High Roller Achievement Unlocked!");
-                            Thread.Sleep(1000);
-                            Console.Clear();
                         }
 
                         if (win)
@@ -1623,13 +1598,6 @@ namespace DoSomething
                 }
             }
 
-            if (!player.CheckIfUnlocked("Explorer"))
-            {
-                player.UnlockAchievement("Explorer");
-                Console.WriteLine("🏆 Explorer Achievement Unlocked!");
-                Thread.Sleep(1000);
-                Console.Clear();
-            }
         }
 
         static char[,] BossMap()
