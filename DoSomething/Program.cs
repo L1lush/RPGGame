@@ -48,16 +48,16 @@ namespace DoSomething
         {
             string[] lines =
             {
-            "╔════════════════════════════════════╗",
-            "║          ⚔️RPG MAIN MENU ⚔️        ║",
-            "╠════════════════════════════════════╣",
-            "║     Start New Game                 ║",
-            "║     Load Game                      ║",
-            "║     Settings                       ║",
-            "║     Credits                        ║",
-            "║     Exit                           ║",
-            "╚════════════════════════════════════╝"
-        };
+                "╔════════════════════════════════════╗",
+                "║          ⚔️RPG MAIN MENU ⚔️        ║",
+                "╠════════════════════════════════════╣",
+                "║     Start New Game                 ║",
+                "║     Load Game                      ║",
+                "║     Settings                       ║",
+                "║     Credits                        ║",
+                "║     Exit                           ║",
+                "╚════════════════════════════════════╝"
+            };
 
             int selectedIndex = 0;
             int menuStartRow = 3;
@@ -581,6 +581,7 @@ namespace DoSomething
                     {
                         PAUSEMenu(player);
                     }
+                    SaveGame(player, saveFile); // Save the game before exiting
                     StartUpMenu();
                     break;
             }
@@ -818,7 +819,7 @@ namespace DoSomething
 
         static void Shop(Player Player, Random random)
         {
-            Player.CaveVisits += 1;
+            Player.ShopVisits += 1;
 
             shopVisitCount++;
 
