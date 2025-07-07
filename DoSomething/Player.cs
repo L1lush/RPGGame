@@ -221,15 +221,19 @@ namespace DoSomething
             }
         }
 
-        public string ShowAchievements()
+        public void ShowAchievements()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Achievements:");
+            Console.WriteLine("Achievements:");
             foreach (var ach in Achievements)
             {
-                sb.AppendLine($"{ach.Title} - {ach.Description} (Unlocked: {ach.Unlocked})");
+                if (ach.Unlocked)
+                    Console.ForegroundColor = ConsoleColor.Green;
+                else
+                    Console.ForegroundColor = ConsoleColor.Red;
+
+                Console.WriteLine($"{ach.Title} - {ach.Description} (Unlocked: {ach.Unlocked})");
             }
-            return sb.ToString();
+            Console.ResetColor();
         }
     }
 }

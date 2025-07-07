@@ -361,6 +361,8 @@ namespace DoSomething
         static void ShowCredits()
         {
             Console.WriteLine("Game developed by Ilya and Or!");
+            Console.WriteLine("press any key to get back.");
+            Console.ReadLine();
         }
 
         static void ExitGame()
@@ -573,7 +575,7 @@ namespace DoSomething
                     PAUSEMenu(player);
                     break;
                 case 2:
-                    Console.WriteLine(player.ShowAchievements());
+                    player.ShowAchievements();
                     Console.WriteLine("Press any key to return...");
                     Console.ReadKey(true);
                     PAUSEMenu(player);
@@ -814,6 +816,12 @@ namespace DoSomething
                     Player.SubtractHP(Enemy.GetATTACK());
                     Console.WriteLine($"Enemy attacked for {Enemy.GetATTACK()} damage.");
                     Console.WriteLine($"Your HP: {Player.GetHP()}");
+                }
+
+                if(Enemy.GetHP() <= 0 && Enemy.GetClass() == "Boss")
+                {
+                    DemonBossDeathAnimation();
+                    break;
                 }
 
                 if (Player.GetHP() <= 0)
@@ -1622,6 +1630,175 @@ namespace DoSomething
             };
 
             return map;
+        }
+
+         static void DemonBossDeathAnimation()
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.CursorVisible = false;
+
+            string[] frames = new string[]
+            {
+@"
+      /\/\     /\/\
+     /    \___/    \
+    |   (  ᗣ  ᗣ )   |
+    |     \  ▽  /    |
+    |      \_=_/     |
+     \   /     \   /
+      \/       \/
+       \  DEMON  /
+        \_______/
+",
+@"
+      /\/\     /\/\
+     /    \___/    \
+    |   (  ᗣ  - )   |
+    |     \  ▽  /    |
+    |      \_=_/     |
+     \   /     \   /
+      \/       \/
+       \  DEMON  /
+        \_______/
+",
+@"
+      /\/\     /\/\
+     /    \___/    \
+    |   (  -    )   |
+    |     \  ▽  /    |
+    |      \_=_/     |
+     \   /     \   /
+      \/       \/
+       \  DEMON  /
+        \_______/
+",
+@"
+      /\/\     /\/\
+     /    \___/    \
+    |   (  .    )   |
+    |     \  ▽  /    |
+    |      \_=_/     |
+     \   /     \   /
+      \/       \/
+       \  DEMON  /
+        \_______/
+",
+@"
+      /\/\     /\/\
+     /    \___/    \
+    |            |
+    |     \  ▽  /    |
+    |      \_=_/     |
+     \   /     \   /
+      \/       \/
+       \  DEMON  /
+        \_______/
+",
+@"
+      /\/\     /\/\
+     /    \___/    \
+    |            |
+    |            |
+    |      \_=_/     |
+     \   /     \   /
+      \/       \/
+       \  DEMON  /
+        \_______/
+",
+@"
+      /\/\     /\/\
+     /    \___/    \
+    |            |
+    |            |
+    |              |
+     \   /     \   /
+      \/       \/
+       \  DEMON  /
+        \_______/
+",
+@"
+     /\/\     /\/\
+    /    \___/    \
+   |            |
+   |            |
+   |              |
+    \           /
+     \/       \/
+      \       /
+       \_____/
+",
+@"
+     
+     
+     
+     
+     
+     
+     
+     
+",
+            };
+
+            // Flicker intro
+            for (int i = 0; i < 3; i++)
+            {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("The Demon lets out a final, terrifying roar...");
+                Thread.Sleep(300);
+                Console.Clear();
+                Thread.Sleep(200);
+            }
+
+            // Animate frames with slight shake effect
+            foreach (var frame in frames)
+            {
+                for (int shake = 0; shake < 2; shake++)
+                {
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+
+                    // Shake by indenting lines slightly
+                    string[] lines = frame.Split('\n');
+                    int indent = (shake == 0) ? 0 : 2;
+                    foreach (var line in lines)
+                    {
+                        Console.SetCursorPosition(indent, Console.CursorTop);
+                        Console.WriteLine(line);
+                    }
+
+                    Thread.Sleep(150);
+                }
+                Thread.Sleep(300);
+            }
+
+            // Fade out text
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("The Demon dissolves into the abyss...");
+            Thread.Sleep(1500);
+
+            // Victory screen
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(@"
+       ▄██████████▄
+      ███        ███
+     ███  YOU WIN  ███
+     ███          ███
+     ███ VICTORY ███
+      ███        ███
+       ▀██████████▀
+");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine(@"
+  ***************************************
+  *          CONGRATULATIONS!            *
+  *     The demon has been vanquished!  *
+  ***************************************
+");
+            Console.ResetColor();
+            Thread.Sleep(4000);
         }
     }
 }
