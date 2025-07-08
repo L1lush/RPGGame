@@ -20,6 +20,7 @@ namespace DoSomething
         public int Positions { get; set; } = 5;
         public Weapon Weapon { get; set; }
         public List<achievement> Achievements { get; set; } = new List<achievement>();
+        public List<Quest> Quests { get; set; } = new List<Quest>();
 
         //stats
         public int Kills { get; set; } = 0;
@@ -73,6 +74,12 @@ namespace DoSomething
                 new achievement("Master of Arms", "Equip a weapon."),
                 new achievement("Level Up", "Reach level 5."),
                 new achievement("Explorer", "Visit all locations.")
+            };
+
+            Quests = new List<Quest>//DO NOT CHANGE THE ORDER OF QUESTS, IT IS USED IN THE GAME
+            {
+                new Quest("Monster Slayer", "Kill 5 enemies.", 5, 20),//0
+                new Quest("Treasure Hunter", "Open 3 chests.", 3, 10),//1
             };
         }
 
@@ -218,6 +225,18 @@ namespace DoSomething
             {
                 ach.Unlock();
                 Console.WriteLine($"Achievement unlocked: {ach.Title} - {ach.Description}");
+            }
+        }
+
+        public void UpdateQuestProgress(string questTitle)
+        {
+            // Find quest by name (Quest is a struct, so use nullable)
+            int questIndex = Quests.FindIndex(q => q.Name == questTitle);
+            Quest updatedQuest = Quests[questIndex];
+            if (questIndex != -1)
+            {
+                updatedQuest.AddProgress();
+                Quests[questIndex] = updatedQuest; // Update the quest in the list
             }
         }
 

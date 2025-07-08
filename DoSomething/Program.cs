@@ -21,8 +21,6 @@ namespace DoSomething
 {
     class Program
     {
-        static Quest killEnemies = new Quest("Monster Slayer", "Kill 5 enemies.", 5);
-        static Quest openChests = new Quest("Treasure Hunter", "Open 3 chests.", 3);
         static string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         static string gameFolder = Path.Combine(appData, "DoSomethingGame");
         static string saveFile = Path.Combine(gameFolder, "savegame.json");
@@ -670,6 +668,11 @@ namespace DoSomething
                 CoinMusicPlayer.Pause(); // Stop coin sound
                 playedSound = true;
             }
+
+            if(Player.Quests[1].IsAccepted == true && Player.Quests[1].IsCompleted == false)
+            {
+                Player.UpdateQuestProgress("Treasure Hunter"); // Increment quest progress
+            }
         }
 
         static void ChestForest(Player Player)
@@ -785,10 +788,16 @@ namespace DoSomething
                     Player.LevelUp(Enemy.GetXp());
                     Player.AddGold(3); // Add 3 gold for winning
                     Console.WriteLine("You won!");
+
+                    if (Player.Quests[0].IsAccepted == true && Player.Quests[0].IsCompleted == false)
+                    {
+                        Player.UpdateQuestProgress("Monster Slayer"); // Increment quest progress
+                    }
+
                     BattleMusicPlayer.Pause(); // Pause battle music
                     MainMusicPlayer.Play(); // Play main music again
                     Thread.Sleep(1500);
-                    EnemyKilled(ref killEnemies);
+                    
 
                     Player.Kills += 1; // Increment kills
                     if (Player.Kills == 1)
@@ -1094,10 +1103,10 @@ namespace DoSomething
                     case 'V': Enemy EnemyV = new Enemy("Vampire", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyV.GetClass()}"); Battle(Player, EnemyV, rand); break;
                     case 'L': Enemy EnemyL = new Enemy("Slime", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyL.GetClass()}"); Battle(Player, EnemyL, rand); break;
                     case 'B': Enemy EnemyB = new Enemy("Bandit", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyB.GetClass()}"); Battle(Player, EnemyB, rand); break;
-                    case 'C': ChestOpened(ref openChests); Chest(Player, map); break;
+                    case 'C': Chest(Player, map); break;
                     case 'c': Casino(Player); break;
                     case 's': Shop(Player, rand); break;
-                    case 'v': TalkToVillager(ref killEnemies, ref openChests, Player); break;
+                    case 'v': TalkToVillager(Player); break;
                     case 'b': Enemy Enemyb = new Enemy("Boss", Player.GETLVL()); Console.WriteLine($"you attacked by {Enemyb.GetClass()}"); Battle(Player, Enemyb, rand); break;
                     case 'G': Enemy EnemyG = new Enemy("Goblin", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
                     case 'S': Enemy EnemyS = new Enemy("Skeleton", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
@@ -1513,89 +1522,89 @@ namespace DoSomething
             return redNumbers.Contains(number) ? "Red" : "Black";
         }
 
-
-        static void AcceptQuest(ref Quest quest)
+        static void TalkToVillager(Player Player)
         {
-            if (!quest.IsAccepted)
-            {
-                quest.IsAccepted = true;
-                Console.WriteLine($"✅ You accepted the quest: {quest.Name}");
-            }
-            else
-            {
-                Console.WriteLine($"You already accepted the quest: {quest.Name}");
-            }
-        }
+            Console.WriteLine("Villager: Hello!");
 
-        static void RewardQuest(ref Quest quest, Player Player)
-        {
-            if (quest.IsCompleted && !quest.IsRewarded)
+            foreach (var quest in Player.Quests)
             {
-                quest.IsRewarded = true;
-                Player.AddGold(100);
-                Player.SetXP(Player.GETXP() + 50);
-                Console.WriteLine($"🏆 You received 100 gold and 50 XP for completing '{quest.Name}'!");
-            }
-        }
+                int questIndex = Player.Quests.IndexOf(quest);
+                if (quest.IsAccepted && !quest.IsCompleted)
+                {
+                    Console.WriteLine($"Villager: You have a quest '{quest.Name}' in progress. Keep it up!");
+                    Console.WriteLine($"Progress: {quest.Progress}/{quest.RequiredAmount}");
+                    Console.ReadKey(true);
+                    return;
+                }
+                else if(quest.IsCompleted && !quest.IsRewarded)
+                {
+                    Console.WriteLine($"Villager: You completed the quest '{quest.Name}'! Here is your reward.");
+                    Console.WriteLine($"You received {quest.Reward} gold!");
+                    Player.AddGold(quest.Reward);
 
-        static void TalkToVillager(ref Quest killQuest, ref Quest chestQuest, Player Player)
-        {
-            Console.WriteLine("Villager: Hello! I have some tasks for you.");
+                    CoinMusicPlayer.Play(); // Play coin sound
+                    Thread.Sleep(400);
+                    CoinMusicPlayer.Pause(); // Stop coin sound
 
-            // Kill enemies quest
-            if (!killQuest.IsAccepted)
-            {
-                Console.WriteLine("1) Accept 'Kill 5 enemies' quest");
-            }
-            else
-            {
-                killQuest.ShowStatus();
-                if (killQuest.IsCompleted && !killQuest.IsRewarded)
-                    Console.WriteLine("You can turn in this quest.");
-            }
+                    // Update the quest in the original list
+                    if (questIndex >= 0)
+                    {
+                        var updatedQuest = quest;
+                        updatedQuest.IsRewarded = true;
+                        updatedQuest.IsCompleted = true;
+                        Player.Quests[questIndex] = updatedQuest;
+                    }
 
-            // Open chests quest
-            if (!chestQuest.IsAccepted)
-            {
-                Console.WriteLine("2) Accept 'Open 3 chests' quest");
-            }
-            else
-            {
-                chestQuest.ShowStatus();
-                if (chestQuest.IsCompleted && !chestQuest.IsRewarded)
-                    Console.WriteLine("You can turn in this quest.");
-            }
+                    Thread.Sleep(1000);
+                    return;
+                }
+                else if(!quest.IsAccepted && !quest.IsCompleted)
+                {
 
-            Console.WriteLine("Choose an option or press any other key to exit:");
+                    Console.WriteLine($"Would you like to accept the quest '{quest.Name}'?");
+                    Console.WriteLine($"Description: {quest.Description}");
 
-            var key = Console.ReadKey(true).Key;
-            switch (key)
-            {
-                case ConsoleKey.D1:
-                    AcceptQuest(ref killQuest);
-                    break;
-                case ConsoleKey.D2:
-                    AcceptQuest(ref chestQuest);
-                    break;
-                case ConsoleKey.T: // Turn in quests (example key)
-                    if (killQuest.IsCompleted && !killQuest.IsRewarded)
-                        RewardQuest(ref killQuest, Player);
-                    if (chestQuest.IsCompleted && !chestQuest.IsRewarded)
-                        RewardQuest(ref chestQuest, Player);
-                    break;
-                default:
-                    Console.WriteLine("Leaving villager.");
-                    break;
+                    string[] options = { "Accept", "Decline" };
+                    int selected = 0;
+                    ConsoleKey key;
+                    Console.CursorVisible = false;
+
+                    do
+                    {
+                        Console.WriteLine();
+                        for (int i = 0; i < options.Length; i++)
+                        {
+                            if (i == selected)
+                                Console.WriteLine($"▶ {options[i]}");
+                            else
+                                Console.WriteLine($"  {options[i]}");
+                        }
+                        Console.WriteLine("Use ↑ ↓ to select. Enter to confirm.");
+
+                        key = Console.ReadKey(true).Key;
+                        if (key == ConsoleKey.UpArrow)
+                            selected = (selected - 1 + options.Length) % options.Length;
+                        else if (key == ConsoleKey.DownArrow)
+                            selected = (selected + 1) % options.Length;
+                    } while (key != ConsoleKey.Enter);
+                    
+                    switch(selected)
+                    {
+                        case 0: // Accept
+                            Quest acceptedQuest = Player.Quests[questIndex];
+                            acceptedQuest.IsAccepted = true;
+                            Player.Quests[questIndex] = acceptedQuest;
+                            Console.WriteLine($"You accepted the quest '{quest.Name}'!");
+                            Thread.Sleep(500);
+                            return;
+                        case 1: // Decline
+                            Console.WriteLine("You declined the quest.");
+                            Thread.Sleep(500);
+                            return;
+                    }
+
+                }
             }
-        }
-        static void EnemyKilled(ref Quest killQuest)
-        {
-            killQuest.AddProgress();
-        }
-
-        static void ChestOpened(ref Quest chestQuest)
-        {
-            chestQuest.AddProgress();
         }
 
         static void CheckExplorer(char[,] map, Player player)
