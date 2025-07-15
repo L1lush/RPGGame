@@ -24,7 +24,6 @@ namespace DoSomething
         static string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         static string gameFolder = Path.Combine(appData, "DoSomethingGame");
         static string saveFile = Path.Combine(gameFolder, "savegame.json");
-        static char[,] villageMap = VillageMap();
         static void Main(string[] args)
         {
             MainMusicPlayer.Play(); // Play main music
@@ -448,9 +447,9 @@ namespace DoSomething
             {
                 string[] options = {
             "Cave",           // Swapped
-            "Forest (LVL 3)", // Swapped + level display
-            "Castle (LVL 5)",
-            "Boss Fight (LVL 10)",
+            "Forest (LVL 5)", // Swapped + level display
+            "Castle (LVL 15)",
+            "Boss Fight (LVL 50)",
             "Village",
         };
                 int selected = 0;
@@ -487,8 +486,8 @@ namespace DoSomething
                     {
                         switch (options[selected])
                         {
-                            case "Forest (LVL 3)":
-                                if (player.GETLVL() >= 3)
+                            case "Forest (LVL 5)":
+                                if (player.GETLVL() >= 5)
                                     Forest(player, rand);
                                 else
                                 {
@@ -499,8 +498,8 @@ namespace DoSomething
                             case "Cave":
                                 Cave(player, rand);
                                 break;
-                            case "Castle (LVL 5)":
-                                if (player.GETLVL() >= 5)
+                            case "Castle (LVL 15)":
+                                if (player.GETLVL() >= 15)
                                     Castle(player, rand);
                                 else
                                 {
@@ -509,10 +508,10 @@ namespace DoSomething
                                 }
                                 break;
                             case "Village":
-                                MoveOnMap(villageMap, player, rand);
+                                MoveOnMap(VillageMap(), player, rand);
                                 break;
-                            case "Boss Fight (LVL 10)":
-                                if (player.GETLVL() >= 10)
+                            case "Boss Fight (LVL 50)":
+                                if (player.GETLVL() >= 50)
                                     BossFight(player, rand);
                                 else
                                 {
@@ -601,7 +600,7 @@ namespace DoSomething
 
         static void Forest(Player Player, Random rand)
         {
-            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", 21, 21);
+            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", Player, 21, 21);
             Player.ForestVisits += 1;
             if(Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
             {
@@ -613,7 +612,7 @@ namespace DoSomething
 
         static void Cave(Player Player, Random rand)
         {
-            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("cave", 21, 21);
+            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("cave", Player, 21, 21);
             Player.CaveVisits += 1; 
             if (Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
             {
@@ -625,7 +624,7 @@ namespace DoSomething
 
         static void Castle(Player Player, Random rand)
         {
-            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("castle", 21, 21);
+            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("castle", Player, 21, 21);
             Player.CastleVisits += 1; 
             if (Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
             {
@@ -642,13 +641,41 @@ namespace DoSomething
             {
                 Player.UnlockAchievement("Explorer");
             }
-            char[,] map = BossMap();
+            
+            char[,] map;
+            if (Player.BossDefeated)
+            {
+                map = new char[,]
+                {
+                    { '0','#','#','#','#','#' },
+                    { '#','P',' ',' ','X','#' },
+                    { '#','#','#','#','#','#' }
+                };
+            }
+            else
+            {
+                map = new char[,]
+                {
+                    { '0','#','#','#','#','#' },
+                    { '#','P',' ','b','X','#' },
+                    { '#','#','#','#','#','#' }
+                };
+            }
+
             MoveOnMap(map, Player, rand);
         }
 
         static void Chest(Player Player, char[,] map)
         {
             bool playedSound = false;
+
+            if(Player.BossDefeated == true)
+            {
+                Console.WriteLine("This chest is already opened");
+                Thread.Sleep(1500);
+                return; // Exit if chest is already opened
+            }
+
             switch (map[0, 0])
             {
                 case '1':
@@ -695,6 +722,19 @@ namespace DoSomething
 
         static void Battle(Player Player, Enemy Enemy, Random rand)
         {
+            bool isBossFight =false;
+            if (Enemy.GetClass() == "Boss")
+            {
+                isBossFight = true;
+                
+                if(Player.BossDefeated == true)
+                {
+                    Console.WriteLine("You have already defeated this boss!");
+                    Thread.Sleep(1500);
+                    return; // Exit the battle if boss is already defeated
+                }
+            }
+
             bool enemyUsedPotion = false;
             MainMusicPlayer.Pause(); // Pause battle music
             BattleMusicPlayer.Play(); // Play battle music
@@ -786,7 +826,7 @@ namespace DoSomething
                 if (Enemy.GetHP() <= 0)
                 {
                     Player.LevelUp(Enemy.GetXp());
-                    Player.AddGold(3); // Add 3 gold for winning
+                    Player.AddGold(5); // Add 5 gold for winning
                     Console.WriteLine("You won!");
 
                     if (Player.Quests[0].IsAccepted == true && Player.Quests[0].IsCompleted == false)
@@ -806,6 +846,21 @@ namespace DoSomething
                         Player.UnlockAchievement("First Blood");
                         Thread.Sleep(2000);
                     }
+                    if(Player.Kills == 100)
+                    {
+                        Console.WriteLine("Achievement unlocked: Unstoppable!");
+                        Player.UnlockAchievement("Unstoppable");
+                        Thread.Sleep(2000);
+                    }
+
+                    if (isBossFight)
+                    {
+                        Player.BossDefeated = true; // Mark boss as defeated
+                        Player.UnlockAchievement("Boss Slayer");
+                        Console.WriteLine("You defeated the boss!");
+                        Thread.Sleep(2000);
+                    }
+
                     break;
                 }
 
@@ -1070,7 +1125,7 @@ namespace DoSomething
                 Console.WriteLine("Move: ↑ ↓ ← → ");
                 Console.WriteLine("Press Escape to pause.");
                 if(map[0, 0] != '4')
-                    Console.WriteLine("'D' Dragon, 'G' Goblin, 'S' Skeleton, 'O' Orc, 'T' Troll, 'V' Vampire, 'L' Slime, 'B' Bandit, 'C' Chest, 'X' Exit, 'P' you, 'b' Boss.");
+                    Console.WriteLine("'D' Dragon, 'G' Goblin, 'S' Skeleton, 'O' Orc, 'T' Troll, 'V' Vampire, 'L' Slime, 'B' Bandit, 'C' Chest, 'X' Exit, 'P' you.");
                 else
                     Console.WriteLine("'c' Casino, 's' Shop, 'v' to talk to Villager, 'P' you.");
 
@@ -1110,7 +1165,7 @@ namespace DoSomething
                     case 'b': Enemy Enemyb = new Enemy("Boss", Player.GETLVL()); Console.WriteLine($"you attacked by {Enemyb.GetClass()}"); Battle(Player, Enemyb, rand); break;
                     case 'G': Enemy EnemyG = new Enemy("Goblin", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
                     case 'S': Enemy EnemyS = new Enemy("Skeleton", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
-                    case 'X': villageMap = VillageMap();
+                    case 'X':
                         Console.WriteLine("You reached the exit! Game Over.");
                         return;
                 }
@@ -1555,6 +1610,23 @@ namespace DoSomething
                         Player.Quests[questIndex] = updatedQuest;
                     }
 
+                    bool allQuestsCompleted = false;
+
+                    foreach(var q in Player.Quests)
+                    {
+                        if (!q.IsCompleted)
+                        {
+                            allQuestsCompleted = false;
+                            break;
+                        }
+                        allQuestsCompleted = true;
+                    }
+                    if (allQuestsCompleted)
+                    {
+                        Console.WriteLine("Villager: You have completed all quests! Congratulations!");
+                        Player.UnlockAchievement("Quest Master");
+                    }
+
                     Thread.Sleep(1000);
                     return;
                 }
@@ -1620,17 +1692,6 @@ namespace DoSomething
                 }
             }
 
-        }
-
-        static char[,] BossMap()
-        {
-            char[,] map =
-            { {'#','#','#','#','#','#', },
-              {'#','P',' ','b','X','#', },
-              {'#','#','#','#','#','#', },
-            };
-
-            return map;
         }
     }
 }

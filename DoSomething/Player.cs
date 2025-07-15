@@ -31,6 +31,7 @@ namespace DoSomething
         public int CaveVisits { get; set; } = 0;
         public int CastleVisits { get; set; } = 0;
         public int BossFightVisits { get; set; } = 0;
+        public bool BossDefeated { get; set; } = false;
 
         public Player()
         {
@@ -73,7 +74,12 @@ namespace DoSomething
                 new achievement("Treasure Hunter", "Collect 100 gold."),
                 new achievement("Master of Arms", "Equip a weapon."),
                 new achievement("Level Up", "Reach level 5."),
-                new achievement("Explorer", "Visit all locations.")
+                new achievement("Explorer", "Visit all locations."),
+                new achievement("Boss Slayer", "Defeat the final boss."),
+                new achievement("Wealthy", "Collect 500 gold."),
+                new achievement("Veteran", "Reach level 25."),
+                new achievement("Quest Master", "Complete all quests."),
+                new achievement("Unstoppable", "Win 100 battles without dying.")
             };
 
             Quests = new List<Quest>//DO NOT CHANGE THE ORDER OF QUESTS, IT IS USED IN THE GAME
@@ -131,6 +137,10 @@ namespace DoSomething
             if(GoldCollected >= 100)
             {
                 UnlockAchievement("Treasure Hunter"); // Unlock achievement for collecting 100 gold
+            }
+            if(GoldCollected >= 500)
+            {
+                UnlockAchievement("Wealthy"); // Unlock achievement for collecting 500 gold
             }
         }
         public void SubtractGold(int amount)
@@ -216,6 +226,10 @@ namespace DoSomething
             if(currentLVL == 5)
             {
                 UnlockAchievement("Level Up"); // Unlock achievement for reaching level 5
+            }
+            if(currentLVL == 25)
+            {
+                UnlockAchievement("Veteran"); // Unlock achievement for reaching level 25
             }
         }
         public void UnlockAchievement(string title)
