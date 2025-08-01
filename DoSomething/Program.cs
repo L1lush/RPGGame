@@ -400,34 +400,49 @@ namespace DoSomething
 
             } while (classKey != ConsoleKey.Enter);
 
-            OpeningStory();
+            Story();
 
             Player Player = new Player(classOptions[selectedClass]);
             Game(Player); // Start the game with the selected class
         }
 
-        static void OpeningStory()
+        static void Story()
         {
             Console.Clear();
             MainMusicPlayer.Pause(); // Pause main music
-            string[] storyLines = new[]
-            {
-                "Long ago, the world of Eldrath was united under the immortal king Valdaran and powered by the ancient Heartstones.",
-                "",
-                "But betrayal shattered the empire.",
-                "The Heartstones were lost.",
-                "The world broke.",
-                "",
-                "Now, centuries later, chaos reigns.",
-                "Monsters roam, kingdoms crumble, and the gods remain silent.",
-                "",
-                "You awaken with a strange mark — a sign of forgotten power.",
-                "The Heartstones call once more.",
-                "And they call for you...", 
-                "to rule the world.",
-                "",
-                "Your journey begins now."
-            };
+            if(!player.BossDefeated)
+                string[] storyLines = new[]
+                {
+                    "Long ago, the world of Eldrath was united under the immortal king Valdaran and powered by the ancient Heartstones.",
+                    "",
+                    "But betrayal shattered the empire.",
+                    "The Heartstones were lost.",
+                    "The world broke.",
+                    "",
+                    "Now, centuries later, chaos reigns.",
+                    "Monsters roam, kingdoms crumble, and the gods remain silent.",
+                    "",
+                    "You awaken with a strange mark — a sign of forgotten power.",
+                    "The Heartstones call once more.",
+                    "And they call for you...", 
+                    "to rule the world.",
+                    "",
+                    "Your journey begins now."
+                };
+            else
+                string[] storyLines = new[]
+                {
+                    "Valdaran is gone. His shadow, his madness — erased."
+                    "he last Heartstone awakens, whole again. Light spreads across Eldrath as the gods stir and silence breaks."
+                    "The land begins to heal. The people rise."
+                    "But all eyes turn to you."
+                    "Bearer of the mark. Master of the stones."
+                    "Will you lead with wisdom?"
+                    "Rule with power?"
+                    "Or disappear into myth?"
+                    "The war is over."
+                    "The future... is yours to shape."
+                };
 
             foreach (string line in storyLines)
             {
@@ -856,6 +871,7 @@ namespace DoSomething
                     if (isBossFight)
                     {
                         Player.BossDefeated = true; // Mark boss as defeated
+                        Story(); // Show story after defeating the boss
                         Player.UnlockAchievement("Boss Slayer");
                         Console.WriteLine("You defeated the boss!");
                         Thread.Sleep(2000);
@@ -1166,7 +1182,7 @@ namespace DoSomething
                     case 'G': Enemy EnemyG = new Enemy("Goblin", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
                     case 'S': Enemy EnemyS = new Enemy("Skeleton", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
                     case 'X':
-                        Console.WriteLine("You reached the exit! Game Over.");
+                        Console.WriteLine("You reached the exit!");
                         return;
                 }
 
