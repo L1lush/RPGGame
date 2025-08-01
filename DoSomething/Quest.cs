@@ -8,19 +8,21 @@ namespace DoSomething
 {
     struct Quest
     {
-        public string Name;
-        public string Description;
-        public int RequiredAmount;
-        public int Progress;
-        public bool IsAccepted;
-        public bool IsCompleted;
-        public bool IsRewarded;
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int RequiredAmount { get; set; }
+        public int Progress { get; set; }
+        public int Reward { get; set; }
+        public bool IsAccepted { get; set; }
+        public bool IsCompleted { get; set; }
+        public bool IsRewarded { get; set; }
 
-        public Quest(string name, string description, int requiredAmount)
+        public Quest(string name, string description, int requiredAmount, int reward)
         {
             Name = name;
             Description = description;
             RequiredAmount = requiredAmount;
+            Reward = reward;
             Progress = 0;
             IsAccepted = false;
             IsCompleted = false;
@@ -40,27 +42,6 @@ namespace DoSomething
                 Progress = RequiredAmount;
                 IsCompleted = true;
                 Console.WriteLine($"🎉 Quest Completed: {Name}!");
-            }
-        }
-
-        public void ShowStatus()
-        {
-            if (!IsAccepted)
-            {
-                Console.WriteLine($"Quest available: {Name}");
-                Console.WriteLine(Description);
-            }
-            else if (!IsCompleted)
-            {
-                Console.WriteLine($"Quest in progress: {Name} ({Progress}/{RequiredAmount})");
-            }
-            else if (IsCompleted && !IsRewarded)
-            {
-                Console.WriteLine($"Quest ready to turn in: {Name}");
-            }
-            else
-            {
-                Console.WriteLine($"Quest completed: {Name}");
             }
         }
 

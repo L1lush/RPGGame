@@ -20,6 +20,7 @@ namespace DoSomething
         public int Positions { get; set; } = 5;
         public Weapon Weapon { get; set; }
         public List<achievement> Achievements { get; set; } = new List<achievement>();
+        public List<Quest> Quests { get; set; } = new List<Quest>();
 
         //stats
         public int Kills { get; set; } = 0;
@@ -30,6 +31,7 @@ namespace DoSomething
         public int CaveVisits { get; set; } = 0;
         public int CastleVisits { get; set; } = 0;
         public int BossFightVisits { get; set; } = 0;
+        public bool BossDefeated { get; set; } = false;
 
         public Player()
         {
@@ -72,7 +74,18 @@ namespace DoSomething
                 new achievement("Treasure Hunter", "Collect 100 gold."),
                 new achievement("Master of Arms", "Equip a weapon."),
                 new achievement("Level Up", "Reach level 5."),
-                new achievement("Explorer", "Visit all locations.")
+                new achievement("Explorer", "Visit all locations."),
+                new achievement("Boss Slayer", "Defeat the final boss."),
+                new achievement("Wealthy", "Collect 500 gold."),
+                new achievement("Veteran", "Reach level 25."),
+                new achievement("Quest Master", "Complete all quests."),
+                new achievement("Unstoppable", "Win 100 battles without dying.")
+            };
+
+            Quests = new List<Quest>//DO NOT CHANGE THE ORDER OF QUESTS, IT IS USED IN THE GAME
+            {
+                new Quest("Monster Slayer", "Kill 5 enemies.", 5, 20),//0
+                new Quest("Treasure Hunter", "Open 3 chests.", 3, 10),//1
             };
         }
 
@@ -124,6 +137,10 @@ namespace DoSomething
             if(GoldCollected >= 100)
             {
                 UnlockAchievement("Treasure Hunter"); // Unlock achievement for collecting 100 gold
+            }
+            if(GoldCollected >= 500)
+            {
+                UnlockAchievement("Wealthy"); // Unlock achievement for collecting 500 gold
             }
         }
         public void SubtractGold(int amount)
@@ -210,6 +227,10 @@ namespace DoSomething
             {
                 UnlockAchievement("Level Up"); // Unlock achievement for reaching level 5
             }
+            if(currentLVL == 25)
+            {
+                UnlockAchievement("Veteran"); // Unlock achievement for reaching level 25
+            }
         }
         public void UnlockAchievement(string title)
         {
@@ -218,6 +239,18 @@ namespace DoSomething
             {
                 ach.Unlock();
                 Console.WriteLine($"Achievement unlocked: {ach.Title} - {ach.Description}");
+            }
+        }
+
+        public void UpdateQuestProgress(string questTitle)
+        {
+            // Find quest by name (Quest is a struct, so use nullable)
+            int questIndex = Quests.FindIndex(q => q.Name == questTitle);
+            Quest updatedQuest = Quests[questIndex];
+            if (questIndex != -1)
+            {
+                updatedQuest.AddProgress();
+                Quests[questIndex] = updatedQuest; // Update the quest in the list
             }
         }
 

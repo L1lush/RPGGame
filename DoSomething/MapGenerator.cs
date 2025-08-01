@@ -11,21 +11,33 @@ namespace DoSomething
     internal static class MapGenerator
     {
 
-        public static char[,] GenerateMazeWithChestsAndEnemies(string mapType, int width = 20, int height = 20)
+        public static char[,] GenerateMazeWithChestsAndEnemies(string mapType, Player player, int width = 20, int height = 20)
         {
-
             char[,] map;
             Random rand = new Random();
 
             // Enemies per map type
             Dictionary<string, char[]> enemyTypes = new()
-        {
-            { "forest", new[] { 'G', 'O', 'T', 'L' } }, // Goblin, Orc, Troll, Slime
-            { "cave",   new[] { 'S', 'B', 'L' } },      // Skeleton, Bandit, Slime
-            { "castle", new[] { 'D', 'V' } }           // Dragon, Vampire
-        };
+            {
+                { "forest", new[] { 'G', 'O', 'T', 'L' } },
+                { "cave",   new[] { 'S', 'B', 'L' } },
+                { "castle", new[] { 'D', 'V' } }
+            };
 
-            char[] enemies = enemyTypes.ContainsKey(mapType.ToLower()) ? enemyTypes[mapType.ToLower()] : new[] { 'G' };
+            char[] enemies;
+
+            // Always set enemies based on mapType, fallback to 'G' if not found
+            if (!player.BossDefeated)
+            {
+                enemies = enemyTypes.ContainsKey(mapType.ToLower())
+                    ? enemyTypes[mapType.ToLower()]
+                    : new[] { 'G' };
+            }
+            else
+            {
+                // After boss defeated, still provide a fallback enemy
+                enemies = new[] { ' ' };
+            }
 
             for (int attempt = 0; attempt < 50; attempt++) // Try up to 50 times
             {

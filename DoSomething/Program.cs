@@ -21,12 +21,9 @@ namespace DoSomething
 {
     class Program
     {
-        static Quest killEnemies = new Quest("Monster Slayer", "Kill 5 enemies.", 5);
-        static Quest openChests = new Quest("Treasure Hunter", "Open 3 chests.", 3);
         static string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         static string gameFolder = Path.Combine(appData, "DoSomethingGame");
         static string saveFile = Path.Combine(gameFolder, "savegame.json");
-        static char[,] villageMap = VillageMap();
         static void Main(string[] args)
         {
             MainMusicPlayer.Play(); // Play main music
@@ -403,34 +400,49 @@ namespace DoSomething
 
             } while (classKey != ConsoleKey.Enter);
 
-            OpeningStory();
+            Story();
 
             Player Player = new Player(classOptions[selectedClass]);
             Game(Player); // Start the game with the selected class
         }
 
-        static void OpeningStory()
+        static void Story()
         {
             Console.Clear();
             MainMusicPlayer.Pause(); // Pause main music
-            string[] storyLines = new[]
-            {
-                "Long ago, the world of Eldrath was united under the immortal king Valdaran and powered by the ancient Heartstones.",
-                "",
-                "But betrayal shattered the empire.",
-                "The Heartstones were lost.",
-                "The world broke.",
-                "",
-                "Now, centuries later, chaos reigns.",
-                "Monsters roam, kingdoms crumble, and the gods remain silent.",
-                "",
-                "You awaken with a strange mark — a sign of forgotten power.",
-                "The Heartstones call once more.",
-                "And they call for you...", 
-                "to rule the world.",
-                "",
-                "Your journey begins now."
-            };
+            if(!player.BossDefeated)
+                string[] storyLines = new[]
+                {
+                    "Long ago, the world of Eldrath was united under the immortal king Valdaran and powered by the ancient Heartstones.",
+                    "",
+                    "But betrayal shattered the empire.",
+                    "The Heartstones were lost.",
+                    "The world broke.",
+                    "",
+                    "Now, centuries later, chaos reigns.",
+                    "Monsters roam, kingdoms crumble, and the gods remain silent.",
+                    "",
+                    "You awaken with a strange mark — a sign of forgotten power.",
+                    "The Heartstones call once more.",
+                    "And they call for you...", 
+                    "to rule the world.",
+                    "",
+                    "Your journey begins now."
+                };
+            else
+                string[] storyLines = new[]
+                {
+                    "Valdaran is gone. His shadow, his madness — erased."
+                    "he last Heartstone awakens, whole again. Light spreads across Eldrath as the gods stir and silence breaks."
+                    "The land begins to heal. The people rise."
+                    "But all eyes turn to you."
+                    "Bearer of the mark. Master of the stones."
+                    "Will you lead with wisdom?"
+                    "Rule with power?"
+                    "Or disappear into myth?"
+                    "The war is over."
+                    "The future... is yours to shape."
+                };
 
             foreach (string line in storyLines)
             {
@@ -450,9 +462,9 @@ namespace DoSomething
             {
                 string[] options = {
             "Cave",           // Swapped
-            "Forest (LVL 3)", // Swapped + level display
-            "Castle (LVL 5)",
-            "Boss Fight (LVL 10)",
+            "Forest (LVL 5)", // Swapped + level display
+            "Castle (LVL 15)",
+            "Boss Fight (LVL 50)",
             "Village",
         };
                 int selected = 0;
@@ -489,8 +501,8 @@ namespace DoSomething
                     {
                         switch (options[selected])
                         {
-                            case "Forest (LVL 3)":
-                                if (player.GETLVL() >= 3)
+                            case "Forest (LVL 5)":
+                                if (player.GETLVL() >= 5)
                                     Forest(player, rand);
                                 else
                                 {
@@ -501,8 +513,8 @@ namespace DoSomething
                             case "Cave":
                                 Cave(player, rand);
                                 break;
-                            case "Castle (LVL 5)":
-                                if (player.GETLVL() >= 5)
+                            case "Castle (LVL 15)":
+                                if (player.GETLVL() >= 15)
                                     Castle(player, rand);
                                 else
                                 {
@@ -511,10 +523,10 @@ namespace DoSomething
                                 }
                                 break;
                             case "Village":
-                                MoveOnMap(villageMap, player, rand);
+                                MoveOnMap(VillageMap(), player, rand);
                                 break;
-                            case "Boss Fight (LVL 10)":
-                                if (player.GETLVL() >= 10)
+                            case "Boss Fight (LVL 50)":
+                                if (player.GETLVL() >= 50)
                                     BossFight(player, rand);
                                 else
                                 {
@@ -603,7 +615,7 @@ namespace DoSomething
 
         static void Forest(Player Player, Random rand)
         {
-            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", 21, 21);
+            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("forest", Player, 21, 21);
             Player.ForestVisits += 1;
             if(Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
             {
@@ -615,7 +627,7 @@ namespace DoSomething
 
         static void Cave(Player Player, Random rand)
         {
-            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("cave", 21, 21);
+            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("cave", Player, 21, 21);
             Player.CaveVisits += 1; 
             if (Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
             {
@@ -627,7 +639,7 @@ namespace DoSomething
 
         static void Castle(Player Player, Random rand)
         {
-            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("castle", 21, 21);
+            char[,] map = MapGenerator.GenerateMazeWithChestsAndEnemies("castle", Player, 21, 21);
             Player.CastleVisits += 1; 
             if (Player.ForestVisits >= 1 && Player.CaveVisits >= 1 && Player.CastleVisits >= 1 && Player.BossFightVisits >= 1)
             {
@@ -644,13 +656,41 @@ namespace DoSomething
             {
                 Player.UnlockAchievement("Explorer");
             }
-            char[,] map = BossMap();
+            
+            char[,] map;
+            if (Player.BossDefeated)
+            {
+                map = new char[,]
+                {
+                    { '0','#','#','#','#','#' },
+                    { '#','P',' ',' ','X','#' },
+                    { '#','#','#','#','#','#' }
+                };
+            }
+            else
+            {
+                map = new char[,]
+                {
+                    { '0','#','#','#','#','#' },
+                    { '#','P',' ','b','X','#' },
+                    { '#','#','#','#','#','#' }
+                };
+            }
+
             MoveOnMap(map, Player, rand);
         }
 
         static void Chest(Player Player, char[,] map)
         {
             bool playedSound = false;
+
+            if(Player.BossDefeated == true)
+            {
+                Console.WriteLine("This chest is already opened");
+                Thread.Sleep(1500);
+                return; // Exit if chest is already opened
+            }
+
             switch (map[0, 0])
             {
                 case '1':
@@ -669,6 +709,11 @@ namespace DoSomething
                 Thread.Sleep(400);
                 CoinMusicPlayer.Pause(); // Stop coin sound
                 playedSound = true;
+            }
+
+            if(Player.Quests[1].IsAccepted == true && Player.Quests[1].IsCompleted == false)
+            {
+                Player.UpdateQuestProgress("Treasure Hunter"); // Increment quest progress
             }
         }
 
@@ -692,6 +737,19 @@ namespace DoSomething
 
         static void Battle(Player Player, Enemy Enemy, Random rand)
         {
+            bool isBossFight =false;
+            if (Enemy.GetClass() == "Boss")
+            {
+                isBossFight = true;
+                
+                if(Player.BossDefeated == true)
+                {
+                    Console.WriteLine("You have already defeated this boss!");
+                    Thread.Sleep(1500);
+                    return; // Exit the battle if boss is already defeated
+                }
+            }
+
             bool enemyUsedPotion = false;
             MainMusicPlayer.Pause(); // Pause battle music
             BattleMusicPlayer.Play(); // Play battle music
@@ -783,12 +841,18 @@ namespace DoSomething
                 if (Enemy.GetHP() <= 0)
                 {
                     Player.LevelUp(Enemy.GetXp());
-                    Player.AddGold(3); // Add 3 gold for winning
+                    Player.AddGold(5); // Add 5 gold for winning
                     Console.WriteLine("You won!");
+
+                    if (Player.Quests[0].IsAccepted == true && Player.Quests[0].IsCompleted == false)
+                    {
+                        Player.UpdateQuestProgress("Monster Slayer"); // Increment quest progress
+                    }
+
                     BattleMusicPlayer.Pause(); // Pause battle music
                     MainMusicPlayer.Play(); // Play main music again
                     Thread.Sleep(1500);
-                    EnemyKilled(ref killEnemies);
+                    
 
                     Player.Kills += 1; // Increment kills
                     if (Player.Kills == 1)
@@ -797,6 +861,22 @@ namespace DoSomething
                         Player.UnlockAchievement("First Blood");
                         Thread.Sleep(2000);
                     }
+                    if(Player.Kills == 100)
+                    {
+                        Console.WriteLine("Achievement unlocked: Unstoppable!");
+                        Player.UnlockAchievement("Unstoppable");
+                        Thread.Sleep(2000);
+                    }
+
+                    if (isBossFight)
+                    {
+                        Player.BossDefeated = true; // Mark boss as defeated
+                        Story(); // Show story after defeating the boss
+                        Player.UnlockAchievement("Boss Slayer");
+                        Console.WriteLine("You defeated the boss!");
+                        Thread.Sleep(2000);
+                    }
+
                     break;
                 }
 
@@ -1061,7 +1141,7 @@ namespace DoSomething
                 Console.WriteLine("Move: ↑ ↓ ← → ");
                 Console.WriteLine("Press Escape to pause.");
                 if(map[0, 0] != '4')
-                    Console.WriteLine("'D' Dragon, 'G' Goblin, 'S' Skeleton, 'O' Orc, 'T' Troll, 'V' Vampire, 'L' Slime, 'B' Bandit, 'C' Chest, 'X' Exit, 'P' you, 'b' Boss.");
+                    Console.WriteLine("'D' Dragon, 'G' Goblin, 'S' Skeleton, 'O' Orc, 'T' Troll, 'V' Vampire, 'L' Slime, 'B' Bandit, 'C' Chest, 'X' Exit, 'P' you.");
                 else
                     Console.WriteLine("'c' Casino, 's' Shop, 'v' to talk to Villager, 'P' you.");
 
@@ -1094,15 +1174,15 @@ namespace DoSomething
                     case 'V': Enemy EnemyV = new Enemy("Vampire", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyV.GetClass()}"); Battle(Player, EnemyV, rand); break;
                     case 'L': Enemy EnemyL = new Enemy("Slime", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyL.GetClass()}"); Battle(Player, EnemyL, rand); break;
                     case 'B': Enemy EnemyB = new Enemy("Bandit", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyB.GetClass()}"); Battle(Player, EnemyB, rand); break;
-                    case 'C': ChestOpened(ref openChests); Chest(Player, map); break;
+                    case 'C': Chest(Player, map); break;
                     case 'c': Casino(Player); break;
                     case 's': Shop(Player, rand); break;
-                    case 'v': TalkToVillager(ref killEnemies, ref openChests, Player); break;
+                    case 'v': TalkToVillager(Player); break;
                     case 'b': Enemy Enemyb = new Enemy("Boss", Player.GETLVL()); Console.WriteLine($"you attacked by {Enemyb.GetClass()}"); Battle(Player, Enemyb, rand); break;
                     case 'G': Enemy EnemyG = new Enemy("Goblin", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyG.GetClass()}"); Battle(Player, EnemyG, rand); break;
                     case 'S': Enemy EnemyS = new Enemy("Skeleton", Player.GETLVL()); Console.WriteLine($"you attacked by {EnemyS.GetClass()}"); Battle(Player, EnemyS, rand); break;
-                    case 'X': villageMap = VillageMap();
-                        Console.WriteLine("You reached the exit! Game Over.");
+                    case 'X':
+                        Console.WriteLine("You reached the exit!");
                         return;
                 }
 
@@ -1513,89 +1593,106 @@ namespace DoSomething
             return redNumbers.Contains(number) ? "Red" : "Black";
         }
 
-
-        static void AcceptQuest(ref Quest quest)
+        static void TalkToVillager(Player Player)
         {
-            if (!quest.IsAccepted)
-            {
-                quest.IsAccepted = true;
-                Console.WriteLine($"✅ You accepted the quest: {quest.Name}");
-            }
-            else
-            {
-                Console.WriteLine($"You already accepted the quest: {quest.Name}");
-            }
-        }
+            Console.WriteLine("Villager: Hello!");
 
-        static void RewardQuest(ref Quest quest, Player Player)
-        {
-            if (quest.IsCompleted && !quest.IsRewarded)
+            foreach (var quest in Player.Quests)
             {
-                quest.IsRewarded = true;
-                Player.AddGold(100);
-                Player.SetXP(Player.GETXP() + 50);
-                Console.WriteLine($"🏆 You received 100 gold and 50 XP for completing '{quest.Name}'!");
-            }
-        }
+                int questIndex = Player.Quests.IndexOf(quest);
+                if (quest.IsAccepted && !quest.IsCompleted)
+                {
+                    Console.WriteLine($"Villager: You have a quest '{quest.Name}' in progress. Keep it up!");
+                    Console.WriteLine($"Progress: {quest.Progress}/{quest.RequiredAmount}");
+                    Console.ReadKey(true);
+                    return;
+                }
+                else if(quest.IsCompleted && !quest.IsRewarded)
+                {
+                    Console.WriteLine($"Villager: You completed the quest '{quest.Name}'! Here is your reward.");
+                    Console.WriteLine($"You received {quest.Reward} gold!");
+                    Player.AddGold(quest.Reward);
 
-        static void TalkToVillager(ref Quest killQuest, ref Quest chestQuest, Player Player)
-        {
-            Console.WriteLine("Villager: Hello! I have some tasks for you.");
+                    CoinMusicPlayer.Play(); // Play coin sound
+                    Thread.Sleep(400);
+                    CoinMusicPlayer.Pause(); // Stop coin sound
 
-            // Kill enemies quest
-            if (!killQuest.IsAccepted)
-            {
-                Console.WriteLine("1) Accept 'Kill 5 enemies' quest");
-            }
-            else
-            {
-                killQuest.ShowStatus();
-                if (killQuest.IsCompleted && !killQuest.IsRewarded)
-                    Console.WriteLine("You can turn in this quest.");
-            }
+                    // Update the quest in the original list
+                    if (questIndex >= 0)
+                    {
+                        var updatedQuest = quest;
+                        updatedQuest.IsRewarded = true;
+                        updatedQuest.IsCompleted = true;
+                        Player.Quests[questIndex] = updatedQuest;
+                    }
 
-            // Open chests quest
-            if (!chestQuest.IsAccepted)
-            {
-                Console.WriteLine("2) Accept 'Open 3 chests' quest");
-            }
-            else
-            {
-                chestQuest.ShowStatus();
-                if (chestQuest.IsCompleted && !chestQuest.IsRewarded)
-                    Console.WriteLine("You can turn in this quest.");
-            }
+                    bool allQuestsCompleted = false;
 
-            Console.WriteLine("Choose an option or press any other key to exit:");
+                    foreach(var q in Player.Quests)
+                    {
+                        if (!q.IsCompleted)
+                        {
+                            allQuestsCompleted = false;
+                            break;
+                        }
+                        allQuestsCompleted = true;
+                    }
+                    if (allQuestsCompleted)
+                    {
+                        Console.WriteLine("Villager: You have completed all quests! Congratulations!");
+                        Player.UnlockAchievement("Quest Master");
+                    }
 
-            var key = Console.ReadKey(true).Key;
-            switch (key)
-            {
-                case ConsoleKey.D1:
-                    AcceptQuest(ref killQuest);
-                    break;
-                case ConsoleKey.D2:
-                    AcceptQuest(ref chestQuest);
-                    break;
-                case ConsoleKey.T: // Turn in quests (example key)
-                    if (killQuest.IsCompleted && !killQuest.IsRewarded)
-                        RewardQuest(ref killQuest, Player);
-                    if (chestQuest.IsCompleted && !chestQuest.IsRewarded)
-                        RewardQuest(ref chestQuest, Player);
-                    break;
-                default:
-                    Console.WriteLine("Leaving villager.");
-                    break;
+                    Thread.Sleep(1000);
+                    return;
+                }
+                else if(!quest.IsAccepted && !quest.IsCompleted)
+                {
+
+                    Console.WriteLine($"Would you like to accept the quest '{quest.Name}'?");
+                    Console.WriteLine($"Description: {quest.Description}");
+
+                    string[] options = { "Accept", "Decline" };
+                    int selected = 0;
+                    ConsoleKey key;
+                    Console.CursorVisible = false;
+
+                    do
+                    {
+                        Console.WriteLine();
+                        for (int i = 0; i < options.Length; i++)
+                        {
+                            if (i == selected)
+                                Console.WriteLine($"▶ {options[i]}");
+                            else
+                                Console.WriteLine($"  {options[i]}");
+                        }
+                        Console.WriteLine("Use ↑ ↓ to select. Enter to confirm.");
+
+                        key = Console.ReadKey(true).Key;
+                        if (key == ConsoleKey.UpArrow)
+                            selected = (selected - 1 + options.Length) % options.Length;
+                        else if (key == ConsoleKey.DownArrow)
+                            selected = (selected + 1) % options.Length;
+                    } while (key != ConsoleKey.Enter);
+                    
+                    switch(selected)
+                    {
+                        case 0: // Accept
+                            Quest acceptedQuest = Player.Quests[questIndex];
+                            acceptedQuest.IsAccepted = true;
+                            Player.Quests[questIndex] = acceptedQuest;
+                            Console.WriteLine($"You accepted the quest '{quest.Name}'!");
+                            Thread.Sleep(500);
+                            return;
+                        case 1: // Decline
+                            Console.WriteLine("You declined the quest.");
+                            Thread.Sleep(500);
+                            return;
+                    }
+
+                }
             }
-        }
-        static void EnemyKilled(ref Quest killQuest)
-        {
-            killQuest.AddProgress();
-        }
-
-        static void ChestOpened(ref Quest chestQuest)
-        {
-            chestQuest.AddProgress();
         }
 
         static void CheckExplorer(char[,] map, Player player)
@@ -1611,17 +1708,6 @@ namespace DoSomething
                 }
             }
 
-        }
-
-        static char[,] BossMap()
-        {
-            char[,] map =
-            { {'#','#','#','#','#','#', },
-              {'#','P',' ','b','X','#', },
-              {'#','#','#','#','#','#', },
-            };
-
-            return map;
         }
     }
 }
